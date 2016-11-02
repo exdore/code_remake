@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 
@@ -15,57 +11,64 @@ namespace MAClassification
     {
         public Form1()
         {
-            int MinCasesPerRule = 3;            //минимальное покрытие каждым правилом
-            int NumberOfAnts = 10;
+            int minCasesPerRule = 3;            //минимальное покрытие каждым правилом
+            int numberOfAnts = 10;
+            int maxUncoveredCases = 2;
             InitializeComponent();
-            List<Rule> RuleSet = new List<Rule>();
             var data = ReadData();              
             data.CountsByColumns = CalculateCountsByColumns(data);
             data.AdditionalCounts = CalculateAdditionalCounts(data);
             var gains = CalculateGains(data);
-            while (NumberOfAnts-- > 0)
+            List<Rule> rulesSet = new List<Rule>();
+            while(data.Cases.Count > maxUncoveredCases)
             {
-                Rule rule = new Rule();
-                rule.Conditions = new List<Rule.Condition>();
-                                           
-                var AttributesCount = data.CountColumns;
-                var AttributesValuesCount = 2;                                          //потом разное у каждого атрибута
-                //List<Weight> weights = new List<Weight>();
-                bool[] used = new bool[AttributesCount];
-                double[,] weights = new double[AttributesValuesCount, AttributesCount];   //на листы, вложенные - разной длины
-                InitializeWeights(AttributesCount, AttributesValuesCount, used, weights);
-                double[,] euristicValues = new double[AttributesValuesCount, AttributesCount];
-                double[,] probabilities = new double[AttributesValuesCount, AttributesCount];
-                var coveredData = data.Cases;
-                int res = data.Cases.Count;
-                while (true)
+                List<Rule> iterationRuleSet = new List<Rule>();
+                while (numberOfAnts-- > 0)
                 {
-                    euristicValues = new double[AttributesValuesCount, AttributesCount];
-                    probabilities = new double[AttributesValuesCount, AttributesCount];
-                    CalculateEuristicFunction(AttributesCount, AttributesValuesCount, gains, used, euristicValues);
-                    CalculateProbabilities(AttributesCount, AttributesValuesCount, used, weights, euristicValues, probabilities); // проверить чтобы не было херни из-за ебучих ссылок
-                    int AttributeIndex;
-                    int AttributeValue;
-                    GetProbability(AttributesCount, AttributesValuesCount, probabilities, out AttributeIndex, out AttributeValue, used);
-                    rule.Conditions.Add(new Rule.Condition
-                                       {
-                                           Index = AttributeIndex,
-                                           Value = AttributeValue
-                                       });
-                    used[AttributeIndex] = true;
-                    coveredData = coveredData.Where(item => item.Attributes[rule.Conditions.Last().Index] == rule.Conditions.Last().Value).ToList();
-                    res = coveredData.Count;
-                    if (res < MinCasesPerRule)
+                    Rule rule = new Rule();
+                    rule.Conditions = new List<Rule.Condition>();                    
+                    var attributesCount = data.CountColumns;
+                    var attributesValuesCount = 2;                                          //потом разное у каждого атрибута
+                    //List<Weight> weights = new List<Weight>();
+                    bool[] used = new bool[attributesCount];
+                    double[,] weights = new double[attributesValuesCount, attributesCount];   //на листы, вложенные - разной длины
+                    InitializeWeights(attributesCount, attributesValuesCount, used, weights);
+                    double[,] euristicValues = new double[attributesValuesCount, attributesCount];
+                    double[,] probabilities = new double[attributesValuesCount, attributesCount];
+                    var coveredData = data.Cases;
+                    int res = data.Cases.Count;
+                    while (true)
                     {
-                        rule.Conditions.RemoveAt(rule.Conditions.Count - 1);
-                        break;
+                        euristicValues = new double[attributesValuesCount, attributesCount];
+                        probabilities = new double[attributesValuesCount, attributesCount];
+                        CalculateEuristicFunction(attributesCount, attributesValuesCount, gains, used, euristicValues);
+                        CalculateProbabilities(attributesCount, attributesValuesCount, used, weights, euristicValues, probabilities); // проверить чтобы не было херни из-за ебучих ссылок
+                        int attributeIndex;
+                        int attributeValue;
+                        GetProbability(attributesCount, attributesValuesCount, probabilities, out attributeIndex, out attributeValue, used);
+                        rule.Conditions.Add(new Rule.Condition
+                                           {
+                                               Index = attributeIndex,
+                                               Value = attributeValue
+                                           });
+                        used[attributeIndex] = true;
+                        coveredData = coveredData.Where(item => item.Attributes[rule.Conditions.Last().Index] == rule.Conditions.Last().Value).ToList();
+                        res = coveredData.Count;
+                        if (res < minCasesPerRule)
+                        {
+                            rule.Conditions.RemoveAt(rule.Conditions.Count - 1);
+                            break;
+                        }
                     }
+                    coveredData = GetCoveredCases(rule, data.Cases).ToList();
+                    var uncoveredData = data.Cases.Except(coveredData).ToList();
+                    CalculateRuleConsequent(ref rule, coveredData);
+                    rule.Quality = CalculateRuleQuality(rule, coveredData, uncoveredData);
+                    iterationRuleSet.Add(SelectRule(data, rule));
                 }
-                coveredData = GetCoveredCases(rule, data.Cases).ToList();
-                var uncoveredData = data.Cases.Except(coveredData).ToList();
-                CalculateRuleConsequent(ref rule, coveredData);
-                rule.Quality = CalculateRuleQuality(rule, coveredData, uncoveredData);
-                RuleSet.Add(SelectRule(data, rule));
+                iterationRuleSet = iterationRuleSet.OrderByDescending(item => item.Quality).ToList();
+                rulesSet.Add(iterationRuleSet.First());
+                data.Cases = data.Cases.Except(GetCoveredCases(rulesSet.Last(), data.Cases)).ToList();
             }
         }
 
@@ -73,14 +76,14 @@ namespace MAClassification
         {
             while (best.Conditions.Count > 1)
             {
-                List<Rule> RulesList = new List<Rule>();
+                List<Rule> rulesList = new List<Rule>();
                 for (int i = 0; i < best.Conditions.Count; i++)
                 {
-                    RulesList.Add(PruneRule(best, data, i));
+                    rulesList.Add(PruneRule(best, data, i));
                 }
-                RulesList = RulesList.OrderByDescending(item => item.Quality).ToList();
-                if (best.Quality <= RulesList.First().Quality)
-                    best = RulesList.First();
+                rulesList = rulesList.OrderByDescending(item => item.Quality).ToList();
+                if (best.Quality <= rulesList.First().Quality)
+                    best = rulesList.First();
             }
             return best;
         }
@@ -94,12 +97,12 @@ namespace MAClassification
 
         private static double CalculateRuleQuality(Rule rule, List<Case> coveredData, List<Case> uncoveredData)
         {
-            int TruePositive = coveredData.Where(item => item.Attributes.Last() == rule.Result).Count();
-            int FalsePositive = coveredData.Where(item => item.Attributes.Last() != rule.Result).Count();
-            int TrueNegative = uncoveredData.Where(item => item.Attributes.Last() != rule.Result).Count();
-            int FalseNegative = uncoveredData.Where(item => item.Attributes.Last() == rule.Result).Count();
-            double RuleQuality = (double)TruePositive / (TruePositive + FalseNegative) * TrueNegative / (FalsePositive + TrueNegative);
-            return RuleQuality;
+            int truePositive = coveredData.Where(item => item.Attributes.Last() == rule.Result).Count();
+            int falsePositive = coveredData.Where(item => item.Attributes.Last() != rule.Result).Count();
+            int trueNegative = uncoveredData.Where(item => item.Attributes.Last() != rule.Result).Count();
+            int falseNegative = uncoveredData.Where(item => item.Attributes.Last() == rule.Result).Count();
+            double ruleQuality = (double)truePositive / (truePositive + falseNegative) * trueNegative / (falsePositive + trueNegative);
+            return ruleQuality;
         }
 
         private Rule PruneRule(Rule rule, Table data, int i)
@@ -113,23 +116,23 @@ namespace MAClassification
             return newRule;
         }
 
-        private static double GetSumForEuristic(List<List<double>> gains, int AttributesValuesCount, bool[] used)
+        private static double GetSumForEuristic(List<List<double>> gains, int attributesValuesCount, bool[] used)
         {
             double res = 0;
             for (int i = 0; i < gains.Count; i++)
             {
                 for(int j = 0; j < gains[i].Count; j++)
-                    res += ((used[i] == false)? 1: 0) * (Math.Log(AttributesValuesCount, 2) - gains[i][j]);
+                    res += ((used[i] == false)? 1: 0) * (Math.Log(attributesValuesCount, 2) - gains[i][j]);
             }
             return res;
         }
 
-        private static double GetSumForProbability(int AttributesValuesCount, int AttributesCount, double[,] weights, double[,] euristicValues, bool[] used)
+        private static double GetSumForProbability(int attributesValuesCount, int attributesCount, double[,] weights, double[,] euristicValues, bool[] used)
         {
             double res = 0;
-            for (int i = 0; i < AttributesCount; i++)
+            for (int i = 0; i < attributesCount; i++)
             {
-                for (int j = 0; j < AttributesValuesCount; j++)
+                for (int j = 0; j < attributesValuesCount; j++)
                     res += ((used[i] == false)? 1: 0) * (weights[j, i] * euristicValues[j, i]);
             }
             return res;
@@ -142,59 +145,59 @@ namespace MAClassification
             return tempData;
         }
 
-        private static void GetProbability(int AttributesCount, int AttributesValuesCount, double[,] probabilities, out int AttributeIndex, out int AttributeValue, bool[] used) //костыльные методы 
+        private static void GetProbability(int attributesCount, int attributesValuesCount, double[,] probabilities, out int attributeIndex, out int attributeValue, bool[] used) //костыльные методы 
         {
-            List<double> CumulativeProbabilities = new List<double>();
+            List<double> cumulativeProbabilities = new List<double>();
             double res = 0;
-            for (int i = 0; i < AttributesCount; i++)
+            for (int i = 0; i < attributesCount; i++)
             {
-                for (int j = 0; j < AttributesValuesCount; j++)
+                for (int j = 0; j < attributesValuesCount; j++)
                     res += probabilities[j, i];
-                CumulativeProbabilities.Add(res);
+                cumulativeProbabilities.Add(res);
             }
             Random rnd = new Random();
-            double CurrProb = rnd.NextDouble();
-            AttributeIndex = CumulativeProbabilities.FindIndex(item => item > CurrProb);          //возможно баг на краях
-            var tempIndex = AttributeIndex;
-            AttributeIndex = CumulativeProbabilities.FindLastIndex(item => item == CumulativeProbabilities[tempIndex]);
-            AttributeIndex = (AttributeIndex == 0) ? 1 : AttributeIndex - 1;
-            CurrProb -= CumulativeProbabilities[AttributeIndex];
-            AttributeIndex = tempIndex;
-            if (CurrProb < probabilities[0, AttributeIndex])
-                AttributeValue = 1;
-            else AttributeValue = 0;
+            double currProb = rnd.NextDouble();
+            attributeIndex = cumulativeProbabilities.FindIndex(item => item > currProb);          //возможно баг на краях
+            var tempIndex = attributeIndex;
+            attributeIndex = cumulativeProbabilities.FindLastIndex(item => item == cumulativeProbabilities[tempIndex]);
+            attributeIndex = (attributeIndex == 0) ? 1 : attributeIndex - 1;
+            currProb -= cumulativeProbabilities[attributeIndex];
+            attributeIndex = tempIndex;
+            if (currProb < probabilities[0, attributeIndex])
+                attributeValue = 1;
+            else attributeValue = 0;
         }
 
-        private static void CalculateProbabilities(int AttributesCount, int AttributesValuesCount, bool[] used, double[,] weights, double[,] euristicValues, double[,] probabilities)
+        private static void CalculateProbabilities(int attributesCount, int attributesValuesCount, bool[] used, double[,] weights, double[,] euristicValues, double[,] probabilities)
         {
-            var sumForProbability = GetSumForProbability(AttributesValuesCount, AttributesCount, weights, euristicValues, used);
-            for (int i = 0; i < AttributesCount; i++)
+            var sumForProbability = GetSumForProbability(attributesValuesCount, attributesCount, weights, euristicValues, used);
+            for (int i = 0; i < attributesCount; i++)
             {
                 if (used[i]) 
                     continue;
-                for (int j = 0; j < AttributesValuesCount; j++)
+                for (int j = 0; j < attributesValuesCount; j++)
                 {
                     probabilities[j, i] = weights[j, i] * euristicValues[j, i] / sumForProbability;
                 }
             }
         }
 
-        private static void CalculateEuristicFunction(int AttributesCount, int AttributesValuesCount, List<List<double>> gains, bool[] used, double[,] euristicValues)
+        private static void CalculateEuristicFunction(int attributesCount, int attributesValuesCount, List<List<double>> gains, bool[] used, double[,] euristicValues)
         {
-            var sumGainsForEurictic = GetSumForEuristic(gains, AttributesValuesCount, used);
-            for (int i = 0; i < AttributesCount; i++)
+            var sumGainsForEurictic = GetSumForEuristic(gains, attributesValuesCount, used);
+            for (int i = 0; i < attributesCount; i++)
             {
                 if (used[i]) continue;
-                for (int j = 0; j < AttributesValuesCount; j++)
+                for (int j = 0; j < attributesValuesCount; j++)
                 {
-                    euristicValues[j, i] = (Math.Log(AttributesValuesCount, 2) - gains[i][j]) / sumGainsForEurictic;
+                    euristicValues[j, i] = (Math.Log(attributesValuesCount, 2) - gains[i][j]) / sumGainsForEurictic;
                 }
             }
         }
-        private static double GetSumWeigthForAttribute(double[,] weights, double[,] euristicValues, int i, int AttributesValuesCount)
+        private static double GetSumWeigthForAttribute(double[,] weights, double[,] euristicValues, int i, int attributesValuesCount)
         {
             double res = 0;
-            for (int j = 0; j < AttributesValuesCount; j++)
+            for (int j = 0; j < attributesValuesCount; j++)
                 res += euristicValues[j, i] * weights[j, i];
             return res;
         }
@@ -205,14 +208,14 @@ namespace MAClassification
         }
 
 
-        private static void InitializeWeights(int AttributesCount, int AttributesValuesCount, bool[] used, double[,] weights) // data.Cases
+        private static void InitializeWeights(int attributesCount, int attributesValuesCount, bool[] used, double[,] weights) // data.Cases
         {
-            for (int i = 0; i < AttributesCount; i++)
+            for (int i = 0; i < attributesCount; i++)
             {
                 used[i] = false;
-                for (int j = 0; j < AttributesValuesCount; j++)
+                for (int j = 0; j < attributesValuesCount; j++)
                 {
-                    weights[j, i] = 1.0 / (AttributesCount * AttributesValuesCount);
+                    weights[j, i] = 1.0 / (attributesCount * attributesValuesCount);
                 }
             }
         }
