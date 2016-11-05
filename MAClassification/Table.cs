@@ -13,11 +13,9 @@ namespace MAClassification
         {
             get
             {
-                return Cases[0].Attributes.Count - 1;
+                return Cases[0].AttributesValuesList.Count;
             }
         }
-        private List<double> Gains { get; set; }
-        private List<AdditionalCount> AdditionalCounts { get; set; }
         public List<double> CountsByColumns { get; set; }
 
         public List<Attribute> GetAttributesInfo()
@@ -27,12 +25,27 @@ namespace MAClassification
             {
                 attributes.Add(new Attribute
                 {
-                    AttributeName = Header[i+1],
-                    AttributeValues = Cases.Select(item => item.Attributes[i]).Distinct().ToList(),
+                    AttributeName = Header[i],
+                    AttributeValues = Cases.Select(item => item.AttributesValuesList[i]).Distinct().ToList(),
                     IsUsed = false
                 });
             }
             return attributes;
+        }
+
+        public double CalculateGain(string attributeName, string attributeValue, List<string> resultsList)
+        {
+            double result = 0;
+            var attributeIndex = Header.IndexOf(attributeName);
+            var appropriateCases = Cases.Where(item => item.AttributesValuesList[attributeIndex] == attributeValue).ToList();
+            var appropriateCasesCount = appropriateCases.Count;
+            foreach (var sample in resultsList)
+            {
+                var casesWithSetResultCount = appropriateCases.Count(item => item.Result == sample);
+                result -= (double)casesWithSetResultCount/appropriateCasesCount*
+                          Math.Log((double)casesWithSetResultCount/appropriateCasesCount, 2);
+            }
+            return result;
         }
 
         public static Table ReadData()
@@ -43,13 +56,16 @@ namespace MAClassification
             if (line != null)
             {
                 var header = line.Split('\t').ToList();
-                while ((line = streamReader.ReadLine()) != null && (line = streamReader.ReadLine()) != String.Empty)
+                header.RemoveAt(0);
+                header.RemoveAt(header.Count - 1);
+                while ((line = streamReader.ReadLine()) != null)
                 {
                     var sourceList = line.Split('\t').ToList();
                     sourceData.Add(new Case
                     {
                         Number = Convert.ToInt32(sourceList[0]),
-                        Attributes = sourceList.GetRange(1,sourceList.Count-1)
+                        AttributesValuesList = sourceList.GetRange(1, sourceList.Count - 2),
+                        Result = sourceList[sourceList.Count - 1]
                     });
                 }
                 streamReader.Close();
@@ -60,6 +76,11 @@ namespace MAClassification
                 };
             }
             return null;
+        }
+
+        public List<string> GetResultsInfo()
+        {
+            return Cases.Select(item => item.Result).Distinct().ToList();
         }
     }
 }

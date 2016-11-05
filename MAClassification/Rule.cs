@@ -10,7 +10,7 @@ namespace MAClassification
             public string Value { get; set; }
         }
 
-        public List<Condition> Conditions;
+        public List<Condition> ConditionsList;
 
         public string Result { get; set; }
 
@@ -18,7 +18,7 @@ namespace MAClassification
 
         public Rule(List<Condition> data) : this()
         {
-            Conditions = data;
+            ConditionsList = data;
             Result = "";
             Quality = 0;
         }

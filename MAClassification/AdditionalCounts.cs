@@ -1,7 +1,0 @@
-﻿namespace MAClassification
-{
-    class AdditionalCount
-    {
-            
-    }
-}
