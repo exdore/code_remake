@@ -3,7 +3,7 @@
     class Weight
     {
         public int AttributeIndex { get; set; }
-        public int AttributeValue { get; set; }
+        public string AttributeValue { get; set; }
         public bool IsChosen { get; set; }
         public double WeightValue { get; set; }
         public double EuristicFunctionValue { get; set; }
