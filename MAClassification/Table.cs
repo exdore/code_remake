@@ -43,7 +43,7 @@ namespace MAClassification
             if (line != null)
             {
                 var header = line.Split('\t').ToList();
-                while ((line = streamReader.ReadLine()) != null)
+                while ((line = streamReader.ReadLine()) != null && (line = streamReader.ReadLine()) != String.Empty)
                 {
                     var sourceList = line.Split('\t').ToList();
                     sourceData.Add(new Case
