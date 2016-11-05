@@ -6,7 +6,7 @@ namespace MAClassification
     {
         public class Condition
         {
-            public int Index { get; set; }
+            public string Attribute { get; set; }
             public string Value { get; set; }
         }
 

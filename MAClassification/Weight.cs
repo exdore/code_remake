@@ -2,7 +2,7 @@
 {
     class Weight
     {
-        public int AttributeIndex { get; set; }
+        public string AttributeName { get; set; }
         public string AttributeValue { get; set; }
         public bool IsChosen { get; set; }
         public double WeightValue { get; set; }

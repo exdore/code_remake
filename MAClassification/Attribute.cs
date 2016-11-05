@@ -2,7 +2,7 @@
 
 namespace MAClassification
 {
-    class Attribute
+    public class Attribute
     {
         public string AttributeName { get; set; }
         public List<string> AttributeValues { get; set; }
