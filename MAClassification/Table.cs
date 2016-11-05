@@ -39,7 +39,6 @@ namespace MAClassification
         {
             var streamReader = new StreamReader(@"data.txt", System.Text.Encoding.GetEncoding(1251));
             var sourceData = new List<Case>();
-            int lineNumber = 0;
             var line = streamReader.ReadLine();
             if (line != null)
             {
@@ -52,7 +51,6 @@ namespace MAClassification
                         Number = Convert.ToInt32(sourceList[0]),
                         Attributes = sourceList.GetRange(1,sourceList.Count-1)
                     });
-                    lineNumber++;
                 }
                 streamReader.Close();
                 return new Table
