@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 
 namespace MAClassification   
@@ -13,41 +12,23 @@ namespace MAClassification
             var attributes = data.GetAttributesInfo();
             var results = data.GetResultsInfo();
             int attributesValuesCount;
-            var termsList = InitializeTerms(attributes, data, results, out attributesValuesCount);
-        }
-
-        private List<Term> InitializeTerms(List<Attribute> attributes, Table data, List<string> results, out int attributesValuesCount)
-        {
-            List<Term> termsList = new List<Term>();
-            attributesValuesCount = GetAllAttributesValuesCount(attributes);
-            foreach (Attribute attribute in attributes)
+            var termsList = new Terms().InitializeTerms(attributes, data, results, out attributesValuesCount);
+            var sumEntropy = termsList.GetSumForEntopy(attributes, termsList);
+            foreach (var term in termsList)
             {
-                foreach (string attributeValue in attribute.AttributeValues)
+                foreach (var item in term)
                 {
-                    termsList.Add(new Term
-                    {
-                        AttributeName = attribute.AttributeName,
-                        AttributeValue = attributeValue,
-                        Entropy = data.CalculateGain(attribute.AttributeName, attributeValue, results),
-                        IsChosen = false,
-                        WeightValue = (double) 1/attributesValuesCount
-                    });
+                    item.EuristicFunctionValue = item.GetEuristicFunctionValue(attributes, item, sumEntropy);
                 }
             }
-            return termsList;
-        }
-
-        private static int GetAllAttributesValuesCount(List<Attribute> attributes)
-        {
-            var attributesValuesCount = 0;
-            foreach (Attribute attribute in attributes)
+            var sumEuristic = termsList.GetSumForEurictic(termsList);
+            foreach (var term in termsList)
             {
-                for (int j = 0; j < attribute.AttributeValues.Count; j++)
+                foreach (var item in term)
                 {
-                    attributesValuesCount++;
+                    item.Probability = item.GetProbability(item, sumEuristic);
                 }
             }
-            return attributesValuesCount;
         }
     }
 }
