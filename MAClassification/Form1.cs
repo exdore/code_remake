@@ -12,7 +12,6 @@ namespace MAClassification
         public Form1()
         {
             int minCasesPerRule = 3;            //минимальное покрытие каждым правилом
-            int numberOfAnts = 10;
             int maxUncoveredCases = 2;
             InitializeComponent();
             var data = ReadData();              
@@ -22,6 +21,7 @@ namespace MAClassification
             List<Rule> rulesSet = new List<Rule>();
             while(data.Cases.Count > maxUncoveredCases)
             {
+                int numberOfAnts = 10;
                 List<Rule> iterationRuleSet = new List<Rule>();
                 while (numberOfAnts-- > 0)
                 {
