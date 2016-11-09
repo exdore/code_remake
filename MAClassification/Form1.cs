@@ -22,9 +22,9 @@ namespace MAClassification
                 }
             }
             var sumEuristic = termsList.GetSumForEurictic(termsList);
-            foreach (var term in termsList)
+            foreach (var terms in termsList)
             {
-                foreach (var item in term)
+                foreach (var item in terms)
                 {
                     item.Probability = item.GetProbability(item, sumEuristic);
                 }

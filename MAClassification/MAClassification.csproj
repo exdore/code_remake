@@ -57,6 +57,7 @@
     <Compile Include="Rule.cs" />
     <Compile Include="Table.cs" />
     <Compile Include="Term.cs" />
+    <Compile Include="Terms.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
