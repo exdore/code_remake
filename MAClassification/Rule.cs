@@ -27,6 +27,32 @@ namespace MAClassification
             Quality = 0;
         }
 
+        public void GetRuleResult(List<string> resultsList)
+        {
+            var result = "";
+            int max = 0;
+            foreach (var item in resultsList)
+            {
+                if (max < CoveredCases.Count(@case => @case.Result == item))
+                {
+                    result = item;
+                    max = CoveredCases.Count(@case => @case.Result == item);
+                }
+            }
+            Result = result;
+        }
+
+        public void CalculateRuleQuality(Table data)
+        {
+            Rule tmpThis = this;
+            int truePositive = tmpThis.CoveredCases.Count(item => item.Result == tmpThis.Result);
+            int falsePositive = tmpThis.CoveredCases.Count(item => item.Result != tmpThis.Result);
+            var uncoveredData = data.GetCases().Except(tmpThis.CoveredCases);
+            int trueNegative = uncoveredData.Count(item => item.Result == tmpThis.Result);
+            int falseNegative = uncoveredData.Count(item => item.Result != tmpThis.Result);
+            Quality = (double)truePositive*trueNegative/(truePositive + falseNegative)/(falsePositive + trueNegative);
+        }
+
         public void AddConditionToRule(Terms terms, Table data)
         {
             ConditionsList = ConditionsList ?? new List<Condition>();

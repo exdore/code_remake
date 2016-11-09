@@ -33,20 +33,27 @@ namespace MAClassification
             Terms currentTerms = new Terms(initialTermsList,attributes);
             while (antsNumber > 0 && numberForConvergence > 0)
             {
-                int coveredCasesCount;
-                do
+                int coveredCasesCount = data.GetCases().Count;
+                while (coveredCasesCount > minCasesPerRule)
                 {
                     currentRule.AddConditionToRule(currentTerms, currentTable);
                     currentRule.CheckUsedAttributes(attributes);
                     currentTerms = new Terms(initialTermsList, attributes);
-                    GetEuristicAndProbabilityValues(currentTerms, attributes);
-                    //recalculate euristic & probability for unused attributes
+                    GetEuristicAndProbabilityValues(currentTerms, attributes);   //recalculate euristic & probability for unused attributes
+                 //   var cumulative = currentTerms.CumulativeProbability();
                     currentRule.GetCoveredCases(currentTable);
                     coveredCasesCount = currentRule.CoveredCases.Count;
+                    if (coveredCasesCount <= minCasesPerRule)
+                    {
+                        currentRule.ConditionsList.RemoveAt(currentRule.ConditionsList.Count - 1);
+                        currentRule.GetCoveredCases(currentTable);
+                        break;
+                    }
                 } 
-                while (coveredCasesCount > minCasesPerRule);
-                currentRules.Add(currentRule);
+                currentRule.GetRuleResult(results);
+                currentRule.CalculateRuleQuality(data);
                 //prune
+                currentRules.Add(currentRule);
                 if (currentRule.ConditionsList == currentRules.Last().ConditionsList)
                     numberForConvergence--;
                 //update weights
@@ -54,7 +61,7 @@ namespace MAClassification
             }
         }
 
-        private void GetEuristicAndProbabilityValues(Terms initialTermsList, List<Attribute> attributes)
+        private static void GetEuristicAndProbabilityValues(Terms initialTermsList, List<Attribute> attributes)
         {
             var sumEntropy = initialTermsList.GetSumForEntopy(attributes);
             foreach (var term in initialTermsList)

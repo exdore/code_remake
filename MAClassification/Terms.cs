@@ -22,6 +22,11 @@ namespace MAClassification
             }
         }
 
+        public double CumulativeProbability()
+        {
+            return this.Sum(term => term.Sum(item => item.Probability));
+        }
+
         public Terms InitializeTerms(List<Attribute> attributes, Table data, List<string> results, out int attributesValuesCount)
         {
             TermsList = new Terms();
