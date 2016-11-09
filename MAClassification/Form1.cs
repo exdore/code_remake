@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.Collections.Generic;
+using System.Windows.Forms;
 
 
 namespace MAClassification   
@@ -7,6 +8,10 @@ namespace MAClassification
     {
         public Form1()
         {
+            int antsNumber = 10;
+            int numberForConvergence = 3;
+            const int maxUncoveredCases = 2;
+            const int minCasesPerRule = 2;
             InitializeComponent();
             var data = Table.ReadData();
             var attributes = data.GetAttributesInfo();
@@ -28,6 +33,22 @@ namespace MAClassification
                 {
                     item.Probability = item.GetProbability(item, sumEuristic);
                 }
+            }
+            Rule currentRule = new Rule();
+            while (antsNumber > 0 && numberForConvergence > 0)
+            {
+                List<Rule> currentRules = new List<Rule>();
+                int coveredCasesCount;
+                do
+                {
+                    currentRule.AddConditionToRule(termsList, data);
+                    currentRule.GetCoveredCases(data);
+                    coveredCasesCount = currentRule.CoveredCases.Count;
+                } while (coveredCasesCount > minCasesPerRule);
+                //prune
+                //update weights
+                currentRules.Add(currentRule);
+                //get covered by set of rules - should be bigger than maxUncoveredCases
             }
         }
     }

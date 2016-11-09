@@ -33,6 +33,11 @@ namespace MAClassification
             return attributes;
         }
 
+        public List<Case> GetCases()
+        {
+            return Cases;
+        }
+
         public double CalculateGain(string attributeName, string attributeValue, List<string> resultsList)
         {
             double result = 0;

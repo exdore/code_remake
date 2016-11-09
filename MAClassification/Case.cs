@@ -2,7 +2,7 @@
 
 namespace MAClassification
 {
-    class Case
+    public class Case
     {
         public int Number { get; set; }
         public List<string> AttributesValuesList { get; set; }
