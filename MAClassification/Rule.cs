@@ -14,25 +14,6 @@ namespace MAClassification
 
         public List<Case> CoveredCases { get; set; }
 
-        public Rule()
-        {
-
-        }
-
-        public Rule(Rule rule)
-        {
-            ConditionsList = rule.ConditionsList;
-            Result = rule.Result;
-            Quality = rule.Quality;
-        }
-
-        public Rule(List<Condition> conditions, string result, double quality)
-        {
-            ConditionsList = conditions;
-            Result = result;
-            Quality = quality;
-        }
-
         public void GetRuleResult(List<string> resultsList)
         {
             var result = "";
@@ -50,11 +31,12 @@ namespace MAClassification
 
         public void CalculateRuleQuality(Table data)
         {
-            int truePositive = this.CoveredCases.Count(item => item.Result == this.Result);
-            int falsePositive = this.CoveredCases.Count(item => item.Result != this.Result);
-            var uncoveredData = data.GetCases().Except(this.CoveredCases).ToList();
-            int trueNegative = uncoveredData.Count(item => item.Result == this.Result);
-            int falseNegative = uncoveredData.Count(item => item.Result != this.Result);
+            Rule tmpThis = this;
+            int truePositive = tmpThis.CoveredCases.Count(item => item.Result == tmpThis.Result);
+            int falsePositive = CoveredCases.Count(item => item.Result != tmpThis.Result);
+            var uncoveredData = data.GetCases().Except(CoveredCases).ToList();
+            int trueNegative = uncoveredData.Count(item => item.Result == tmpThis.Result);
+            int falseNegative = uncoveredData.Count(item => item.Result != tmpThis.Result);
             Quality = (double)truePositive*trueNegative/(truePositive + falseNegative)/(falsePositive + trueNegative);
         }
 

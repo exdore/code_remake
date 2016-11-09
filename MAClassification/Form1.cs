@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using System.Xml.Serialization;
 
 
 namespace MAClassification   
@@ -52,11 +54,12 @@ namespace MAClassification
                 } 
                 currentRule.GetRuleResult(results);
                 currentRule.CalculateRuleQuality(data);
-                var tempRule = new Rule(currentRule.ConditionsList, currentRule.Result, currentRule.Quality);
-                for (int index = 0; index < currentRule.ConditionsList.Count; index++)
-                {
-                    tempRule = PruneRule(tempRule.ConditionsList, data, results, index);
-                }
+                XmlSerializer srSerializer = new XmlSerializer(typeof(Rule));
+                StreamWriter swStreamWriter = new StreamWriter(@"rules.xml");
+                srSerializer.Serialize(swStreamWriter, currentRule);
+                swStreamWriter.Close();
+                var tempRule = PruneRule(currentRule.ConditionsList, data, results, 0);
+               
                 
                 currentRules.Add(currentRule);
                 if (currentRule.ConditionsList == currentRules.Last().ConditionsList)
@@ -68,8 +71,9 @@ namespace MAClassification
 
         public Rule PruneRule(List<Condition> conditions, Table data, List<string> resultsList, int index)
         {
-            var newRule = new Rule();
-            newRule.ConditionsList = conditions;
+            StreamReader srStreamReader = new StreamReader(@"rules.xml");
+            XmlSerializer srSerializer = new XmlSerializer(typeof(Rule));
+            var newRule = (Rule)srSerializer.Deserialize(srStreamReader);
             newRule.ConditionsList.RemoveAt(index);
             newRule.GetCoveredCases(data);
             newRule.GetRuleResult(resultsList);
