@@ -52,13 +52,29 @@ namespace MAClassification
                 } 
                 currentRule.GetRuleResult(results);
                 currentRule.CalculateRuleQuality(data);
-                //prune
+                var tempRule = new Rule(currentRule.ConditionsList, currentRule.Result, currentRule.Quality);
+                for (int index = 0; index < currentRule.ConditionsList.Count; index++)
+                {
+                    tempRule = PruneRule(tempRule.ConditionsList, data, results, index);
+                }
+                
                 currentRules.Add(currentRule);
                 if (currentRule.ConditionsList == currentRules.Last().ConditionsList)
                     numberForConvergence--;
                 //update weights
                 //get covered by set of rules - should be bigger than maxUncoveredCases
             }
+        }
+
+        public Rule PruneRule(List<Condition> conditions, Table data, List<string> resultsList, int index)
+        {
+            var newRule = new Rule();
+            newRule.ConditionsList = conditions;
+            newRule.ConditionsList.RemoveAt(index);
+            newRule.GetCoveredCases(data);
+            newRule.GetRuleResult(resultsList);
+            newRule.CalculateRuleQuality(data);
+            return newRule;
         }
 
         private static void GetEuristicAndProbabilityValues(Terms initialTermsList, List<Attribute> attributes)

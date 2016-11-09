@@ -4,14 +4,8 @@ using System.Linq;
 
 namespace MAClassification
 {
-    struct Rule
+    public class Rule : ICloneable
     {
-        public class Condition
-        {
-            public string Attribute { get; set; }
-            public string Value { get; set; }
-        }
-
         public List<Condition> ConditionsList;
 
         public string Result { get; set; }
@@ -20,11 +14,23 @@ namespace MAClassification
 
         public List<Case> CoveredCases { get; set; }
 
-        public Rule(List<Condition> data) : this()
+        public Rule()
         {
-            ConditionsList = data;
-            Result = "";
-            Quality = 0;
+
+        }
+
+        public Rule(Rule rule)
+        {
+            ConditionsList = rule.ConditionsList;
+            Result = rule.Result;
+            Quality = rule.Quality;
+        }
+
+        public Rule(List<Condition> conditions, string result, double quality)
+        {
+            ConditionsList = conditions;
+            Result = result;
+            Quality = quality;
         }
 
         public void GetRuleResult(List<string> resultsList)
@@ -44,12 +50,11 @@ namespace MAClassification
 
         public void CalculateRuleQuality(Table data)
         {
-            Rule tmpThis = this;
-            int truePositive = tmpThis.CoveredCases.Count(item => item.Result == tmpThis.Result);
-            int falsePositive = tmpThis.CoveredCases.Count(item => item.Result != tmpThis.Result);
-            var uncoveredData = data.GetCases().Except(tmpThis.CoveredCases);
-            int trueNegative = uncoveredData.Count(item => item.Result == tmpThis.Result);
-            int falseNegative = uncoveredData.Count(item => item.Result != tmpThis.Result);
+            int truePositive = this.CoveredCases.Count(item => item.Result == this.Result);
+            int falsePositive = this.CoveredCases.Count(item => item.Result != this.Result);
+            var uncoveredData = data.GetCases().Except(this.CoveredCases).ToList();
+            int trueNegative = uncoveredData.Count(item => item.Result == this.Result);
+            int falseNegative = uncoveredData.Count(item => item.Result != this.Result);
             Quality = (double)truePositive*trueNegative/(truePositive + falseNegative)/(falsePositive + trueNegative);
         }
 
@@ -98,6 +103,11 @@ namespace MAClassification
                 var index = attributes.FindIndex(item => item.AttributeName == condition.Attribute);
                 attributes[index].IsUsed = true;
             }
+        }
+
+        public object Clone()
+        {
+            return MemberwiseClone();
         }
     }
 }
