@@ -16,7 +16,17 @@ namespace MAClassification
                 return Cases[0].AttributesValuesList.Count;
             }
         }
-        public List<double> CountsByColumns { get; set; }
+
+        public Table(Table data)
+        {
+            Cases = data.Cases;
+            Header = data.Header;
+        }
+
+        public Table()
+        {
+            
+        }
 
         public List<Attribute> GetAttributesInfo()
         {

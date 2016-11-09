@@ -13,9 +13,13 @@ namespace MAClassification
             
         }
 
-        public Terms(Terms terms)
+        public Terms(Terms terms, List<Attribute> attributes)
         {
-            this.TermsList = terms.TermsList;
+            for (int i = 0; i < attributes.Count; i++)
+            {
+                if (attributes[i].IsUsed) continue;
+                Add(terms[i]);
+            }
         }
 
         public Terms InitializeTerms(List<Attribute> attributes, Table data, List<string> results, out int attributesValuesCount)
@@ -33,35 +37,34 @@ namespace MAClassification
                         AttributeValue = attributeValue,
                         Entropy = data.CalculateGain(attribute.AttributeName, attributeValue, results),
                         IsChosen = false,
-                        WeightValue = (double)1 / attributesValuesCount
                     });
                 }
             }
             return TermsList;
         }
 
-        public double GetSumForEntopy(List<Attribute> attributes, Terms termsList)
+        public double GetSumForEntopy(List<Attribute> attributes)
         {
             double result = 0;
             for (int i = 0; i < Count; i++)
             {
                 if(attributes[i].IsUsed) continue;
-                for (int j = 0; j < termsList[i].Count; j++)
+                for (int j = 0; j < this[i].Count; j++)
                 {
-                    result += Math.Log(attributes[i].AttributeValues.Count, 2) - termsList[i][j].Entropy;
+                    result += Math.Log(attributes[i].AttributeValues.Count, 2) - this[i][j].Entropy;
                 }
             }
             return result;
         }
 
-        public double GetSumForEurictic(Terms termsList)
+        public double GetSumForEurictic()
         {
             double result = 0;
             for (int i = 0; i < Count; i++)
             {
-                for (int j = 0; j < termsList[i].Count; j++)
+                for (int j = 0; j < this[i].Count; j++)
                 {
-                    result += termsList[i][j].WeightValue*termsList[i][j].EuristicFunctionValue;
+                    result += this[i][j].WeightValue * this[i][j].EuristicFunctionValue;
                 }
             }
             return result;
@@ -72,6 +75,7 @@ namespace MAClassification
             var attributesValuesCount = 0;
             foreach (Attribute attribute in attributes)
             {
+                if(attribute.IsUsed) continue;
                 for (int j = 0; j < attribute.AttributeValues.Count; j++)
                 {
                     attributesValuesCount++;

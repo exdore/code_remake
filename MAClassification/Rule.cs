@@ -29,7 +29,7 @@ namespace MAClassification
 
         public void AddConditionToRule(Terms terms, Table data)
         {
-            ConditionsList = (ConditionsList ?? new List<Condition>());
+            ConditionsList = ConditionsList ?? new List<Condition>();
             var probability = GetSomeProbability();
             foreach (var term in terms)
             {
@@ -42,7 +42,7 @@ namespace MAClassification
                             Attribute = item.AttributeName,
                             Value = item.AttributeValue
                         });
-                        break;
+                        return;
                     }
                     probability -= item.Probability;
                 }
@@ -63,6 +63,15 @@ namespace MAClassification
                 cases = cases.Where(item => item.AttributesValuesList[attributeIndex] == condition.Value).ToList();
             }
             CoveredCases = cases;
+        }
+
+        public void CheckUsedAttributes(List<Attribute> attributes)
+        {
+            foreach (var condition in ConditionsList)
+            {
+                var index = attributes.FindIndex(item => item.AttributeName == condition.Attribute);
+                attributes[index].IsUsed = true;
+            }
         }
     }
 }

@@ -13,15 +13,16 @@ namespace MAClassification
         public double Probability { get; set; }
         public double Entropy { get; set; }
 
-        public double GetEuristicFunctionValue(List<Attribute> attributes, Term term, double sumEntropy)
+
+        public double GetEuristicFunctionValue(List<Attribute> attributes, double sumEntropy)
         {
-            return (Math.Log(attributes.Find(item => item.AttributeName == term.AttributeName)
-                .AttributeValues.Count, 2) - term.Entropy) / sumEntropy;
+            return (Math.Log(attributes.Find(item => item.AttributeName == AttributeName)
+                .AttributeValues.Count, 2) - Entropy) / sumEntropy;
         }
 
-        public double GetProbability(Term term, double sumEuristic)
+        public double GetProbability(double sumEuristic)
         {
-            return term.EuristicFunctionValue * term.WeightValue / sumEuristic;
+            return EuristicFunctionValue * WeightValue / sumEuristic;
         }
     }
 }
