@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace MAClassification
 {
-    public class Rule : ICloneable
+    public class Rule 
     {
         public List<Condition> ConditionsList;
 
@@ -87,9 +87,32 @@ namespace MAClassification
             }
         }
 
-        public object Clone()
+        public Rule Clone()
         {
-            return MemberwiseClone();
+            return new Rule { 
+                ConditionsList = ConditionsList.ToList(),
+                Quality = Quality,
+                CoveredCases = CoveredCases.ToList(),
+                Result = Result
+            };
+        }
+
+        public Rule PruneRule(Table data, List<string> resultsList)
+        {
+            var newRule = Clone();
+            if(newRule.ConditionsList.Count == 1) return newRule;
+            var rulesList = new List<Rule>();
+            for (int i = 0; i < ConditionsList.Count; i++)
+            {
+                newRule = Clone();
+                newRule.ConditionsList.RemoveAt(i);
+                newRule.GetCoveredCases(data);
+                newRule.GetRuleResult(resultsList);
+                newRule.CalculateRuleQuality(data);
+                rulesList.Add(newRule);
+            }
+            var bestRule = rulesList.OrderByDescending(item => item.Quality).First();
+            return (bestRule.Quality > Quality) ? bestRule.PruneRule(data, resultsList) : this;
         }
     }
 }

@@ -88,5 +88,31 @@ namespace MAClassification
             }
             return attributesValuesCount;
         }
+
+        public void UpdateWeights(Rule rule)
+        {
+            double sumWeight = .0;
+            foreach (var items in this)
+            {
+                foreach (var item in items)
+                {
+                    if (rule.ConditionsList.Exists(condition => condition.Attribute == item.AttributeName &&
+                                                                condition.Value == item.AttributeValue))
+                    {
+                        item.IsChosen = true;
+                        item.WeightValue += item.WeightValue * rule.Quality;
+                    }
+                    sumWeight += item.WeightValue;
+                }
+            }
+            foreach (var items in this)
+            {
+                foreach (var item in items)
+                {
+                    if (!item.IsChosen)
+                        item.WeightValue /= sumWeight;
+                }
+            }
+        }
     }
 }

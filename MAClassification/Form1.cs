@@ -32,7 +32,12 @@ namespace MAClassification
             Rule currentRule = new Rule();
             List<Rule> currentRules = new List<Rule>();
             Table currentTable = new Table(data);
-            Terms currentTerms = new Terms(initialTermsList,attributes);
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Terms));
+            StreamWriter streamWriter = new StreamWriter(@"terms.xml");
+            xmlSerializer.Serialize(streamWriter, initialTermsList);
+            streamWriter.Close();
+            StreamReader streamReader = new StreamReader(@"terms.xml");
+            Terms currentTerms = (Terms)xmlSerializer.Deserialize(streamReader);
             while (antsNumber > 0 && numberForConvergence > 0)
             {
                 int coveredCasesCount = data.GetCases().Count;
@@ -54,31 +59,12 @@ namespace MAClassification
                 } 
                 currentRule.GetRuleResult(results);
                 currentRule.CalculateRuleQuality(data);
-                XmlSerializer srSerializer = new XmlSerializer(typeof(Rule));
-                StreamWriter swStreamWriter = new StreamWriter(@"rules.xml");
-                srSerializer.Serialize(swStreamWriter, currentRule);
-                swStreamWriter.Close();
-                var tempRule = PruneRule(currentRule.ConditionsList, data, results, 0);
-               
-                
-                currentRules.Add(currentRule);
-                if (currentRule.ConditionsList == currentRules.Last().ConditionsList)
+                var tempRule = currentRule.PruneRule(data, results);
+                initialTermsList.UpdateWeights(tempRule);
+                currentRules.Add(tempRule);
+                if (tempRule.ConditionsList == currentRules.Last().ConditionsList)
                     numberForConvergence--;
-                //update weights
-                //get covered by set of rules - should be bigger than maxUncoveredCases
             }
-        }
-
-        public Rule PruneRule(List<Condition> conditions, Table data, List<string> resultsList, int index)
-        {
-            StreamReader srStreamReader = new StreamReader(@"rules.xml");
-            XmlSerializer srSerializer = new XmlSerializer(typeof(Rule));
-            var newRule = (Rule)srSerializer.Deserialize(srStreamReader);
-            newRule.ConditionsList.RemoveAt(index);
-            newRule.GetCoveredCases(data);
-            newRule.GetRuleResult(resultsList);
-            newRule.CalculateRuleQuality(data);
-            return newRule;
         }
 
         private static void GetEuristicAndProbabilityValues(Terms initialTermsList, List<Attribute> attributes)
