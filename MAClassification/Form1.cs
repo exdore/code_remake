@@ -11,15 +11,16 @@ namespace MAClassification
     {
         public Form1()
         {
-            int antsNumber = 10;
-            int numberForConvergence = 3;
-    //        const int maxUncoveredCases = 2;
+            int maxAntsNumber = 10;
+            int maxNumberForConvergence = 3;
+            const int maxUncoveredCases = 2;
             const int minCasesPerRule = 2;
             InitializeComponent();
             var data = Table.ReadData();
             var attributes = data.GetAttributesInfo();
             var results = data.GetResultsInfo();
             int attributesValuesCount;
+            var discoveredRules = new List<Rule>();
             var initialTermsList = new Terms().InitializeTerms(attributes, data, results, out attributesValuesCount);
             foreach (var terms in initialTermsList)
             {
@@ -29,41 +30,53 @@ namespace MAClassification
                 }
             }
             GetEuristicAndProbabilityValues(initialTermsList, attributes);
-            Rule currentRule = new Rule();
+            
             List<Rule> currentRules = new List<Rule>();
             Table currentTable = new Table(data);
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Terms));
             StreamWriter streamWriter = new StreamWriter(@"terms.xml");
             xmlSerializer.Serialize(streamWriter, initialTermsList);
             streamWriter.Close();
-            StreamReader streamReader = new StreamReader(@"terms.xml");
-            Terms currentTerms = (Terms)xmlSerializer.Deserialize(streamReader);
-            while (antsNumber > 0 && numberForConvergence > 0)
+            while (currentTable.GetCases().Count > maxUncoveredCases)
             {
-                int coveredCasesCount = data.GetCases().Count;
-                while (coveredCasesCount > minCasesPerRule)
+                var currentAntsNumber = maxAntsNumber;
+                var currentNumberForConvergence = maxNumberForConvergence;
+                var streamReader = new StreamReader(@"terms.xml");
+                Terms currentTerms = (Terms) xmlSerializer.Deserialize(streamReader);
+                while (currentAntsNumber > 0 && currentNumberForConvergence > 0)
                 {
-                    currentRule.AddConditionToRule(currentTerms, currentTable);
-                    currentRule.CheckUsedAttributes(attributes);
-                    currentTerms = new Terms(initialTermsList, attributes);
-                    GetEuristicAndProbabilityValues(currentTerms, attributes);   //recalculate euristic & probability for unused attributes
-                 //   var cumulative = currentTerms.CumulativeProbability();
-                    currentRule.GetCoveredCases(currentTable);
-                    coveredCasesCount = currentRule.CoveredCases.Count;
-                    if (coveredCasesCount <= minCasesPerRule)
+                    Rule currentRule = new Rule();
+                    int coveredCasesCount = currentTable.GetCases().Count;
+                    while (coveredCasesCount > minCasesPerRule)
                     {
-                        currentRule.ConditionsList.RemoveAt(currentRule.ConditionsList.Count - 1);
+                        currentRule.AddConditionToRule(currentTerms, currentTable);
+                        currentRule.CheckUsedAttributes(attributes);
+                        currentTerms = new Terms(initialTermsList, attributes);
+                        GetEuristicAndProbabilityValues(currentTerms, attributes);
+                            //recalculate euristic & probability for unused attributes
+                        //   var cumulative = currentTerms.CumulativeProbability();
                         currentRule.GetCoveredCases(currentTable);
-                        break;
+                        coveredCasesCount = currentRule.CoveredCases.Count;
+                        if (coveredCasesCount <= minCasesPerRule)
+                        {
+                            currentRule.ConditionsList.RemoveAt(currentRule.ConditionsList.Count - 1);
+                            currentRule.GetCoveredCases(currentTable);
+                            break;
+                        }
                     }
-                } 
-                currentRule.GetRuleResult(results);
-                currentRule.CalculateRuleQuality(data);
-                var tempRule = currentRule.PruneRule(data, results);
-                initialTermsList.UpdateWeights(tempRule);
-                currentRules.Add(tempRule);
-                if (tempRule.ConditionsList == currentRules.Last().ConditionsList)
-                    numberForConvergence--;
+                    currentRule.GetRuleResult(results);
+                    currentRule.CalculateRuleQuality(currentTable);
+                    var tempRule = currentRule.PruneRule(currentTable, results);
+                    initialTermsList.UpdateWeights(tempRule);
+                    currentRules.Add(tempRule);
+                    if (tempRule.ConditionsList == currentRules.Last().ConditionsList)
+                        currentNumberForConvergence--;
+                    else currentNumberForConvergence = maxNumberForConvergence;
+                    currentAntsNumber++;
+                }
+                var bestRule = currentRules.OrderByDescending(item => item.Quality).First();
+                discoveredRules.Add(bestRule);
+                currentTable.Cases = currentTable.Cases.Except(bestRule.CoveredCases).ToList();
             }
         }
 
