@@ -60,6 +60,7 @@ namespace MAClassification
                         if (coveredCasesCount <= minCasesPerRule)
                         {
                             currentRule.ConditionsList.RemoveAt(currentRule.ConditionsList.Count - 1);
+                            attributes[currentRule.ConditionsList.Count - 1].IsUsed = false;
                             currentRule.GetCoveredCases(currentTable);
                             break;
                         }
@@ -72,7 +73,11 @@ namespace MAClassification
                     if (tempRule.ConditionsList == currentRules.Last().ConditionsList)
                         currentNumberForConvergence--;
                     else currentNumberForConvergence = maxNumberForConvergence;
-                    currentAntsNumber++;
+                    currentAntsNumber--;
+                    foreach (var attribute in attributes)
+                    {
+                        attribute.IsUsed = false;
+                    }
                 }
                 var bestRule = currentRules.OrderByDescending(item => item.Quality).First();
                 discoveredRules.Add(bestRule);
