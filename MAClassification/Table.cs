@@ -8,7 +8,7 @@ namespace MAClassification
     public class Table
     {
         public List<string> Header { get; set; }
-        private List<Case> Cases { get; set; }
+        public List<Case> Cases { get; set; }
         public int CountColumns
         {
             get
