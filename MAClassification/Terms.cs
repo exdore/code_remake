@@ -17,7 +17,7 @@ namespace MAClassification
         {
             for (int i = 0; i < attributes.Count; i++)
             {
-                if (attributes[i].IsUsed) continue;
+                //if (attributes[i].IsUsed) continue;
                 Add(terms[i]);
             }
         }
@@ -62,11 +62,12 @@ namespace MAClassification
             return result;
         }
 
-        public double GetSumForEurictic()
+        public double GetSumForEurictic(List<Attribute> attributes)
         {
             double result = 0;
             for (int i = 0; i < Count; i++)
             {
+                if (attributes[i].IsUsed) continue;
                 for (int j = 0; j < this[i].Count; j++)
                 {
                     result += this[i][j].WeightValue * this[i][j].EuristicFunctionValue;

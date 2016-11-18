@@ -41,10 +41,11 @@ namespace MAClassification
             {
                 var currentAntsNumber = maxAntsNumber;
                 var currentNumberForConvergence = maxNumberForConvergence;
-                var streamReader = new StreamReader(@"terms.xml");
-                Terms currentTerms = (Terms) xmlSerializer.Deserialize(streamReader);
                 while (currentAntsNumber > 0 && currentNumberForConvergence > 0)
                 {
+                    var streamReader = new StreamReader(@"terms.xml");
+                    Terms currentTerms = (Terms)xmlSerializer.Deserialize(streamReader);
+                    streamReader.Close();
                     Rule currentRule = new Rule();
                     int coveredCasesCount = currentTable.GetCases().Count;
                     while (coveredCasesCount > minCasesPerRule)
@@ -54,13 +55,14 @@ namespace MAClassification
                         currentTerms = new Terms(initialTermsList, attributes);
                         GetEuristicAndProbabilityValues(currentTerms, attributes);
                             //recalculate euristic & probability for unused attributes
-                        //   var cumulative = currentTerms.CumulativeProbability();
+                        var cumulative = currentTerms.CumulativeProbability();
                         currentRule.GetCoveredCases(currentTable);
                         coveredCasesCount = currentRule.CoveredCases.Count;
                         if (coveredCasesCount <= minCasesPerRule)
                         {
+                            attributes.Find(item => item.AttributeName == currentRule.ConditionsList.Last().Attribute)
+                                .IsUsed = false;
                             currentRule.ConditionsList.RemoveAt(currentRule.ConditionsList.Count - 1);
-                            attributes[currentRule.ConditionsList.Count - 1].IsUsed = false;
                             currentRule.GetCoveredCases(currentTable);
                             break;
                         }
@@ -88,17 +90,21 @@ namespace MAClassification
         private static void GetEuristicAndProbabilityValues(Terms initialTermsList, List<Attribute> attributes)
         {
             var sumEntropy = initialTermsList.GetSumForEntopy(attributes);
-            foreach (var term in initialTermsList)
+            for (int index = 0; index < initialTermsList.Count; index++)
             {
+                var term = initialTermsList[index];
+                if (attributes[index].IsUsed) continue;
                 foreach (var item in term)
                 {
                     item.EuristicFunctionValue = item.GetEuristicFunctionValue(attributes, sumEntropy);
                 }
             }
-            var sumEuristic = initialTermsList.GetSumForEurictic();
-            foreach (var terms in initialTermsList)
+            var sumEuristic = initialTermsList.GetSumForEurictic(attributes);
+            for (int index = 0; index < initialTermsList.Count; index++)
             {
-                foreach (var item in terms)
+                var term = initialTermsList[index];
+                if (attributes[index].IsUsed) continue;
+                foreach (var item in term)
                 {
                     item.Probability = item.GetProbability(sumEuristic);
                 }
