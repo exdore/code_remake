@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attribute.cs" />
+    <Compile Include="Attributes.cs" />
     <Compile Include="Case.cs" />
     <Compile Include="Condition.cs" />
     <Compile Include="Form1.cs">

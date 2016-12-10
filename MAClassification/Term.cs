@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace MAClassification
 {
@@ -12,5 +11,17 @@ namespace MAClassification
         public double EuristicFunctionValue { get; set; }
         public double Probability { get; set; }
         public double Entropy { get; set; }
+
+
+        public double GetEuristicFunctionValue(Attributes attributes, double sumEntropy)
+        {
+            return (Math.Log(attributes.Find(item => item.AttributeName == AttributeName)
+                .AttributeValues.Count, 2) - Entropy) / sumEntropy;
+        }
+
+        public double GetProbabilityValue(double sumEuristic)
+        {
+            return EuristicFunctionValue * WeightValue / sumEuristic;
+        }
     }
 }

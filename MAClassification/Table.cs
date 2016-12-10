@@ -2,17 +2,20 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Serialization;
 
 namespace MAClassification
 {
+    [Serializable]
+    [XmlInclude(typeof(Case))]
     public class Table
     {
         public List<string> Header { get; set; }
         public List<Case> Cases { get; set; }
 
-        public List<Attribute> GetAttributesInfo()
+        public Attributes GetAttributesInfo()
         {
-            List<Attribute> attributes = new List<Attribute>();
+            Attributes attributes = new Attributes();
             for (int i = 0; i < Header.Count; i++)
             {
                 attributes.Add(new Attribute
@@ -25,17 +28,46 @@ namespace MAClassification
             return attributes;
         }
 
+        public Table()
+        {
+
+        }
+
+        public Table(List<Case> cases, Table data )
+        {
+            Cases = cases;
+            Header = data.Header;
+        }
+        
+        public void Serialize()
+        {
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Table));
+            StreamWriter streamWriter = new StreamWriter(@"table.xml");
+            xmlSerializer.Serialize(streamWriter, this);
+            streamWriter.Close();
+        }
+
+        public int GetCasesCount()
+        {
+            return Cases.Count;
+        }
+
+        public List<Case> GetCases()
+        {
+            return Cases;
+        }
+
         public double CalculateGain(string attributeName, string attributeValue, List<string> resultsList)
         {
             double result = 0;
             var attributeIndex = Header.IndexOf(attributeName);
-            var appropriateCases = Cases.Where(item => item.AttributesValuesList[attributeIndex] == attributeValue).ToList();
-            var appropriateCasesCount = appropriateCases.Count;
+            var apropriateCases = Cases.Where(item => item.AttributesValuesList[attributeIndex] == attributeValue).ToList();
+            var apropriateCasesCount = apropriateCases.Count;
             foreach (var sample in resultsList)
             {
-                var casesWithSetResultCount = appropriateCases.Count(item => item.Result == sample);
-                result -= (double)casesWithSetResultCount/appropriateCasesCount*
-                          Math.Log((double)casesWithSetResultCount/appropriateCasesCount, 2);
+                var casesWithSetResultCount = apropriateCases.Count(item => item.Result == sample);
+                result -= (double)casesWithSetResultCount/apropriateCasesCount*
+                          Math.Log((double)casesWithSetResultCount/apropriateCasesCount, 2);
             }
             return result;
         }
