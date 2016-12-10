@@ -9,29 +9,11 @@ namespace MAClassification
     {
         public List<string> Header { get; set; }
         public List<Case> Cases { get; set; }
-        public int CountColumns
-        {
-            get
-            {
-                return Cases[0].AttributesValuesList.Count;
-            }
-        }
-
-        public Table(Table data)
-        {
-            Cases = data.Cases;
-            Header = data.Header;
-        }
-
-        public Table()
-        {
-            
-        }
 
         public List<Attribute> GetAttributesInfo()
         {
             List<Attribute> attributes = new List<Attribute>();
-            for (int i = 0; i < CountColumns; i++)
+            for (int i = 0; i < Header.Count; i++)
             {
                 attributes.Add(new Attribute
                 {
@@ -41,11 +23,6 @@ namespace MAClassification
                 });
             }
             return attributes;
-        }
-
-        public List<Case> GetCases()
-        {
-            return Cases;
         }
 
         public double CalculateGain(string attributeName, string attributeValue, List<string> resultsList)
