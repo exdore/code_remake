@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -53,20 +54,23 @@ namespace MAClassification
                     };
                     while (currentAntRule.CoveredCases.Count > minCasesPerRule)
                     {
-                        var prob = initialTerms.CumulativeProbability(attributes);
                         currentAntRule.AddConditionToRule(initialTerms, data);
                         currentAntRule.CheckUsedAttributes(attributes);
                         currentAntRule.GetCoveredCases(data);
                         currentAntRule.GetRuleResult(results);
                         currentAntRule.CalculateRuleQuality(data);
                         initialTerms.Update(attributes, currentAntRule);
-                        prob = initialTerms.CumulativeProbability(attributes);
+                        var prob = initialTerms.CumulativeProbability(attributes);
+                        if(Math.Abs(prob - 1) > 1e-6)
+                        {
+                            MessageBox.Show(@"fail prob");
+                            return;
+                        }
                         currentAntRule.GetCoveredCases(data);
                     }
-                    if (currentAntRule.ConditionsList.Count == 1)
+                    if (currentAntRule.ConditionsList.Count == 1) 
                     {
-                        MessageBox.Show("fail");
-                        return;
+                        continue;
                     }
                     attributes.Find(item => item.AttributeName == currentAntRule.ConditionsList.Last().AttributeName)
                                 .IsUsed = false;
@@ -74,7 +78,6 @@ namespace MAClassification
                     currentAntRule.GetCoveredCases(data);
                     currentAntRule.GetRuleResult(results);
                     currentAntRule.CalculateRuleQuality(data);
-                    
                     currentAntRule = currentAntRule.PruneRule(data, results);
                     currentAntRule.GetCoveredCases(data);
                     currentAntRule.GetRuleResult(results);
@@ -85,7 +88,8 @@ namespace MAClassification
                         currentRules.Add(currentAntRule);
                         currentNumberForConvergence++;
                     }
-                    else if (currentAntRule.ConditionsList.Except(currentRules.Last().ConditionsList).ToList().Count == 0)
+                    var diff = currentAntRule.ConditionsList.Except(currentRules.Last().ConditionsList).ToList();
+                    if (diff.Count != 0)
                     {
                         currentRules.Add(currentAntRule);
                         currentNumberForConvergence++;
@@ -106,6 +110,7 @@ namespace MAClassification
                             term.IsChosen = false;
                         }
                     }
+                    initialTerms.Update(attributes, currentAntRule);
                     currentAnt++;
                 }
                 discoveredRules.Add(currentRules.OrderByDescending(item => item.Quality).First());
