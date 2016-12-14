@@ -1,8 +1,11 @@
-﻿namespace MAClassification
+﻿using System;
+
+namespace MAClassification
 {
+    [Serializable]
     public class Condition
     {
-        public string Attribute { get; set; }
-        public string Value { get; set; }
+        public string AttributeName { get; set; }
+        public string AttributeValue { get; set; }
     }
 }

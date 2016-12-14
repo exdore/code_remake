@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Xml.Serialization;
 
 namespace MAClassification
 {
+    [Serializable]
+    [XmlInclude(typeof(Condition))]
     public class Rule 
     {
         public List<Condition> ConditionsList;
@@ -11,9 +15,16 @@ namespace MAClassification
         public string Result { get; set; }
 
         public double Quality { get; set; }
-
+        [XmlIgnore]
         public List<Case> CoveredCases { get; set; }
 
+        public void Serialize()
+        {
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Rule));
+            StreamWriter streamWriter = new StreamWriter(@"rules.xml", true);
+            xmlSerializer.Serialize(streamWriter, this);
+            streamWriter.Close();
+        }
 
         public void GetRuleResult(List<string> resultsList)
         {
@@ -45,15 +56,16 @@ namespace MAClassification
             var probability = GetSomeProbability();
             foreach (var term in terms)
             {
-                if(ConditionsList.Exists(item => item.Attribute == term[0].AttributeName)) continue;
+                if(ConditionsList.Exists(item => item.AttributeName == term[0].AttributeName)) continue;
                 foreach (var item in term)
                 {
+                    if (item.IsChosen) continue;
                     if (probability < item.Probability)
                     {
                         ConditionsList.Add(new Condition
                         {
-                            Attribute = item.AttributeName,
-                            Value = item.AttributeValue
+                            AttributeName = item.AttributeName,
+                            AttributeValue = item.AttributeValue
                         });
                         return;
                     }
@@ -72,8 +84,8 @@ namespace MAClassification
             var cases = data.GetCases();
             foreach (var condition in ConditionsList)
             {
-                int attributeIndex = data.Header.FindIndex(item => item == condition.Attribute);
-                cases = cases.Where(item => item.AttributesValuesList[attributeIndex] == condition.Value).ToList();
+                int attributeIndex = data.Header.FindIndex(item => item == condition.AttributeName);
+                cases = cases.Where(item => item.AttributesValuesList[attributeIndex] == condition.AttributeValue).ToList();
             }
             CoveredCases = cases;
         }
@@ -82,7 +94,7 @@ namespace MAClassification
         {
             foreach (var condition in ConditionsList)
             {
-                var index = attributes.FindIndex(item => item.AttributeName == condition.Attribute);
+                var index = attributes.FindIndex(item => item.AttributeName == condition.AttributeName);
                 attributes[index].IsUsed = true;
             }
         }

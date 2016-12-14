@@ -34,11 +34,12 @@ namespace MAClassification
                     {
                         foreach (var discoveredRule in discoveredRules)
                         {
-                            if (discoveredRule.ConditionsList.Contains(new Condition
-                            {
-                                Attribute = term.AttributeName,
-                                Value = term.AttributeValue
-                            }))
+                            var fl =
+                                discoveredRule.ConditionsList.Exists(
+                                    item =>
+                                        item.AttributeName == term.AttributeName &&
+                                        item.AttributeValue == term.AttributeValue);
+                            if (fl)
                                 term.IsChosen = true;
                         }
                     }
@@ -62,12 +63,18 @@ namespace MAClassification
                         prob = initialTerms.CumulativeProbability(attributes);
                         currentAntRule.GetCoveredCases(data);
                     }
-                    attributes.Find(item => item.AttributeName == currentAntRule.ConditionsList.Last().Attribute)
+                    if (currentAntRule.ConditionsList.Count == 1)
+                    {
+                        MessageBox.Show("fail");
+                        return;
+                    }
+                    attributes.Find(item => item.AttributeName == currentAntRule.ConditionsList.Last().AttributeName)
                                 .IsUsed = false;
                     currentAntRule.ConditionsList.RemoveAt(currentAntRule.ConditionsList.Count - 1);
                     currentAntRule.GetCoveredCases(data);
                     currentAntRule.GetRuleResult(results);
                     currentAntRule.CalculateRuleQuality(data);
+                    
                     currentAntRule = currentAntRule.PruneRule(data, results);
                     currentAntRule.GetCoveredCases(data);
                     currentAntRule.GetRuleResult(results);
@@ -92,10 +99,18 @@ namespace MAClassification
                     {
                         attribute.IsUsed = false;
                     }
+                    foreach (var initialTerm in initialTerms)
+                    {
+                        foreach (var term in initialTerm)
+                        {
+                            term.IsChosen = false;
+                        }
+                    }
                     currentAnt++;
                 }
                 discoveredRules.Add(currentRules.OrderByDescending(item => item.Quality).First());
                 data.Cases = data.Cases.Except(discoveredRules.Last().CoveredCases).ToList();
+                discoveredRules.Last().Serialize();
             }
         }
 

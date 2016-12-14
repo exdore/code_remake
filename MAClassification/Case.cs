@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace MAClassification
 {
+    [Serializable]
     public class Case
     {
         public int Number { get; set; }

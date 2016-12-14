@@ -17,8 +17,8 @@ namespace MAClassification
             {
                 foreach (var item in items)
                 {
-                    if (rule.ConditionsList.Exists(condition => condition.Attribute == item.AttributeName &&
-                                                                condition.Value == item.AttributeValue))
+                    if (rule.ConditionsList.Exists(condition => condition.AttributeName == item.AttributeName &&
+                                                                condition.AttributeValue == item.AttributeValue))
                     {
                         item.IsChosen = true;
                         item.WeightValue += item.WeightValue * rule.Quality;
@@ -77,6 +77,7 @@ namespace MAClassification
                 if (attributes[i].IsUsed) continue;
                 for (int index = 0; index < terms.Count; index++)
                 {
+                    if (terms[index].IsChosen) continue;
                     res += this[i][index].Probability;
                 }
             }
@@ -85,7 +86,6 @@ namespace MAClassification
 
         public void Update(Attributes attributes, Rule rule)
         {
-            UpdateWeights(rule);
             InitializeEuristicFunctionValues(attributes);
             InitializeProbabilities(attributes);
         }
@@ -111,6 +111,7 @@ namespace MAClassification
                 if (attributes[i].IsUsed) continue;
                 foreach (var term in terms)
                 {
+                    if (term.IsChosen) continue;
                     term.Probability = term.GetProbabilityValue(SumEuristic);
                 }
             }
@@ -125,6 +126,7 @@ namespace MAClassification
                 if (attributes[i].IsUsed) continue;
                 foreach (var term in terms)
                 {
+                    if (term.IsChosen) continue;
                     term.EuristicFunctionValue = term.GetEuristicFunctionValue(attributes, SumEntropy);
                 }
             }
@@ -138,6 +140,7 @@ namespace MAClassification
                 if (attributes[i].IsUsed) continue;
                 for (int j = 0; j < this[i].Count; j++)
                 {
+                    if (this[i][j].IsChosen) continue;
                     result += Math.Log(attributes[i].AttributeValues.Count, 2) - this[i][j].Entropy;
                 }
             }
@@ -152,6 +155,7 @@ namespace MAClassification
                 if (attributes[i].IsUsed) continue;
                 for (int j = 0; j < this[i].Count; j++)
                 {
+                    if(this[i][j].IsChosen) continue;
                     result += this[i][j].WeightValue * this[i][j].EuristicFunctionValue;
                 }
             }
