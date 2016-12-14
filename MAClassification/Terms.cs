@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Xml.Serialization;
 
 namespace MAClassification
@@ -106,13 +105,12 @@ namespace MAClassification
         private void InitializeProbabilities(Attributes attributes)
         {
             GetSumForEurictic(attributes);
-            for (int i = 0; i < this.Count; i++)
+            for (int i = 0; i < Count; i++)
             {
                 var terms = this[i];
                 if (attributes[i].IsUsed) continue;
-                for (int index = 0; index < terms.Count; index++)
+                foreach (var term in terms)
                 {
-                    var term = terms[index];
                     term.Probability = term.GetProbabilityValue(SumEuristic);
                 }
             }
@@ -121,13 +119,12 @@ namespace MAClassification
         private void InitializeEuristicFunctionValues(Attributes attributes)
         {
             GetSumForEntopy(attributes);
-            for (int i = 0; i < this.Count; i++)
+            for (int i = 0; i < Count; i++)
             {
                 var terms = this[i]; 
                 if (attributes[i].IsUsed) continue;
-                for (int index = 0; index < terms.Count; index++)
+                foreach (var term in terms)
                 {
-                    var term = terms[index];
                     term.EuristicFunctionValue = term.GetEuristicFunctionValue(attributes, SumEntropy);
                 }
             }

@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using System.Xml.Serialization;
 
 
 namespace MAClassification   
@@ -30,6 +28,21 @@ namespace MAClassification
                 var currentCases = data.GetCases();
                 var currentRules = new List<Rule>();
                 initialTerms = initialTerms.Deserialize();
+                foreach (var initialTerm in initialTerms)
+                {
+                    foreach (var term in initialTerm)
+                    {
+                        foreach (var discoveredRule in discoveredRules)
+                        {
+                            if (discoveredRule.ConditionsList.Contains(new Condition
+                            {
+                                Attribute = term.AttributeName,
+                                Value = term.AttributeValue
+                            }))
+                                term.IsChosen = true;
+                        }
+                    }
+                }
                 while (currentAnt < maxAntsNumber && currentNumberForConvergence < maxNumberForConvergence)
                 {
                     var currentAntRule = new Rule
@@ -65,7 +78,7 @@ namespace MAClassification
                         currentRules.Add(currentAntRule);
                         currentNumberForConvergence++;
                     }
-                    else if (currentAntRule.ConditionsList == currentRules.Last().ConditionsList)
+                    else if (currentAntRule.ConditionsList.Except(currentRules.Last().ConditionsList).ToList().Count == 0)
                     {
                         currentRules.Add(currentAntRule);
                         currentNumberForConvergence++;
@@ -75,9 +88,14 @@ namespace MAClassification
                         currentRules.Add(currentAntRule);
                         currentNumberForConvergence = 0;
                     }
+                    foreach (var attribute in attributes)
+                    {
+                        attribute.IsUsed = false;
+                    }
                     currentAnt++;
                 }
-
+                discoveredRules.Add(currentRules.OrderByDescending(item => item.Quality).First());
+                data.Cases = data.Cases.Except(discoveredRules.Last().CoveredCases).ToList();
             }
         }
 
