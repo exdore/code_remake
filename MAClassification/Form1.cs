@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -22,6 +23,7 @@ namespace MAClassification
             var discoveredRules = new List<Rule>();
             Initialize(out data, out attributes, out results, out initialTerms);
             data.Serialize();
+            File.Delete(@"rules.xml");
             while (data.GetCasesCount() > maxUncoveredCases)
             {
                 var currentAnt = 0;
