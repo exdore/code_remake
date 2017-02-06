@@ -7,5 +7,10 @@ namespace MAClassification
     {
         public string AttributeName { get; set; }
         public string AttributeValue { get; set; }
+
+        public override string ToString()
+        {
+            return AttributeName + " = " + AttributeValue;
+        }
     }
 }

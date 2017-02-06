@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -10,11 +11,15 @@ namespace MAClassification
     {
         public Form1()
         {
-            const int maxAntsNumber = 10;
-            const int maxNumberForConvergence = 3;
-            const int maxUncoveredCases = 2;
-            const int minCasesPerRule = 2;
             InitializeComponent();
+        }
+
+        private void startButton_Click(object sender, EventArgs e)
+        {
+            var maxAntsNumber = antsCount.Value;
+            var maxNumberForConvergence = convergenceStopValue.Value;
+            var maxUncoveredCases = maxUncoveredCasesCount.Value;
+            var minCasesPerRule = minNumberPerRule.Value;
             Table data;
             Attributes attributes;
             List<string> results;
@@ -48,36 +53,7 @@ namespace MAClassification
                 }
                 while (currentAnt < maxAntsNumber && currentNumberForConvergence < maxNumberForConvergence)
                 {
-                    var currentAntRule = new Rule
-                    {
-                        ConditionsList = new List<Condition>(),
-                        CoveredCases = currentCases
-                    };
-                    while (currentAntRule.CoveredCases.Count > minCasesPerRule)
-                    {
-                        currentAntRule.AddConditionToRule(initialTerms, data);
-                        currentAntRule.CheckUsedAttributes(attributes);
-                        currentAntRule.GetCoveredCases(data);
-                        currentAntRule.GetRuleResult(results);
-                        currentAntRule.CalculateRuleQuality(data);
-                        initialTerms.Update(attributes, currentAntRule);
-                        //var prob = initialTerms.CumulativeProbability(attributes);
-                        //if (Math.Abs(prob - 1) > 1e-6)
-                        //{
-                        //    MessageBox.Show(@"fail prob");
-                        //    return;
-                        //}
-                        currentAntRule.GetCoveredCases(data);
-                    }
-                    if (currentAntRule.CoveredCases.Count < minCasesPerRule && currentAntRule.ConditionsList.Count > 1)
-                    {
-                        attributes.Find(item => item.AttributeName == currentAntRule.ConditionsList.Last().AttributeName)
-                            .IsUsed = false;
-                        currentAntRule.ConditionsList.RemoveAt(currentAntRule.ConditionsList.Count - 1);
-                        currentAntRule.GetCoveredCases(data);
-                        currentAntRule.GetRuleResult(results);
-                        currentAntRule.CalculateRuleQuality(data);
-                    }
+                    var currentAntRule = Ant.RunAnt(currentCases, minCasesPerRule, initialTerms, data, attributes, results);
                     if (currentAntRule.ConditionsList.Count > 1)
                     {
                         currentAntRule = currentAntRule.PruneRule(data, results);
@@ -120,11 +96,11 @@ namespace MAClassification
                 data.Cases = data.Cases.Except(discoveredRules.Last().CoveredCases).ToList();
                 discoveredRules.Last().Serialize();
             }
-            //XPathDocument myXPathDoc = new XPathDocument(@"rules_d.xml");
-            //XslCompiledTransform myXslTrans = new XslCompiledTransform();
-            //XmlTextWriter myWriter = new XmlTextWriter("result.html", null);
-            //myXslTrans.Transform(myXPathDoc, null, myWriter);
+            listBox1.DataSource = discoveredRules;
+            uncoveredCount.Text = data.GetCasesCount().ToString();
         }
+
+        
 
         private static void Initialize(out Table data, out Attributes attributes, out List<string> results, out Terms initialTerms)
         {

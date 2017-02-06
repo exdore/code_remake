@@ -18,6 +18,17 @@ namespace MAClassification
         [XmlIgnore]
         public List<Case> CoveredCases { get; set; }
 
+        public override string ToString()
+        {
+            var res = "";
+            foreach (var condition in ConditionsList)
+            {
+                res += condition + " & ";
+            }
+            if(res.Length > 0) res = res.Remove(res.Length - 2);
+            return res;
+        }
+
         public void Serialize()
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Rule));
@@ -53,7 +64,7 @@ namespace MAClassification
 
         public void AddConditionToRule(Terms terms, Table data)
         {
-            var probability = GetSomeProbability();
+            var probability = new Random().NextDouble();
             foreach (var term in terms)
             {
                 if(ConditionsList.Exists(item => item.AttributeName == term[0].AttributeName)) continue;
@@ -72,11 +83,6 @@ namespace MAClassification
                     probability -= item.Probability;
                 }
             }
-        }
-
-        public double GetSomeProbability()
-        {
-            return new Random().NextDouble();
         }
 
         public void GetCoveredCases(Table data)
@@ -110,7 +116,7 @@ namespace MAClassification
             };
         }
 
-        public Rule PruneRule(Table data, List<string> resultsList)
+        public Rule PruneRule(Table data, List<string> resultsList) //решение проблемы оверфиттинга через обобщение правил
         {
             var newRule = Clone();
             if (newRule.ConditionsList.Count == 1) return newRule;

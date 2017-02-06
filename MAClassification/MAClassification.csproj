@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ant.cs" />
     <Compile Include="Attribute.cs" />
     <Compile Include="Attributes.cs" />
     <Compile Include="Case.cs" />

@@ -36,14 +36,6 @@ namespace MAClassification
             }
         }
 
-        public void UpdateEuristic(Rule rule)
-        {
-        }
-
-        public void UpdateProbability(Rule rule)
-        {
-        }
-
         public void Serialize()
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Terms));
@@ -112,7 +104,7 @@ namespace MAClassification
                 foreach (var term in terms)
                 {
                     if (term.IsChosen) continue;
-                    term.Probability = term.GetProbabilityValue(SumEuristic);
+                    term.Probability = term.GetProbabilityValue(SumEuristic, this);
                 }
             }
         }

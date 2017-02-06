@@ -19,7 +19,7 @@ namespace MAClassification
                 .AttributeValues.Count, 2) - Entropy) / sumEntropy;
         }
 
-        public double GetProbabilityValue(double sumEuristic)
+        public double GetProbabilityValue(double sumEuristic, Terms terms)
         {
             return EuristicFunctionValue * WeightValue / sumEuristic;
         }
