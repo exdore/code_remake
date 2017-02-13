@@ -33,7 +33,7 @@ namespace MAClassification
                 }
                 currentAntRule.GetCoveredCases(data);
             }
-            if (currentAntRule.CoveredCases.Count < minCasesPerRule && currentAntRule.ConditionsList.Count > 1)
+            if (currentAntRule.CoveredCases.Count < minCasesPerRule)
             {
                 attributes.Find(item => item.AttributeName == currentAntRule.ConditionsList.Last().AttributeName)
                     .IsUsed = false;
