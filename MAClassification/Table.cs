@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Xml.Serialization;
 
 namespace MAClassification
@@ -66,8 +67,9 @@ namespace MAClassification
             foreach (var sample in resultsList)
             {
                 var casesWithSetResultCount = apropriateCases.Count(item => item.Result == sample);
-                result -= (double)casesWithSetResultCount/apropriateCasesCount*
-                          Math.Log((double)casesWithSetResultCount/apropriateCasesCount, 2);
+                if (casesWithSetResultCount != 0)
+                    result -= (double) casesWithSetResultCount / apropriateCasesCount *
+                              Math.Log((double) casesWithSetResultCount / apropriateCasesCount, 2);
             }
             return result;
         }

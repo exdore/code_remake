@@ -23,9 +23,9 @@ namespace MAClassification
             Table data;
             Attributes attributes;
             List<string> results;
-            Terms initialTerms;
+            Terms terms;
             var discoveredRules = new List<Rule>();
-            Initialize(out data, out attributes, out results, out initialTerms);
+            Initialize(out data, out attributes, out results, out terms);
             data.Serialize();
             File.Delete(@"rules.xml");
             while (data.GetCasesCount() > maxUncoveredCases)
@@ -34,73 +34,95 @@ namespace MAClassification
                 var currentNumberForConvergence = 0;
                 var currentCases = data.GetCases();
                 var currentRules = new List<Rule>();
-                initialTerms = initialTerms.Deserialize();
-                foreach (var initialTerm in initialTerms)
+                terms = terms.Deserialize();
+                if (CheckUsedTerms(terms, data))
                 {
-                    foreach (var term in initialTerm)
+                    while (currentAnt < maxAntsNumber && currentNumberForConvergence < maxNumberForConvergence)
                     {
-                        foreach (var discoveredRule in discoveredRules)
+                        var basicAnt = new Ant(
                         {
-                            var fl =
-                                discoveredRule.ConditionsList.Exists(
-                                    item =>
-                                        item.AttributeName == term.AttributeName &&
-                                        item.AttributeValue == term.AttributeValue);
-                            if (fl)
-                                term.IsChosen = true;
-                        }
-                    }
-                }
-                while (currentAnt < maxAntsNumber && currentNumberForConvergence < maxNumberForConvergence)
-                {
-                    var currentAntRule = Ant.RunAnt(currentCases, minCasesPerRule, initialTerms, data, attributes, results);
-                    if (currentAntRule.ConditionsList.Count > 1)
-                    {
-                        currentAntRule = currentAntRule.PruneRule(data, results);
-                        currentAntRule.GetCoveredCases(data);
-                        currentAntRule.GetRuleResult(results);
-                        currentAntRule.CalculateRuleQuality(data);
-                        initialTerms.UpdateWeights(currentAntRule);
-                    }
-                    if (currentRules.Count == 0)
-                    {
-                        currentRules.Add(currentAntRule);
-                        currentNumberForConvergence++;
-                    }
-                    var diff = currentAntRule.ConditionsList.Except(currentRules.Last().ConditionsList).ToList();
-                    if (diff.Count != 0)
-                    {
-                        currentRules.Add(currentAntRule);
-                        currentNumberForConvergence++;
-                    }
-                    else
-                    {
-                        currentRules.Add(currentAntRule);
-                        currentNumberForConvergence = 0;
-                    }
-                    foreach (var attribute in attributes)
-                    {
-                        attribute.IsUsed = false;
-                    }
-                    foreach (var initialTerm in initialTerms)
-                    {
-                        foreach (var term in initialTerm)
+                            Alpha = new Random().Next(40, 60) / 100,
+                            Beta =
+                        };
+                        var currentAntRule = basicAnt.RunAnt(currentCases, minCasesPerRule, terms, data, attributes, results);
+                        if (currentAntRule.ConditionsList.Count > 1)
                         {
-                            term.IsChosen = false;
+                            currentAntRule = currentAntRule.PruneRule(data, results);
+                            currentAntRule.GetCoveredCases(data);
+                            currentAntRule.GetRuleResult(results);
+                            currentAntRule.CalculateRuleQuality(data);
+                            terms.UpdateWeights(currentAntRule);
                         }
+                        if (currentRules.Count == 0)
+                        {
+                            currentRules.Add(currentAntRule);
+                        }
+                        var diff = currentAntRule.ConditionsList.SequenceEqual(currentRules.Last().ConditionsList);
+                        if (diff)
+                        {
+                            currentNumberForConvergence++;
+                        }
+                        else
+                        {
+                            currentRules.Add(currentAntRule);
+                            currentNumberForConvergence = 0;
+                        }
+                        foreach (var attribute in attributes)
+                        {
+                            attribute.IsUsed = false;
+                        }
+                        CheckUsedTerms(terms, data);
+                        terms.Update(attributes, currentAntRule);
+                        currentAnt++;
                     }
-                    initialTerms.Update(attributes, currentAntRule);
-                    currentAnt++;
+                    discoveredRules.Add(currentRules.OrderByDescending(item => item.Quality).First());
+                    data.Cases = data.Cases.Except(discoveredRules.Last().CoveredCases).ToList();
+                    discoveredRules.Last().Serialize();
                 }
-                discoveredRules.Add(currentRules.OrderByDescending(item => item.Quality).First());
-                data.Cases = data.Cases.Except(discoveredRules.Last().CoveredCases).ToList();
-                discoveredRules.Last().Serialize();
             }
+            listBox1.HorizontalScrollbar = true;
             listBox1.DataSource = discoveredRules;
             uncoveredCount.Text = data.GetCasesCount().ToString();
+            var header = data.Header;
+            var dnf = new List<string>();
+            foreach (var discoveredRule in discoveredRules)
+            {
+                var dnfRule = "Conditions: ";
+                foreach (var condition in discoveredRule.ConditionsList)
+                {
+                    dnfRule += " x" + (header.IndexOf(condition.AttributeName) + 1) + " = " + condition.AttributeValue + " &";
+                }
+                dnfRule = dnfRule.Remove(dnfRule.Length - 1) + " Result: " + discoveredRule.Result;
+                dnf.Add(dnfRule);
+            }
+            listBox2.DataSource = dnf;
         }
 
-        
+        private static bool CheckUsedTerms(Terms terms, Table data)
+        {
+            var availableTermsCount = 0;
+            foreach (var term in terms)
+            {
+                foreach (var item in term)
+                {
+                    item.IsChosen = false;
+                    var fl = false;
+                    var index = data.Header.IndexOf(item.AttributeName);
+                    foreach (var dataCase in data.Cases)
+                    {
+                        if (dataCase.AttributesValuesList[index] == item.AttributeValue)
+                        {
+                            availableTermsCount++;
+                            fl = true;
+                            break;
+                        }
+                    }
+                    if (!fl) item.IsChosen = true;
+                }
+            }
+            return availableTermsCount != 0;
+        }
+
 
         private static void Initialize(out Table data, out Attributes attributes, out List<string> results, out Terms initialTerms)
         {

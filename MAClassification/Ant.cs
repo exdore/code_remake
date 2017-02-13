@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace MAClassification
 {
     public class Ant
     {
-        public static Rule RunAnt(List<Case> currentCases, decimal minCasesPerRule, Terms initialTerms, Table data,
+        public double Alpha { get; set; }
+        public double Beta { get; set; }
+
+        public Rule RunAnt(List<Case> currentCases, decimal minCasesPerRule, Terms initialTerms, Table data,
             Attributes attributes, List<string> results)
         {
             var currentAntRule = new Rule
@@ -28,8 +28,7 @@ namespace MAClassification
                 var prob = initialTerms.CumulativeProbability(attributes);
                 if (Math.Abs(prob - 1) > 1e-6)
                 {
-                    MessageBox.Show(@"fail prob");
-                    return currentAntRule;
+                    continue;
                 }
                 currentAntRule.GetCoveredCases(data);
             }

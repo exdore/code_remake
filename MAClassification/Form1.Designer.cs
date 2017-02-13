@@ -39,6 +39,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.uncoveredCount = new System.Windows.Forms.TextBox();
+            this.listBox2 = new System.Windows.Forms.ListBox();
             ((System.ComponentModel.ISupportInitialize)(this.antsCount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.convergenceStopValue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.maxUncoveredCasesCount)).BeginInit();
@@ -52,7 +53,7 @@
             this.antsCount.Size = new System.Drawing.Size(120, 20);
             this.antsCount.TabIndex = 0;
             this.antsCount.Value = new decimal(new int[] {
-            100,
+            30,
             0,
             0,
             0});
@@ -64,7 +65,7 @@
             this.convergenceStopValue.Size = new System.Drawing.Size(120, 20);
             this.convergenceStopValue.TabIndex = 1;
             this.convergenceStopValue.Value = new decimal(new int[] {
-            10,
+            5,
             0,
             0,
             0});
@@ -108,7 +109,7 @@
             this.listBox1.FormattingEnabled = true;
             this.listBox1.Location = new System.Drawing.Point(265, 13);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(457, 277);
+            this.listBox1.Size = new System.Drawing.Size(457, 134);
             this.listBox1.TabIndex = 5;
             // 
             // label1
@@ -154,12 +155,21 @@
             this.uncoveredCount.Size = new System.Drawing.Size(100, 20);
             this.uncoveredCount.TabIndex = 10;
             // 
+            // listBox2
+            // 
+            this.listBox2.FormattingEnabled = true;
+            this.listBox2.Location = new System.Drawing.Point(265, 153);
+            this.listBox2.Name = "listBox2";
+            this.listBox2.Size = new System.Drawing.Size(457, 134);
+            this.listBox2.TabIndex = 11;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(734, 297);
+            this.Controls.Add(this.listBox2);
             this.Controls.Add(this.uncoveredCount);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
@@ -196,6 +206,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox uncoveredCount;
+        private System.Windows.Forms.ListBox listBox2;
 
     }
 }

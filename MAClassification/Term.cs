@@ -15,8 +15,10 @@ namespace MAClassification
 
         public double GetEuristicFunctionValue(Attributes attributes, double sumEntropy)
         {
-            return (Math.Log(attributes.Find(item => item.AttributeName == AttributeName)
-                .AttributeValues.Count, 2) - Entropy) / sumEntropy;
+            if (Math.Abs(Entropy) > 1e-6)
+                return (Math.Log(attributes.Find(item => item.AttributeName == AttributeName)
+                            .AttributeValues.Count, 2) - Entropy) / sumEntropy;
+            return 0;
         }
 
         public double GetProbabilityValue(double sumEuristic, Terms terms)

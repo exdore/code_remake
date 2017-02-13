@@ -20,12 +20,13 @@ namespace MAClassification
 
         public override string ToString()
         {
-            var res = "";
+            var res = "Conditions: ";
             foreach (var condition in ConditionsList)
             {
                 res += condition + " & ";
             }
             if(res.Length > 0) res = res.Remove(res.Length - 2);
+            res += " Result: " + Result + " Covered Cases Count: " + CoveredCases.Count;
             return res;
         }
 
@@ -43,10 +44,11 @@ namespace MAClassification
             int max = 0;
             foreach (var item in resultsList)
             {
-                if (max < CoveredCases.Count(@case => @case.Result == item))
+                var currentResultCases = CoveredCases.Count(@case => @case.Result == item);
+                if (max < currentResultCases)
                 {
                     result = item;
-                    max = CoveredCases.Count(@case => @case.Result == item);
+                    max = currentResultCases;
                 }
             }
             Result = result;

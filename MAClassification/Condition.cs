@@ -12,5 +12,10 @@ namespace MAClassification
         {
             return AttributeName + " = " + AttributeValue;
         }
+
+        public override int GetHashCode()
+        {
+            return AttributeName.GetHashCode() ^ AttributeValue.GetHashCode();
+        }
     }
 }

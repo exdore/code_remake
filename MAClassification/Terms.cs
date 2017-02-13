@@ -17,6 +17,7 @@ namespace MAClassification
             {
                 foreach (var item in items)
                 {
+                    item.IsChosen = false;
                     if (rule.ConditionsList.Exists(condition => condition.AttributeName == item.AttributeName &&
                                                                 condition.AttributeValue == item.AttributeValue))
                     {
