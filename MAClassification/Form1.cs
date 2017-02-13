@@ -12,6 +12,7 @@ namespace MAClassification
         public Form1()
         {
             InitializeComponent();
+            startButton.Focus();
         }
 
         private void startButton_Click(object sender, EventArgs e)
@@ -34,7 +35,10 @@ namespace MAClassification
                 var currentNumberForConvergence = 0;
                 var currentCases = data.GetCases();
                 var currentRules = new List<Rule>();
-                terms = terms.Deserialize();
+                var socialTerms = terms.Deserialize();
+                var basicTerms = terms.Deserialize();
+                var greedyTerms = terms.Deserialize();
+                var mergingTerms = terms.Deserialize();
                 if (CheckUsedTerms(terms, data))
                 {
                     while (currentAnt < maxAntsNumber && currentNumberForConvergence < maxNumberForConvergence)
@@ -54,9 +58,18 @@ namespace MAClassification
                             Alpha = (double)new Random().Next(0, 20) / 100,
                             Beta = (double)new Random().Next(70, 100) / 100
                         };
-                        GetAntResult(basicAnt, currentCases, minCasesPerRule, terms, data, attributes, results, currentRules, ref currentNumberForConvergence, ref currentAnt);
-                        GetAntResult(greedyAnt, currentCases, minCasesPerRule, terms, data, attributes, results, currentRules, ref currentNumberForConvergence, ref currentAnt);
-                        GetAntResult(socialAnt, currentCases, minCasesPerRule, terms, data, attributes, results, currentRules, ref currentNumberForConvergence, ref currentAnt);
+                        var mergingAnt = new Ant
+                        {
+                            Alpha = 1,
+                            Beta = 1
+                        };
+                        GetAntResult(basicAnt, currentCases, minCasesPerRule, basicTerms, data, attributes, results, currentRules, ref currentNumberForConvergence, ref currentAnt);
+                        GetAntResult(greedyAnt, currentCases, minCasesPerRule, greedyTerms, data, attributes, results, currentRules, ref currentNumberForConvergence, ref currentAnt);
+                        GetAntResult(socialAnt, currentCases, minCasesPerRule, socialTerms, data, attributes, results, currentRules, ref currentNumberForConvergence, ref currentAnt);
+                        mergingTerms.Merge(socialTerms, basicTerms, greedyTerms);
+                        mergingTerms.UpdateWeights(new Rule());
+                        mergingTerms.Update(attributes, new Rule(), mergingAnt);
+                        GetAntResult(mergingAnt, currentCases, minCasesPerRule, mergingTerms, data, attributes, results, currentRules, ref currentNumberForConvergence, ref currentAnt);
                     }
                     discoveredRules.Add(currentRules.OrderByDescending(item => item.Quality).First());
                     data.Cases = data.Cases.Except(discoveredRules.Last().CoveredCases).ToList();
@@ -97,8 +110,8 @@ namespace MAClassification
             {
                 currentRules.Add(currentAntRule);
             }
-            var diff = currentAntRule.ConditionsList.SequenceEqual(currentRules.Last().ConditionsList);
-            if (diff)
+            var equal = currentAntRule.ConditionsList.SequenceEqual(currentRules.Last().ConditionsList);
+            if (equal)
             {
                 currentNumberForConvergence++;
             }
@@ -140,7 +153,6 @@ namespace MAClassification
             }
             return availableTermsCount != 0;
         }
-
 
         private static void Initialize(out Table data, out Attributes attributes, out List<string> results, out Terms initialTerms)
         {

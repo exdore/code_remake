@@ -10,6 +10,19 @@ namespace MAClassification
         private double SumEuristic { get; set; }
         private double SumEntropy { get; set; }
 
+        public void Merge(Terms socialTerms, Terms basicTerms, Terms greedyTerms)
+        {
+            for (int i = 0; i < this.Count; i++)
+            {
+                for (int j = 0; j < this[i].Count; j++)
+                {
+                    this[i][j].WeightValue =
+                        Math.Max(Math.Max(socialTerms[i][j].WeightValue, basicTerms[i][j].WeightValue),
+                            greedyTerms[i][j].WeightValue);
+                }
+            }
+        }
+
         public void UpdateWeights(Rule rule)
         {
             double sumWeight = .0;
@@ -18,7 +31,7 @@ namespace MAClassification
                 foreach (var item in items)
                 {
                     item.IsChosen = false;
-                    if (rule.ConditionsList.Exists(condition => condition.AttributeName == item.AttributeName &&
+                    if (rule.ConditionsList != null && rule.ConditionsList.Exists(condition => condition.AttributeName == item.AttributeName &&
                                                                 condition.AttributeValue == item.AttributeValue))
                     {
                         item.IsChosen = true;
