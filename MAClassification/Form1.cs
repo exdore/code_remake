@@ -39,41 +39,24 @@ namespace MAClassification
                 {
                     while (currentAnt < maxAntsNumber && currentNumberForConvergence < maxNumberForConvergence)
                     {
-                        var basicAnt = new Ant(
+                        var basicAnt = new Ant
                         {
-                            Alpha = new Random().Next(40, 60) / 100,
-                            Beta =
+                            Alpha = (double)new Random().Next(40, 60) / 100,
+                            Beta = (double)new Random().Next(40,60) / 100
                         };
-                        var currentAntRule = basicAnt.RunAnt(currentCases, minCasesPerRule, terms, data, attributes, results);
-                        if (currentAntRule.ConditionsList.Count > 1)
+                        var greedyAnt = new Ant
                         {
-                            currentAntRule = currentAntRule.PruneRule(data, results);
-                            currentAntRule.GetCoveredCases(data);
-                            currentAntRule.GetRuleResult(results);
-                            currentAntRule.CalculateRuleQuality(data);
-                            terms.UpdateWeights(currentAntRule);
-                        }
-                        if (currentRules.Count == 0)
+                            Alpha = (double)new Random().Next(80, 100) / 100,
+                            Beta = (double)new Random().Next(0, 30) / 100
+                        };
+                        var socialAnt = new Ant
                         {
-                            currentRules.Add(currentAntRule);
-                        }
-                        var diff = currentAntRule.ConditionsList.SequenceEqual(currentRules.Last().ConditionsList);
-                        if (diff)
-                        {
-                            currentNumberForConvergence++;
-                        }
-                        else
-                        {
-                            currentRules.Add(currentAntRule);
-                            currentNumberForConvergence = 0;
-                        }
-                        foreach (var attribute in attributes)
-                        {
-                            attribute.IsUsed = false;
-                        }
-                        CheckUsedTerms(terms, data);
-                        terms.Update(attributes, currentAntRule);
-                        currentAnt++;
+                            Alpha = (double)new Random().Next(0, 20) / 100,
+                            Beta = (double)new Random().Next(70, 100) / 100
+                        };
+                        GetAntResult(basicAnt, currentCases, minCasesPerRule, terms, data, attributes, results, currentRules, ref currentNumberForConvergence, ref currentAnt);
+                        GetAntResult(greedyAnt, currentCases, minCasesPerRule, terms, data, attributes, results, currentRules, ref currentNumberForConvergence, ref currentAnt);
+                        GetAntResult(socialAnt, currentCases, minCasesPerRule, terms, data, attributes, results, currentRules, ref currentNumberForConvergence, ref currentAnt);
                     }
                     discoveredRules.Add(currentRules.OrderByDescending(item => item.Quality).First());
                     data.Cases = data.Cases.Except(discoveredRules.Last().CoveredCases).ToList();
@@ -96,6 +79,41 @@ namespace MAClassification
                 dnf.Add(dnfRule);
             }
             listBox2.DataSource = dnf;
+        }
+
+        private static void GetAntResult(Ant basicAnt, List<Case> currentCases, decimal minCasesPerRule, Terms terms, Table data,
+            Attributes attributes, List<string> results, List<Rule> currentRules, ref int currentNumberForConvergence, ref int currentAnt)
+        {
+            var currentAntRule = basicAnt.RunAnt(currentCases, minCasesPerRule, terms, data, attributes, results);
+            if (currentAntRule.ConditionsList.Count > 1)
+            {
+                currentAntRule = currentAntRule.PruneRule(data, results);
+                currentAntRule.GetCoveredCases(data);
+                currentAntRule.GetRuleResult(results);
+                currentAntRule.CalculateRuleQuality(data);
+                terms.UpdateWeights(currentAntRule);
+            }
+            if (currentRules.Count == 0)
+            {
+                currentRules.Add(currentAntRule);
+            }
+            var diff = currentAntRule.ConditionsList.SequenceEqual(currentRules.Last().ConditionsList);
+            if (diff)
+            {
+                currentNumberForConvergence++;
+            }
+            else
+            {
+                currentRules.Add(currentAntRule);
+                currentNumberForConvergence = 0;
+            }
+            foreach (var attribute in attributes)
+            {
+                attribute.IsUsed = false;
+            }
+            CheckUsedTerms(terms, data);
+            terms.Update(attributes, currentAntRule, basicAnt);
+            currentAnt++;
         }
 
         private static bool CheckUsedTerms(Terms terms, Table data)

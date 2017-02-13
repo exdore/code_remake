@@ -21,9 +21,9 @@ namespace MAClassification
             return 0;
         }
 
-        public double GetProbabilityValue(double sumEuristic, Terms terms)
+        public double GetProbabilityValue(double sumEuristic, double alpha, double beta)
         {
-            return EuristicFunctionValue * WeightValue / sumEuristic;
+            return Math.Pow(EuristicFunctionValue, alpha) * Math.Pow(WeightValue, beta) / sumEuristic;
         }
     }
 }

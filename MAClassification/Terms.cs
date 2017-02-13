@@ -58,7 +58,7 @@ namespace MAClassification
         {
             InitializeWeights(attributes);
             InitializeEuristicFunctionValues(attributes);
-            InitializeProbabilities(attributes);
+            //InitializeProbabilities(attributes);
         }
 
         public double CumulativeProbability(Attributes attributes)
@@ -77,10 +77,10 @@ namespace MAClassification
             return res;
         }
 
-        public void Update(Attributes attributes, Rule rule)
+        public void Update(Attributes attributes, Rule rule, Ant ant)
         {
             InitializeEuristicFunctionValues(attributes);
-            InitializeProbabilities(attributes);
+            InitializeProbabilities(attributes, ant.Alpha, ant.Beta);
         }
 
         private void InitializeWeights(Attributes attributes)
@@ -95,9 +95,9 @@ namespace MAClassification
             }
         }
 
-        private void InitializeProbabilities(Attributes attributes)
+        public void InitializeProbabilities(Attributes attributes, double alpha, double beta)
         {
-            GetSumForEurictic(attributes);
+            GetSumForEurictic(attributes, alpha, beta);
             for (int i = 0; i < Count; i++)
             {
                 var terms = this[i];
@@ -105,7 +105,7 @@ namespace MAClassification
                 foreach (var term in terms)
                 {
                     if (term.IsChosen) continue;
-                    term.Probability = term.GetProbabilityValue(SumEuristic, this);
+                    term.Probability = term.GetProbabilityValue(SumEuristic, alpha, beta);
                 }
             }
         }
@@ -140,7 +140,7 @@ namespace MAClassification
             SumEntropy = result;
         }
 
-        private void GetSumForEurictic(Attributes attributes)
+        private void GetSumForEurictic(Attributes attributes, double alpha, double beta)
         {
             double result = 0;
             for (int i = 0; i < Count; i++)
@@ -149,7 +149,7 @@ namespace MAClassification
                 for (int j = 0; j < this[i].Count; j++)
                 {
                     if(this[i][j].IsChosen) continue;
-                    result += this[i][j].WeightValue * this[i][j].EuristicFunctionValue;
+                    result += Math.Pow(this[i][j].WeightValue, beta) * Math.Pow(this[i][j].EuristicFunctionValue, alpha);
                 }
             }
             SumEuristic = result;

@@ -17,6 +17,7 @@ namespace MAClassification
                 ConditionsList = new List<Condition>(),
                 CoveredCases = currentCases
             };
+            initialTerms.InitializeProbabilities(attributes, Alpha, Beta);
             while (currentAntRule.CoveredCases.Count > minCasesPerRule)
             {
                 currentAntRule.AddConditionToRule(initialTerms, data);
@@ -24,7 +25,7 @@ namespace MAClassification
                 currentAntRule.GetCoveredCases(data);
                 currentAntRule.GetRuleResult(results);
                 currentAntRule.CalculateRuleQuality(data);
-                initialTerms.Update(attributes, currentAntRule);
+                initialTerms.Update(attributes, currentAntRule, this);
                 var prob = initialTerms.CumulativeProbability(attributes);
                 if (Math.Abs(prob - 1) > 1e-6)
                 {
