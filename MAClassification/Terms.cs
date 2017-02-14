@@ -12,7 +12,7 @@ namespace MAClassification
 
         public void Merge(Terms socialTerms, Terms basicTerms, Terms greedyTerms)
         {
-            for (int i = 0; i < this.Count; i++)
+            for (int i = 0; i < Count; i++)
             {
                 for (int j = 0; j < this[i].Count; j++)
                 {
@@ -90,7 +90,7 @@ namespace MAClassification
             return res;
         }
 
-        public void Update(Attributes attributes, Rule rule, Ant ant)
+        public void Update(Attributes attributes, Ant ant)
         {
             InitializeEuristicFunctionValues(attributes);
             InitializeProbabilities(attributes, ant.Alpha, ant.Beta);

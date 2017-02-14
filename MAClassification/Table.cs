@@ -74,9 +74,9 @@ namespace MAClassification
             return result;
         }
 
-        public static Table ReadData()
+        public static Table ReadData(string path)
         {
-            var streamReader = new StreamReader(@"data.txt", System.Text.Encoding.GetEncoding(1251));
+            var streamReader = new StreamReader(path, System.Text.Encoding.GetEncoding(1251));
             var sourceData = new List<Case>();
             var line = streamReader.ReadLine();
             if (line != null)

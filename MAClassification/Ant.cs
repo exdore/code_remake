@@ -25,7 +25,7 @@ namespace MAClassification
                 currentAntRule.GetCoveredCases(data);
                 currentAntRule.GetRuleResult(results);
                 currentAntRule.CalculateRuleQuality(data);
-                initialTerms.Update(attributes, currentAntRule, this);
+                initialTerms.Update(attributes, this);
                 var prob = initialTerms.CumulativeProbability(attributes);
                 if (Math.Abs(prob - 1) > 1e-6)
                 {

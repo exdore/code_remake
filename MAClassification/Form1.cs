@@ -12,8 +12,11 @@ namespace MAClassification
         public Form1()
         {
             InitializeComponent();
-            startButton.Focus();
+            startButton.Enabled = false;
+            testButton.Enabled = false;
         }
+
+        private List<Rule> _discoveredRules;
 
         private void startButton_Click(object sender, EventArgs e)
         {
@@ -25,8 +28,8 @@ namespace MAClassification
             Attributes attributes;
             List<string> results;
             Terms terms;
-            var discoveredRules = new List<Rule>();
-            Initialize(out data, out attributes, out results, out terms);
+            _discoveredRules = new List<Rule>();
+            Initialize(trainingPathLabel.Text, out data, out attributes, out results, out terms);
             data.Serialize();
             File.Delete(@"rules.xml");
             while (data.GetCasesCount() > maxUncoveredCases)
@@ -50,13 +53,13 @@ namespace MAClassification
                         };
                         var greedyAnt = new Ant
                         {
-                            Alpha = (double)new Random().Next(80, 100) / 100,
-                            Beta = (double)new Random().Next(0, 30) / 100
+                            Alpha = (double)new Random().Next(0, 30) / 100,
+                            Beta = (double)new Random().Next(80, 100) / 100
                         };
                         var socialAnt = new Ant
                         {
-                            Alpha = (double)new Random().Next(0, 20) / 100,
-                            Beta = (double)new Random().Next(70, 100) / 100
+                            Alpha = (double)new Random().Next(70, 100) / 100,
+                            Beta = (double)new Random().Next(0, 20) / 100
                         };
                         var mergingAnt = new Ant
                         {
@@ -68,36 +71,22 @@ namespace MAClassification
                         GetAntResult(socialAnt, currentCases, minCasesPerRule, socialTerms, data, attributes, results, currentRules, ref currentNumberForConvergence, ref currentAnt);
                         mergingTerms.Merge(socialTerms, basicTerms, greedyTerms);
                         mergingTerms.UpdateWeights(new Rule());
-                        mergingTerms.Update(attributes, new Rule(), mergingAnt);
+                        mergingTerms.Update(attributes, mergingAnt);
                         GetAntResult(mergingAnt, currentCases, minCasesPerRule, mergingTerms, data, attributes, results, currentRules, ref currentNumberForConvergence, ref currentAnt);
                     }
-                    discoveredRules.Add(currentRules.OrderByDescending(item => item.Quality).First());
-                    data.Cases = data.Cases.Except(discoveredRules.Last().CoveredCases).ToList();
-                    discoveredRules.Last().Serialize();
+                    _discoveredRules.Add(currentRules.OrderByDescending(item => item.Quality).First());
+                    data.Cases = data.Cases.Except(_discoveredRules.Last().CoveredCases).ToList();
+                    _discoveredRules.Last().Serialize();
                 }
             }
             listBox1.HorizontalScrollbar = true;
-            listBox1.DataSource = discoveredRules;
-            uncoveredCount.Text = data.GetCasesCount().ToString();
-            var header = data.Header;
-            var dnf = new List<string>();
-            foreach (var discoveredRule in discoveredRules)
-            {
-                var dnfRule = "Conditions: ";
-                foreach (var condition in discoveredRule.ConditionsList)
-                {
-                    dnfRule += " x" + (header.IndexOf(condition.AttributeName) + 1) + " = " + condition.AttributeValue + " &";
-                }
-                dnfRule = dnfRule.Remove(dnfRule.Length - 1) + " Result: " + discoveredRule.Result;
-                dnf.Add(dnfRule);
-            }
-            listBox2.DataSource = dnf;
+            listBox1.DataSource = _discoveredRules;
         }
 
-        private static void GetAntResult(Ant basicAnt, List<Case> currentCases, decimal minCasesPerRule, Terms terms, Table data,
+        private static void GetAntResult(Ant ant, List<Case> currentCases, decimal minCasesPerRule, Terms terms, Table data,
             Attributes attributes, List<string> results, List<Rule> currentRules, ref int currentNumberForConvergence, ref int currentAnt)
         {
-            var currentAntRule = basicAnt.RunAnt(currentCases, minCasesPerRule, terms, data, attributes, results);
+            var currentAntRule = ant.RunAnt(currentCases, minCasesPerRule, terms, data, attributes, results);
             if (currentAntRule.ConditionsList.Count > 1)
             {
                 currentAntRule = currentAntRule.PruneRule(data, results);
@@ -125,7 +114,7 @@ namespace MAClassification
                 attribute.IsUsed = false;
             }
             CheckUsedTerms(terms, data);
-            terms.Update(attributes, currentAntRule, basicAnt);
+            terms.Update(attributes, ant);
             currentAnt++;
         }
 
@@ -154,9 +143,9 @@ namespace MAClassification
             return availableTermsCount != 0;
         }
 
-        private static void Initialize(out Table data, out Attributes attributes, out List<string> results, out Terms initialTerms)
+        private static void Initialize(string path, out Table data, out Attributes attributes, out List<string> results, out Terms initialTerms)
         {
-            data = Table.ReadData();
+            data = Table.ReadData(path);
             attributes = data.GetAttributesInfo();
             results = data.GetResultsInfo();
             initialTerms = new Terms();
@@ -175,6 +164,56 @@ namespace MAClassification
             }
             initialTerms.FullInitialize(attributes);
             initialTerms.Serialize();
+        }
+
+        private void testButton_Click(object sender, EventArgs e)
+        {
+            var data = Table.ReadData(testPathLabel.Text);
+            var realResults = new List<string>();
+            foreach (var item in data.Cases)
+            {
+                realResults.Add(item.Result);
+            }
+            foreach (var discoveredRule in _discoveredRules)
+            {
+                discoveredRule.GetCoveredCases(data);
+                foreach (var discoveredRuleCoveredCase in discoveredRule.CoveredCases)
+                {
+                    data.Cases.Find(item => item.Number == discoveredRuleCoveredCase.Number).Result =
+                        discoveredRule.Result;
+                }
+                data.Cases = data.Cases.Except(discoveredRule.CoveredCases).ToList();
+            }
+            var predictedResults = new List<string>();
+            foreach (var item in data.Cases)
+            {
+                predictedResults.Add(item.Result);
+            }
+            var count = 0;
+            for (var index = 0; index < predictedResults.Count; index++)
+            {
+                if (predictedResults[index] != realResults[index])
+                    count++;
+            }
+            textBox1.Text = count.ToString();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var openFileDialog1 = new OpenFileDialog {Filter = @"txt files (*.txt)|*.txt|All files (*.*)|*.*"};
+            openFileDialog1.ShowDialog();
+            var file = openFileDialog1.FileName;
+            trainingPathLabel.Text = file;
+            startButton.Enabled = true;
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            var openFileDialog1 = new OpenFileDialog {Filter = @"txt files (*.txt)|*.txt|All files (*.*)|*.*"};
+            openFileDialog1.ShowDialog();
+            var file = openFileDialog1.FileName;
+            testPathLabel.Text = file;
+            testButton.Enabled = true;
         }
     }
 }
