@@ -14,9 +14,12 @@ namespace MAClassification
             InitializeComponent();
             startButton.Enabled = false;
             testButton.Enabled = false;
+            button4.Enabled = false;
         }
 
         private List<Rule> _discoveredRules;
+        private Table _trainingTable;
+        private Table _testingTable;
 
         private void startButton_Click(object sender, EventArgs e)
         {
@@ -143,9 +146,9 @@ namespace MAClassification
             return availableTermsCount != 0;
         }
 
-        private static void Initialize(string path, out Table data, out Attributes attributes, out List<string> results, out Terms initialTerms)
+        private void Initialize(string path, out Table data, out Attributes attributes, out List<string> results, out Terms initialTerms)
         {
-            data = Table.ReadData(path);
+            data = _trainingTable ?? Table.ReadData(path);
             attributes = data.GetAttributesInfo();
             results = data.GetResultsInfo();
             initialTerms = new Terms();
@@ -168,7 +171,7 @@ namespace MAClassification
 
         private void testButton_Click(object sender, EventArgs e)
         {
-            var data = Table.ReadData(testPathLabel.Text);
+            var data = _testingTable ?? Table.ReadData(testPathLabel.Text);
             var realResults = new List<string>();
             foreach (var item in data.Cases)
             {
@@ -214,6 +217,33 @@ namespace MAClassification
             var file = openFileDialog1.FileName;
             testPathLabel.Text = file;
             testButton.Enabled = true;
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            var openFileDialog1 = new OpenFileDialog { Filter = @"txt files (*.txt)|*.txt|All files (*.*)|*.*" };
+            openFileDialog1.ShowDialog();
+            label2.Text = openFileDialog1.FileName;
+            button4.Enabled = true;
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            var data = Table.ReadData(label2.Text);
+            data.Cases = data.Cases.OrderBy(item => Guid.NewGuid()).ToList();
+            var count = data.Cases.Count / 5;
+            _trainingTable = new Table
+            {
+                Cases = data.Cases.GetRange(0, count),
+                Header = data.Header
+            };
+            _testingTable = new Table
+            {
+                Cases = data.Cases.GetRange(count, data.Cases.Count - count),
+                Header = data.Header
+            };
+            testButton.Enabled = true;
+            startButton.Enabled = true;
         }
     }
 }
