@@ -23,6 +23,8 @@ namespace MAClassification
 
         private void startButton_Click(object sender, EventArgs e)
         {
+            button4_Click(sender,e);
+            _discoveredRules = new List<Rule>();
             var maxAntsNumber = antsCount.Value;
             var maxNumberForConvergence = convergenceStopValue.Value;
             var maxUncoveredCases = maxUncoveredCasesCount.Value;
@@ -234,16 +236,18 @@ namespace MAClassification
             var count = data.Cases.Count / 5;
             _trainingTable = new Table
             {
-                Cases = data.Cases.GetRange(0, count),
+                Cases = data.Cases.GetRange(0, count).ToList(),
                 Header = data.Header
             };
             _testingTable = new Table
             {
-                Cases = data.Cases.GetRange(count, data.Cases.Count - count),
+                Cases = data.Cases.GetRange(count, data.Cases.Count - count).ToList(),
                 Header = data.Header
             };
             testButton.Enabled = true;
             startButton.Enabled = true;
+            button1.Enabled = false;
+            button2.Enabled = false;
         }
     }
 }

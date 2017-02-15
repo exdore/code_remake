@@ -17,5 +17,10 @@ namespace MAClassification
         {
             return AttributeName.GetHashCode() ^ AttributeValue.GetHashCode();
         }
+
+        public override bool Equals(object obj)
+        {
+            return GetHashCode() == obj.GetHashCode();
+        }
     }
 }
