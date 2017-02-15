@@ -20,6 +20,8 @@ namespace MAClassification
 
         public override bool Equals(object obj)
         {
+            if (obj == null)
+                return false;
             return GetHashCode() == obj.GetHashCode();
         }
     }
