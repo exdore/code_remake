@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 using System.Xml.Serialization;
 
 namespace MAClassification
@@ -23,31 +25,37 @@ namespace MAClassification
             }
         }
 
-        public void UpdateWeights(Rule rule)
+        public void UpdateWeights(Rule rule, GroupBox groupBox)
         {
-            double sumWeight = .0;
-            foreach (var items in this)
+            var weightsType = groupBox.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked);
+            if (weightsType.Name == "normalization")
             {
-                foreach (var item in items)
+                double sumWeight = .0;
+                foreach (var items in this)
                 {
-                    item.IsChosen = false;
-                    if (rule.ConditionsList != null && rule.ConditionsList.Exists(condition => condition.AttributeName == item.AttributeName &&
-                                                                condition.AttributeValue == item.AttributeValue))
+                    foreach (var item in items)
                     {
-                        item.IsChosen = true;
-                        item.WeightValue += item.WeightValue * rule.Quality;
+                        item.IsChosen = false;
+                        if (rule.ConditionsList != null &&
+                            rule.ConditionsList.Exists(condition => condition.AttributeName == item.AttributeName &&
+                                                                    condition.AttributeValue == item.AttributeValue))
+                        {
+                            item.IsChosen = true;
+                            item.WeightValue += item.WeightValue * rule.Quality;
+                        }
+                        sumWeight += item.WeightValue;
                     }
-                    sumWeight += item.WeightValue;
                 }
-            }
-            foreach (var items in this)
-            {
-                foreach (var item in items)
+                foreach (var items in this)
                 {
-                    if (!item.IsChosen)
-                        item.WeightValue /= sumWeight;
+                    foreach (var item in items)
+                    {
+                        if (!item.IsChosen)
+                            item.WeightValue /= sumWeight;
+                    }
                 }
             }
+            else ; //implement evaporation
         }
 
         public void Serialize()
@@ -67,11 +75,14 @@ namespace MAClassification
             return currentTerms;
         }
 
-        public void FullInitialize(Attributes attributes)
+        public void FullInitialize(Attributes attributes, GroupBox groupBox)
         {
             InitializeWeights(attributes);
-            InitializeEuristicFunctionValues(attributes);
-            //InitializeProbabilities(attributes);
+            var euristicType = groupBox.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked);
+            if (euristicType.Name == "entropy")
+                InitializeEuristicFunctionValues(attributes);
+            else ;
+            //implement density
         }
 
         public double CumulativeProbability(Attributes attributes)
@@ -90,10 +101,14 @@ namespace MAClassification
             return res;
         }
 
-        public void Update(Attributes attributes, Ant ant)
+        public void Update(Attributes attributes, Ant ant, GroupBox groupBox)
         {
             InitializeEuristicFunctionValues(attributes);
-            InitializeProbabilities(attributes, ant.Alpha, ant.Beta);
+            var euristicType = groupBox.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked);
+            if (euristicType.Name == "entropy")
+                InitializeEuristicFunctionValues(attributes);
+            else ;
+            //implement density
         }
 
         private void InitializeWeights(Attributes attributes)

@@ -48,10 +48,18 @@
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
+            this.entropy = new System.Windows.Forms.RadioButton();
+            this.density = new System.Windows.Forms.RadioButton();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.evaporation = new System.Windows.Forms.RadioButton();
+            this.normalization = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.antsCount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.convergenceStopValue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.maxUncoveredCasesCount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.minNumberPerRule)).BeginInit();
+            this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // antsCount
@@ -115,9 +123,9 @@
             // listBox1
             // 
             this.listBox1.FormattingEnabled = true;
-            this.listBox1.Location = new System.Drawing.Point(348, 13);
+            this.listBox1.Location = new System.Drawing.Point(12, 314);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(374, 134);
+            this.listBox1.Size = new System.Drawing.Size(374, 82);
             this.listBox1.TabIndex = 5;
             // 
             // antCountLabel
@@ -220,7 +228,7 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(647, 163);
+            this.button3.Location = new System.Drawing.Point(437, 121);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(75, 23);
             this.button3.TabIndex = 19;
@@ -230,7 +238,7 @@
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(647, 226);
+            this.button4.Location = new System.Drawing.Point(437, 176);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(75, 23);
             this.button4.TabIndex = 20;
@@ -246,12 +254,80 @@
             this.label2.Size = new System.Drawing.Size(0, 13);
             this.label2.TabIndex = 21;
             // 
+            // entropy
+            // 
+            this.entropy.AutoSize = true;
+            this.entropy.Checked = true;
+            this.entropy.Location = new System.Drawing.Point(6, 30);
+            this.entropy.Name = "entropy";
+            this.entropy.Size = new System.Drawing.Size(109, 17);
+            this.entropy.TabIndex = 22;
+            this.entropy.TabStop = true;
+            this.entropy.Text = "Через энтропию";
+            this.entropy.UseVisualStyleBackColor = true;
+            // 
+            // density
+            // 
+            this.density.AutoSize = true;
+            this.density.Location = new System.Drawing.Point(6, 53);
+            this.density.Name = "density";
+            this.density.Size = new System.Drawing.Size(112, 17);
+            this.density.TabIndex = 23;
+            this.density.Text = "Через плотность";
+            this.density.UseVisualStyleBackColor = true;
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.density);
+            this.groupBox1.Controls.Add(this.entropy);
+            this.groupBox1.Location = new System.Drawing.Point(285, 8);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(131, 76);
+            this.groupBox1.TabIndex = 26;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Эвристическая функция";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.evaporation);
+            this.groupBox2.Controls.Add(this.normalization);
+            this.groupBox2.Location = new System.Drawing.Point(437, 8);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(131, 76);
+            this.groupBox2.TabIndex = 27;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Пересчет феромона";
+            // 
+            // evaporation
+            // 
+            this.evaporation.AutoSize = true;
+            this.evaporation.Location = new System.Drawing.Point(6, 53);
+            this.evaporation.Name = "evaporation";
+            this.evaporation.Size = new System.Drawing.Size(81, 17);
+            this.evaporation.TabIndex = 23;
+            this.evaporation.Text = "Испарение";
+            this.evaporation.UseVisualStyleBackColor = true;
+            // 
+            // normalization
+            // 
+            this.normalization.AutoSize = true;
+            this.normalization.Checked = true;
+            this.normalization.Location = new System.Drawing.Point(6, 30);
+            this.normalization.Name = "normalization";
+            this.normalization.Size = new System.Drawing.Size(101, 17);
+            this.normalization.TabIndex = 22;
+            this.normalization.TabStop = true;
+            this.normalization.Text = "Нормализация";
+            this.normalization.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
-            this.ClientSize = new System.Drawing.Size(734, 297);
+            this.ClientSize = new System.Drawing.Size(734, 429);
+            this.Controls.Add(this.groupBox2);
+            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button3);
@@ -279,6 +355,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.convergenceStopValue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.maxUncoveredCasesCount)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.minNumberPerRule)).EndInit();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -306,6 +386,12 @@
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.RadioButton entropy;
+        private System.Windows.Forms.RadioButton density;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.RadioButton evaporation;
+        private System.Windows.Forms.RadioButton normalization;
 
     }
 }

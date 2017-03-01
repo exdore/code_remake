@@ -23,7 +23,7 @@ namespace MAClassification
 
         private void startButton_Click(object sender, EventArgs e)
         {
-            button4_Click(sender,e);
+            //button4_Click(sender,e);
             _discoveredRules = new List<Rule>();
             var maxAntsNumber = antsCount.Value;
             var maxNumberForConvergence = convergenceStopValue.Value;
@@ -71,13 +71,13 @@ namespace MAClassification
                             Alpha = 1,
                             Beta = 1
                         };
-                        GetAntResult(basicAnt, currentCases, minCasesPerRule, basicTerms, data, attributes, results, currentRules, ref currentNumberForConvergence, ref currentAnt);
-                        GetAntResult(greedyAnt, currentCases, minCasesPerRule, greedyTerms, data, attributes, results, currentRules, ref currentNumberForConvergence, ref currentAnt);
-                        GetAntResult(socialAnt, currentCases, minCasesPerRule, socialTerms, data, attributes, results, currentRules, ref currentNumberForConvergence, ref currentAnt);
+                        GetAntResult(basicAnt, currentCases, minCasesPerRule, basicTerms, data, attributes, results, currentRules, groupBox1, groupBox2, ref currentNumberForConvergence, ref currentAnt);
+                        GetAntResult(greedyAnt, currentCases, minCasesPerRule, greedyTerms, data, attributes, results, currentRules, groupBox1, groupBox2, ref currentNumberForConvergence, ref currentAnt);
+                        GetAntResult(socialAnt, currentCases, minCasesPerRule, socialTerms, data, attributes, results, currentRules, groupBox1, groupBox2, ref currentNumberForConvergence, ref currentAnt);
                         mergingTerms.Merge(socialTerms, basicTerms, greedyTerms);
-                        mergingTerms.UpdateWeights(new Rule());
-                        mergingTerms.Update(attributes, mergingAnt);
-                        GetAntResult(mergingAnt, currentCases, minCasesPerRule, mergingTerms, data, attributes, results, currentRules, ref currentNumberForConvergence, ref currentAnt);
+                        mergingTerms.UpdateWeights(new Rule(), groupBox2);
+                        mergingTerms.Update(attributes, mergingAnt, groupBox1);
+                        GetAntResult(mergingAnt, currentCases, minCasesPerRule, mergingTerms, data, attributes, results, currentRules, groupBox1, groupBox2, ref currentNumberForConvergence, ref currentAnt);
                     }
                     _discoveredRules.Add(currentRules.OrderByDescending(item => item.Quality).First());
                     data.Cases = data.Cases.Except(_discoveredRules.Last().CoveredCases).ToList();
@@ -89,16 +89,16 @@ namespace MAClassification
         }
 
         private static void GetAntResult(Ant ant, List<Case> currentCases, decimal minCasesPerRule, Terms terms, Table data,
-            Attributes attributes, List<string> results, List<Rule> currentRules, ref int currentNumberForConvergence, ref int currentAnt)
+            Attributes attributes, List<string> results, List<Rule> currentRules, GroupBox groupBox1, GroupBox groupBox2, ref int currentNumberForConvergence, ref int currentAnt)
         {
-            var currentAntRule = ant.RunAnt(currentCases, minCasesPerRule, terms, data, attributes, results);
+            var currentAntRule = ant.RunAnt(currentCases, minCasesPerRule, terms, data, attributes, results, groupBox1);
             if (currentAntRule.ConditionsList.Count > 1)
             {
                 currentAntRule = currentAntRule.PruneRule(data, results);
                 currentAntRule.GetCoveredCases(data);
                 currentAntRule.GetRuleResult(results);
                 currentAntRule.CalculateRuleQuality(data);
-                terms.UpdateWeights(currentAntRule);
+                terms.UpdateWeights(currentAntRule, groupBox2);
             }
             if (currentRules.Count == 0)
             {
@@ -119,7 +119,7 @@ namespace MAClassification
                 attribute.IsUsed = false;
             }
             CheckUsedTerms(terms, data);
-            terms.Update(attributes, ant);
+            terms.Update(attributes, ant, groupBox1);
             currentAnt++;
         }
 
@@ -167,7 +167,7 @@ namespace MAClassification
                     });
                 }
             }
-            initialTerms.FullInitialize(attributes);
+            initialTerms.FullInitialize(attributes, groupBox1);
             initialTerms.Serialize();
         }
 
@@ -178,6 +178,7 @@ namespace MAClassification
             foreach (var item in data.Cases)
             {
                 realResults.Add(item.Result);
+                item.Result = "";
             }
             foreach (var discoveredRule in _discoveredRules)
             {

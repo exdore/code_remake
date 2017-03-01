@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace MAClassification
 {
@@ -10,7 +11,7 @@ namespace MAClassification
         public double Beta { get; set; }
 
         public Rule RunAnt(List<Case> currentCases, decimal minCasesPerRule, Terms initialTerms, Table data,
-            Attributes attributes, List<string> results)
+            Attributes attributes, List<string> results, GroupBox groupBox)
         {
             var currentAntRule = new Rule
             {
@@ -25,7 +26,7 @@ namespace MAClassification
                 currentAntRule.GetCoveredCases(data);
                 currentAntRule.GetRuleResult(results);
                 currentAntRule.CalculateRuleQuality(data);
-                initialTerms.Update(attributes, this);
+                initialTerms.Update(attributes, this, groupBox);
                 var prob = initialTerms.CumulativeProbability(attributes);
                 if (Math.Abs(prob - 1) > 1e-6)
                 {
@@ -33,7 +34,7 @@ namespace MAClassification
                 }
                 currentAntRule.GetCoveredCases(data);
             }
-            if (currentAntRule.CoveredCases.Count < minCasesPerRule)
+            if (currentAntRule.CoveredCases.Count < minCasesPerRule && currentAntRule.ConditionsList.Count > 1)
             {
                 attributes.Find(item => item.AttributeName == currentAntRule.ConditionsList.Last().AttributeName)
                     .IsUsed = false;
