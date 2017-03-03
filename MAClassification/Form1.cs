@@ -25,7 +25,7 @@ namespace MAClassification
         {
             //button4_Click(sender,e);
             _discoveredRules = new List<Rule>();
-            var maxAntsNumber = antsCount.Value;
+            var maxAntsGenerationsNumber = antsCount.Value;
             var maxNumberForConvergence = convergenceStopValue.Value;
             var maxUncoveredCases = maxUncoveredCasesCount.Value;
             var minCasesPerRule = minNumberPerRule.Value;
@@ -49,7 +49,7 @@ namespace MAClassification
                 var mergingTerms = terms.Deserialize();
                 if (CheckUsedTerms(terms, data))
                 {
-                    while (currentAnt < maxAntsNumber && currentNumberForConvergence < maxNumberForConvergence)
+                    while (currentAnt < maxAntsGenerationsNumber * 4 && currentNumberForConvergence < maxNumberForConvergence)
                     {
                         var basicAnt = new Ant
                         {
@@ -75,8 +75,8 @@ namespace MAClassification
                         GetAntResult(greedyAnt, currentCases, minCasesPerRule, greedyTerms, data, attributes, results, currentRules, groupBox1, groupBox2, ref currentNumberForConvergence, ref currentAnt);
                         GetAntResult(socialAnt, currentCases, minCasesPerRule, socialTerms, data, attributes, results, currentRules, groupBox1, groupBox2, ref currentNumberForConvergence, ref currentAnt);
                         mergingTerms.Merge(socialTerms, basicTerms, greedyTerms);
-                        mergingTerms.UpdateWeights(new Rule(), groupBox2);
-                        mergingTerms.Update(attributes, mergingAnt, groupBox1);
+                        mergingTerms.UpdateWeights(new Rule(), groupBox2, currentAnt);
+                        mergingTerms.Update(attributes, mergingAnt, groupBox1, currentCases);
                         GetAntResult(mergingAnt, currentCases, minCasesPerRule, mergingTerms, data, attributes, results, currentRules, groupBox1, groupBox2, ref currentNumberForConvergence, ref currentAnt);
                     }
                     _discoveredRules.Add(currentRules.OrderByDescending(item => item.Quality).First());
@@ -98,7 +98,7 @@ namespace MAClassification
                 currentAntRule.GetCoveredCases(data);
                 currentAntRule.GetRuleResult(results);
                 currentAntRule.CalculateRuleQuality(data);
-                terms.UpdateWeights(currentAntRule, groupBox2);
+                terms.UpdateWeights(currentAntRule, groupBox2, currentAnt);
             }
             if (currentRules.Count == 0)
             {
@@ -119,7 +119,7 @@ namespace MAClassification
                 attribute.IsUsed = false;
             }
             CheckUsedTerms(terms, data);
-            terms.Update(attributes, ant, groupBox1);
+            terms.Update(attributes, ant, groupBox1, currentCases);
             currentAnt++;
         }
 
@@ -167,7 +167,7 @@ namespace MAClassification
                     });
                 }
             }
-            initialTerms.FullInitialize(attributes, groupBox1);
+            initialTerms.FullInitialize(attributes, groupBox1, data.Cases);
             initialTerms.Serialize();
         }
 

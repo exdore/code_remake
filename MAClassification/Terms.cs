@@ -25,37 +25,50 @@ namespace MAClassification
             }
         }
 
-        public void UpdateWeights(Rule rule, GroupBox groupBox)
+        public void UpdateWeights(Rule rule, GroupBox groupBox, int currentAnt)
         {
             var weightsType = groupBox.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked);
-            if (weightsType.Name == "normalization")
+            double sumWeight = .0;
+            foreach (var items in this)
             {
-                double sumWeight = .0;
-                foreach (var items in this)
+                foreach (var item in items)
                 {
-                    foreach (var item in items)
+                    item.IsChosen = false;
+                    if (rule.ConditionsList != null &&
+                        rule.ConditionsList.Exists(condition => condition.AttributeName == item.AttributeName &&
+                                                                condition.AttributeValue == item.AttributeValue))
                     {
-                        item.IsChosen = false;
-                        if (rule.ConditionsList != null &&
-                            rule.ConditionsList.Exists(condition => condition.AttributeName == item.AttributeName &&
-                                                                    condition.AttributeValue == item.AttributeValue))
-                        {
-                            item.IsChosen = true;
+                        item.IsChosen = true;
+                        if (weightsType != null && weightsType.Name == "normalization")
                             item.WeightValue += item.WeightValue * rule.Quality;
+                        else
+                        {
+                            var rate = CalculateEvaporationRate(currentAnt);
+                            item.WeightValue = item.WeightValue * (1 - rate) + item.WeightValue * rule.Quality;
                         }
-                        sumWeight += item.WeightValue;
                     }
-                }
-                foreach (var items in this)
-                {
-                    foreach (var item in items)
-                    {
-                        if (!item.IsChosen)
-                            item.WeightValue /= sumWeight;
-                    }
+                    sumWeight += item.WeightValue;
                 }
             }
-            else ; //implement evaporation
+            foreach (var items in this)
+            {
+                foreach (var item in items)
+                {
+                    if (!item.IsChosen)
+                        item.WeightValue /= sumWeight;
+                }
+            }
+        }
+
+        private double CalculateEvaporationRate(int currentAnt)
+        {
+            return 3.0 / 2 * CalculateFunctionForEvaporation(currentAnt) - 3.0 / 2 * CalculateFunctionForEvaporation(0); // 3/2 magic from 2016 article
+        }
+
+        private double CalculateFunctionForEvaporation(int currentAnt)
+        {
+            var sigma = 10; // magic from 2016 article
+            return 1.0 / sigma / Math.Sqrt(2 * Math.PI) * Math.Exp(-currentAnt ^ 2 / 2 / sigma ^ 2);
         }
 
         public void Serialize()
@@ -75,14 +88,13 @@ namespace MAClassification
             return currentTerms;
         }
 
-        public void FullInitialize(Attributes attributes, GroupBox groupBox)
+        public void FullInitialize(Attributes attributes, GroupBox groupBox, List<Case> cases)
         {
             InitializeWeights(attributes);
             var euristicType = groupBox.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked);
-            if (euristicType.Name == "entropy")
-                InitializeEuristicFunctionValues(attributes);
-            else ;
-            //implement density
+            if (euristicType != null && euristicType.Name == "entropy")
+                CalculateEuristicFunctionValues(attributes);
+            else CalculateEuristicsByDensity(attributes, cases);
         }
 
         public double CumulativeProbability(Attributes attributes)
@@ -101,14 +113,13 @@ namespace MAClassification
             return res;
         }
 
-        public void Update(Attributes attributes, Ant ant, GroupBox groupBox)
+        public void Update(Attributes attributes, Ant ant, GroupBox groupBox, List<Case> cases)
         {
-            InitializeEuristicFunctionValues(attributes);
+            CalculateEuristicFunctionValues(attributes);
             var euristicType = groupBox.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked);
-            if (euristicType.Name == "entropy")
-                InitializeEuristicFunctionValues(attributes);
-            else ;
-            //implement density
+            if (euristicType != null && euristicType.Name == "entropy")
+                CalculateEuristicFunctionValues(attributes);
+            else CalculateEuristicsByDensity(attributes, cases);
         }
 
         private void InitializeWeights(Attributes attributes)
@@ -118,12 +129,12 @@ namespace MAClassification
             {
                 foreach (var term in terms)
                 {
-                    term.WeightValue = 1.0/attributesCount;
+                    term.WeightValue = 1.0 / attributesCount;
                 }
             }
         }
 
-        public void InitializeProbabilities(Attributes attributes, double alpha, double beta)
+        public void CalculateProbabilities(Attributes attributes, double alpha, double beta)
         {
             GetSumForEurictic(attributes, alpha, beta);
             for (int i = 0; i < Count; i++)
@@ -138,17 +149,35 @@ namespace MAClassification
             }
         }
 
-        private void InitializeEuristicFunctionValues(Attributes attributes)
+        private void CalculateEuristicFunctionValues(Attributes attributes)
         {
             GetSumForEntopy(attributes);
             for (int i = 0; i < Count; i++)
             {
-                var terms = this[i]; 
+                var terms = this[i];
                 if (attributes[i].IsUsed) continue;
                 foreach (var term in terms)
                 {
                     if (term.IsChosen) continue;
                     term.EuristicFunctionValue = term.GetEuristicFunctionValue(attributes, SumEntropy);
+                }
+            }
+        }
+
+        private void CalculateEuristicsByDensity(Attributes attributes, List<Case> cases)
+        {
+            foreach (var terms in this)
+            {
+                foreach (var term in terms)
+                {
+                    var attribute = attributes.FindIndex(item => item.AttributeName == term.AttributeName);
+                    if (attributes[attribute].IsUsed) continue;
+                    var correctCasesCount =
+                        cases.Count(item => item.AttributesValuesList[attribute] == term.AttributeValue);
+                    if (correctCasesCount != 0)
+                        term.EuristicFunctionValue = correctCasesCount * 1.0 / cases.Count;
+                    else
+                        term.EuristicFunctionValue = 0;
                 }
             }
         }
@@ -176,7 +205,7 @@ namespace MAClassification
                 if (attributes[i].IsUsed) continue;
                 for (int j = 0; j < this[i].Count; j++)
                 {
-                    if(this[i][j].IsChosen) continue;
+                    if (this[i][j].IsChosen) continue;
                     result += Math.Pow(this[i][j].WeightValue, beta) * Math.Pow(this[i][j].EuristicFunctionValue, alpha);
                 }
             }
