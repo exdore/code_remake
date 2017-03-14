@@ -62,7 +62,7 @@ namespace MAClassification
 
         private double CalculateEvaporationRate(int currentAnt)
         {
-            return 3.0 / 2 * CalculateFunctionForEvaporation(currentAnt) - 3.0 / 2 * CalculateFunctionForEvaporation(0); // 3/2 magic from 2016 article
+            return 3.0 / 2 * CalculateFunctionForEvaporation(currentAnt) - 3.0 / 2 * CalculateFunctionForEvaporation(0); // magic from 2016 article
         }
 
         private double CalculateFunctionForEvaporation(int currentAnt)
@@ -172,7 +172,7 @@ namespace MAClassification
                 {
                     var attribute = attributes.FindIndex(item => item.AttributeName == term.AttributeName);
                     if (attributes[attribute].IsUsed) continue;
-                    var correctCasesCount =
+                    var correctCasesCount =                             //для DAG обернуть в if по radioButton и проверять класс записи
                         cases.Count(item => item.AttributesValuesList[attribute] == term.AttributeValue);
                     if (correctCasesCount != 0)
                         term.EuristicFunctionValue = correctCasesCount * 1.0 / cases.Count;
