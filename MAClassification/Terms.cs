@@ -11,6 +11,9 @@ namespace MAClassification
     {
         private double SumEuristic { get; set; }
         private double SumEntropy { get; set; }
+        [XmlText]
+        public double MinValue { get; set; }
+        public double MaxValue { get; set; }
 
         public void Merge(Terms socialTerms, Terms basicTerms, Terms greedyTerms)
         {
@@ -46,6 +49,10 @@ namespace MAClassification
                             var rate = CalculateEvaporationRate(currentAnt);
                             item.WeightValue = item.WeightValue * (1 - rate) + item.WeightValue * rule.Quality;
                         }
+                        if (item.WeightValue < MinValue)
+                            item.WeightValue = MinValue;
+                        if (item.WeightValue > MaxValue)
+                            item.WeightValue = MaxValue;
                     }
                     sumWeight += item.WeightValue;
                 }
@@ -71,10 +78,10 @@ namespace MAClassification
             return 1.0 / sigma / Math.Sqrt(2 * Math.PI) * Math.Exp(-currentAnt ^ 2 / 2 / sigma ^ 2);
         }
 
-        public void Serialize()
+        public void Serialize(string type)
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Terms));
-            StreamWriter streamWriter = new StreamWriter(@"terms.xml");
+            StreamWriter streamWriter = new StreamWriter(@"terms" + type + ".xml");
             xmlSerializer.Serialize(streamWriter, this);
             streamWriter.Close();
         }
@@ -95,6 +102,8 @@ namespace MAClassification
             if (euristicType != null && euristicType.Name == "entropy")
                 CalculateEuristicFunctionValues(attributes);
             else CalculateEuristicsByDensity(attributes, cases);
+            MinValue = 1e-4;
+            MaxValue = 0.8;
         }
 
         public double CumulativeProbability(Attributes attributes)
@@ -120,6 +129,7 @@ namespace MAClassification
             if (euristicType != null && euristicType.Name == "entropy")
                 CalculateEuristicFunctionValues(attributes);
             else CalculateEuristicsByDensity(attributes, cases);
+            CalculateProbabilities(attributes,ant.Alpha, ant.Beta);
         }
 
         private void InitializeWeights(Attributes attributes)

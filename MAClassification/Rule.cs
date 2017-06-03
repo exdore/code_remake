@@ -8,13 +8,16 @@ namespace MAClassification
 {
     [Serializable]
     [XmlInclude(typeof(Condition))]
-    public class Rule 
+    public class Rule
     {
-        public List<Condition> ConditionsList;
+        public List<Condition> ConditionsList { get; set; }
 
         public string Result { get; set; }
 
         public double Quality { get; set; }
+        public double Precision { get; set; }
+        public double Specificity { get; set; }
+
         [XmlIgnore]
         public List<Case> CoveredCases { get; set; }
 
@@ -25,17 +28,9 @@ namespace MAClassification
             {
                 res += condition + " & ";
             }
-            if(res.Length > 0) res = res.Remove(res.Length - 2);
+            if (res.Length > 0) res = res.Remove(res.Length - 2);
             res += " Result: " + Result + " Covered Cases Count: " + CoveredCases.Count;
             return res;
-        }
-
-        public void Serialize()
-        {
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Rule));
-            StreamWriter streamWriter = new StreamWriter(@"rules.xml", true);
-            xmlSerializer.Serialize(streamWriter, this);
-            streamWriter.Close();
         }
 
         public void GetRuleResult(List<string> resultsList)
@@ -61,7 +56,11 @@ namespace MAClassification
             var uncoveredData = data.GetCases().Except(CoveredCases).ToList();
             int trueNegative = uncoveredData.Count(item => item.Result == Result);
             int falseNegative = uncoveredData.Count(item => item.Result != Result);
-            Quality = (double)truePositive * trueNegative / (truePositive + falseNegative) / (falsePositive + trueNegative);
+            Precision = double.IsNaN((double)truePositive / (truePositive + falseNegative)) ? 0
+                        : (double)truePositive / (truePositive + falseNegative);
+            Specificity = double.IsNaN((double)trueNegative / (falsePositive + trueNegative)) ? 0
+                        : (double)trueNegative / (falsePositive + trueNegative);
+            Quality = Precision * Specificity;
         }
 
         public void AddConditionToRule(Terms terms, Table data)
@@ -69,7 +68,7 @@ namespace MAClassification
             var probability = new Random().NextDouble();
             foreach (var term in terms)
             {
-                if(ConditionsList.Exists(item => item.AttributeName == term[0].AttributeName)) continue;
+                if (ConditionsList.Exists(item => item.AttributeName == term[0].AttributeName)) continue;
                 foreach (var item in term)
                 {
                     if (item.IsChosen) continue;
@@ -112,6 +111,8 @@ namespace MAClassification
             return new Rule
             {
                 ConditionsList = ConditionsList.ToList(),
+                Precision = Precision,
+                Specificity = Specificity,
                 Quality = Quality,
                 CoveredCases = CoveredCases.ToList(),
                 Result = Result

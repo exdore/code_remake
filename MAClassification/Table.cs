@@ -68,7 +68,7 @@ namespace MAClassification
                 var casesWithSetResultCount = apropriateCases.Count(item => item.Result == sample);
                 if (casesWithSetResultCount != 0)
                     result -= (double) casesWithSetResultCount / apropriateCasesCount *
-                              Math.Log((double) casesWithSetResultCount / apropriateCasesCount, 2);
+                              Math.Log((double) casesWithSetResultCount / apropriateCasesCount, 2); 
             }
             return result;
         }
