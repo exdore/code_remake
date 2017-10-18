@@ -15,8 +15,32 @@ namespace MAClassification
         public string Result { get; set; }
 
         public double Quality { get; set; }
-        public double Precision { get; set; }
-        public double Specificity { get; set; }
+        private double _precision { get; set; }
+        private double _specificity { get; set; }
+
+        public double Precision
+        {
+            get
+            {
+                return _precision;
+            }
+            set
+            {
+                _precision = value;
+            }
+        }
+
+        public double Specificity
+        {
+            get
+            {
+                return _specificity;
+            }
+            set
+            {
+                _specificity = value;
+            }
+        }
 
         [XmlIgnore]
         public List<Case> CoveredCases { get; set; }

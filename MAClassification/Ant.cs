@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 
@@ -13,6 +14,10 @@ namespace MAClassification
         public double Beta { get; set; }
         public string Type { get; set; }
         private Rule _rule;
+        public Rule Rule { get { return _rule; } set { _rule = value; } }
+
+        public Ant()
+        { }
 
         public void RunAnt(List<Case> currentCases, decimal minCasesPerRule, Terms initialTerms, Table data,
             Attributes attributes, List<string> results, GroupBox groupBox)
@@ -33,26 +38,16 @@ namespace MAClassification
                 currentAntRule.CalculateRuleQuality(data);
                 initialTerms.Update(attributes, this, groupBox, currentCases);
             }
-            //if (currentAntRule.CoveredCases.Count < minCasesPerRule && currentAntRule.ConditionsList.Count > 1)
-            //{
-            //    attributes.Find(item => item.AttributeName == currentAntRule.ConditionsList.Last().AttributeName)
-            //        .IsUsed = false;
-            //    currentAntRule.ConditionsList.RemoveAt(currentAntRule.ConditionsList.Count - 1);
-            //    currentAntRule.GetCoveredCases(data);
-            //    currentAntRule.GetRuleResult(results);
-            //    currentAntRule.CalculateRuleQuality(data);
-            //}
+            if (currentAntRule.CoveredCases.Count < minCasesPerRule && currentAntRule.ConditionsList.Count > 1)
+            {
+                attributes.Find(item => item.AttributeName == currentAntRule.ConditionsList.Last().AttributeName)
+                    .IsUsed = false;
+                currentAntRule.ConditionsList.RemoveAt(currentAntRule.ConditionsList.Count - 1);
+                currentAntRule.GetCoveredCases(data);
+                currentAntRule.GetRuleResult(results);
+                currentAntRule.CalculateRuleQuality(data);
+            }
             _rule = currentAntRule;
-        }
-
-        public Rule GetRule()
-        {
-            return _rule;
-        }
-
-        public void SetRule(Rule rule)
-        {
-            _rule = rule.Clone();
         }
     }
 }

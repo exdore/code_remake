@@ -7,6 +7,7 @@ using System.Xml.Serialization;
 
 namespace MAClassification
 {
+    [Serializable]
     public class Terms : List<List<Term>>
     {
         private double SumEuristic { get; set; }

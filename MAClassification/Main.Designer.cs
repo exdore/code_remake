@@ -57,6 +57,7 @@
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
             ((System.ComponentModel.ISupportInitialize)(this.antsCount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.convergenceStopValue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.maxUncoveredCasesCount)).BeginInit();
@@ -64,14 +65,16 @@
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // antsCount
             // 
             this.antsCount.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.antsCount.Location = new System.Drawing.Point(139, 12);
+            this.antsCount.Location = new System.Drawing.Point(185, 15);
+            this.antsCount.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.antsCount.Name = "antsCount";
-            this.antsCount.Size = new System.Drawing.Size(120, 20);
+            this.antsCount.Size = new System.Drawing.Size(160, 22);
             this.antsCount.TabIndex = 0;
             this.antsCount.Value = new decimal(new int[] {
             50,
@@ -81,9 +84,10 @@
             // 
             // convergenceStopValue
             // 
-            this.convergenceStopValue.Location = new System.Drawing.Point(139, 38);
+            this.convergenceStopValue.Location = new System.Drawing.Point(185, 47);
+            this.convergenceStopValue.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.convergenceStopValue.Name = "convergenceStopValue";
-            this.convergenceStopValue.Size = new System.Drawing.Size(120, 20);
+            this.convergenceStopValue.Size = new System.Drawing.Size(160, 22);
             this.convergenceStopValue.TabIndex = 1;
             this.convergenceStopValue.Value = new decimal(new int[] {
             15,
@@ -93,9 +97,10 @@
             // 
             // maxUncoveredCasesCount
             // 
-            this.maxUncoveredCasesCount.Location = new System.Drawing.Point(138, 64);
+            this.maxUncoveredCasesCount.Location = new System.Drawing.Point(184, 79);
+            this.maxUncoveredCasesCount.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.maxUncoveredCasesCount.Name = "maxUncoveredCasesCount";
-            this.maxUncoveredCasesCount.Size = new System.Drawing.Size(120, 20);
+            this.maxUncoveredCasesCount.Size = new System.Drawing.Size(160, 22);
             this.maxUncoveredCasesCount.TabIndex = 2;
             this.maxUncoveredCasesCount.Value = new decimal(new int[] {
             2,
@@ -105,9 +110,10 @@
             // 
             // minNumberPerRule
             // 
-            this.minNumberPerRule.Location = new System.Drawing.Point(138, 90);
+            this.minNumberPerRule.Location = new System.Drawing.Point(184, 111);
+            this.minNumberPerRule.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.minNumberPerRule.Name = "minNumberPerRule";
-            this.minNumberPerRule.Size = new System.Drawing.Size(120, 20);
+            this.minNumberPerRule.Size = new System.Drawing.Size(160, 22);
             this.minNumberPerRule.TabIndex = 3;
             this.minNumberPerRule.Value = new decimal(new int[] {
             2,
@@ -117,9 +123,10 @@
             // 
             // startButton
             // 
-            this.startButton.Location = new System.Drawing.Point(12, 124);
+            this.startButton.Location = new System.Drawing.Point(16, 153);
+            this.startButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.startButton.Name = "startButton";
-            this.startButton.Size = new System.Drawing.Size(75, 23);
+            this.startButton.Size = new System.Drawing.Size(100, 28);
             this.startButton.TabIndex = 4;
             this.startButton.Text = "Train";
             this.startButton.UseVisualStyleBackColor = true;
@@ -128,114 +135,106 @@
             // listBox1
             // 
             this.listBox1.FormattingEnabled = true;
-            this.listBox1.Location = new System.Drawing.Point(12, 314);
+            this.listBox1.ItemHeight = 16;
+            this.listBox1.Location = new System.Drawing.Point(16, 386);
+            this.listBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(532, 147);
+            this.listBox1.Size = new System.Drawing.Size(708, 180);
             this.listBox1.TabIndex = 5;
             // 
             // antCountLabel
             // 
             this.antCountLabel.AutoSize = true;
-            this.antCountLabel.Location = new System.Drawing.Point(12, 14);
+            this.antCountLabel.Location = new System.Drawing.Point(16, 17);
+            this.antCountLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.antCountLabel.Name = "antCountLabel";
-            this.antCountLabel.Size = new System.Drawing.Size(59, 13);
+            this.antCountLabel.Size = new System.Drawing.Size(77, 17);
             this.antCountLabel.TabIndex = 6;
             this.antCountLabel.Text = "Ants Count";
             // 
             // convergenceCountLabel
             // 
             this.convergenceCountLabel.AutoSize = true;
-            this.convergenceCountLabel.Location = new System.Drawing.Point(12, 40);
+            this.convergenceCountLabel.Location = new System.Drawing.Point(16, 49);
+            this.convergenceCountLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.convergenceCountLabel.Name = "convergenceCountLabel";
-            this.convergenceCountLabel.Size = new System.Drawing.Size(102, 13);
+            this.convergenceCountLabel.Size = new System.Drawing.Size(133, 17);
             this.convergenceCountLabel.TabIndex = 7;
             this.convergenceCountLabel.Text = "Convergence Count";
             // 
             // uncoveredCasesLabel
             // 
             this.uncoveredCasesLabel.AutoSize = true;
-            this.uncoveredCasesLabel.Location = new System.Drawing.Point(12, 66);
+            this.uncoveredCasesLabel.Location = new System.Drawing.Point(16, 81);
+            this.uncoveredCasesLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.uncoveredCasesLabel.Name = "uncoveredCasesLabel";
-            this.uncoveredCasesLabel.Size = new System.Drawing.Size(115, 13);
+            this.uncoveredCasesLabel.Size = new System.Drawing.Size(149, 17);
             this.uncoveredCasesLabel.TabIndex = 8;
             this.uncoveredCasesLabel.Text = "Max Uncovered Cases";
             // 
             // casesPerRuleLabel
             // 
             this.casesPerRuleLabel.AutoSize = true;
-            this.casesPerRuleLabel.Location = new System.Drawing.Point(12, 92);
+            this.casesPerRuleLabel.Location = new System.Drawing.Point(16, 113);
+            this.casesPerRuleLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.casesPerRuleLabel.Name = "casesPerRuleLabel";
-            this.casesPerRuleLabel.Size = new System.Drawing.Size(100, 13);
+            this.casesPerRuleLabel.Size = new System.Drawing.Size(132, 17);
             this.casesPerRuleLabel.TabIndex = 9;
             this.casesPerRuleLabel.Text = "Min Cases Per Rule";
             // 
             // testButton
             // 
-            this.testButton.Location = new System.Drawing.Point(12, 197);
+            this.testButton.Location = new System.Drawing.Point(16, 242);
+            this.testButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.testButton.Name = "testButton";
-            this.testButton.Size = new System.Drawing.Size(75, 23);
+            this.testButton.Size = new System.Drawing.Size(100, 28);
             this.testButton.TabIndex = 12;
             this.testButton.Text = "Test";
             this.testButton.UseVisualStyleBackColor = true;
             this.testButton.Click += new System.EventHandler(this.testButton_Click);
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(138, 124);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 13;
-            this.button1.Text = "Training Set";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
             // trainingPathLabel
             // 
             this.trainingPathLabel.AutoSize = true;
-            this.trainingPathLabel.Location = new System.Drawing.Point(12, 163);
+            this.trainingPathLabel.Location = new System.Drawing.Point(16, 201);
+            this.trainingPathLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.trainingPathLabel.Name = "trainingPathLabel";
-            this.trainingPathLabel.Size = new System.Drawing.Size(0, 13);
+            this.trainingPathLabel.Size = new System.Drawing.Size(0, 17);
             this.trainingPathLabel.TabIndex = 14;
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(138, 197);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 15;
-            this.button2.Text = "Testing Set";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // testPathLabel
             // 
             this.testPathLabel.AutoSize = true;
-            this.testPathLabel.Location = new System.Drawing.Point(12, 236);
+            this.testPathLabel.Location = new System.Drawing.Point(16, 290);
+            this.testPathLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.testPathLabel.Name = "testPathLabel";
-            this.testPathLabel.Size = new System.Drawing.Size(0, 13);
+            this.testPathLabel.Size = new System.Drawing.Size(0, 17);
             this.testPathLabel.TabIndex = 16;
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(138, 265);
+            this.textBox1.Location = new System.Drawing.Point(184, 326);
+            this.textBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(100, 20);
+            this.textBox1.Size = new System.Drawing.Size(132, 22);
             this.textBox1.TabIndex = 17;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 268);
+            this.label1.Location = new System.Drawing.Point(12, 330);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(124, 13);
+            this.label1.Size = new System.Drawing.Size(163, 17);
             this.label1.TabIndex = 18;
             this.label1.Text = "Cases With Wrong Class";
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(437, 121);
+            this.button3.Location = new System.Drawing.Point(380, 153);
+            this.button3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 23);
+            this.button3.Size = new System.Drawing.Size(100, 28);
             this.button3.TabIndex = 19;
             this.button3.Text = "Full Set";
             this.button3.UseVisualStyleBackColor = true;
@@ -243,9 +242,10 @@
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(437, 176);
+            this.button4.Location = new System.Drawing.Point(380, 221);
+            this.button4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
+            this.button4.Size = new System.Drawing.Size(100, 28);
             this.button4.TabIndex = 20;
             this.button4.Text = "Divide";
             this.button4.UseVisualStyleBackColor = true;
@@ -254,18 +254,20 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(485, 202);
+            this.label2.Location = new System.Drawing.Point(444, 253);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(0, 13);
+            this.label2.Size = new System.Drawing.Size(0, 17);
             this.label2.TabIndex = 21;
             // 
             // entropy
             // 
             this.entropy.AutoSize = true;
             this.entropy.Checked = true;
-            this.entropy.Location = new System.Drawing.Point(6, 30);
+            this.entropy.Location = new System.Drawing.Point(8, 37);
+            this.entropy.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.entropy.Name = "entropy";
-            this.entropy.Size = new System.Drawing.Size(109, 17);
+            this.entropy.Size = new System.Drawing.Size(138, 21);
             this.entropy.TabIndex = 22;
             this.entropy.TabStop = true;
             this.entropy.Text = "Через энтропию";
@@ -274,9 +276,10 @@
             // density
             // 
             this.density.AutoSize = true;
-            this.density.Location = new System.Drawing.Point(6, 53);
+            this.density.Location = new System.Drawing.Point(8, 65);
+            this.density.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.density.Name = "density";
-            this.density.Size = new System.Drawing.Size(112, 17);
+            this.density.Size = new System.Drawing.Size(142, 21);
             this.density.TabIndex = 23;
             this.density.Text = "Через плотность";
             this.density.UseVisualStyleBackColor = true;
@@ -285,9 +288,11 @@
             // 
             this.groupBox1.Controls.Add(this.density);
             this.groupBox1.Controls.Add(this.entropy);
-            this.groupBox1.Location = new System.Drawing.Point(285, 8);
+            this.groupBox1.Location = new System.Drawing.Point(380, 10);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(131, 76);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Size = new System.Drawing.Size(175, 94);
             this.groupBox1.TabIndex = 26;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Эвристическая функция";
@@ -296,9 +301,11 @@
             // 
             this.groupBox2.Controls.Add(this.evaporation);
             this.groupBox2.Controls.Add(this.normalization);
-            this.groupBox2.Location = new System.Drawing.Point(437, 8);
+            this.groupBox2.Location = new System.Drawing.Point(583, 10);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(131, 76);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox2.Size = new System.Drawing.Size(175, 94);
             this.groupBox2.TabIndex = 27;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Пересчет феромона";
@@ -306,9 +313,10 @@
             // evaporation
             // 
             this.evaporation.AutoSize = true;
-            this.evaporation.Location = new System.Drawing.Point(6, 53);
+            this.evaporation.Location = new System.Drawing.Point(8, 65);
+            this.evaporation.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.evaporation.Name = "evaporation";
-            this.evaporation.Size = new System.Drawing.Size(81, 17);
+            this.evaporation.Size = new System.Drawing.Size(102, 21);
             this.evaporation.TabIndex = 23;
             this.evaporation.Text = "Испарение";
             this.evaporation.UseVisualStyleBackColor = true;
@@ -317,9 +325,10 @@
             // 
             this.normalization.AutoSize = true;
             this.normalization.Checked = true;
-            this.normalization.Location = new System.Drawing.Point(6, 30);
+            this.normalization.Location = new System.Drawing.Point(8, 37);
+            this.normalization.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.normalization.Name = "normalization";
-            this.normalization.Size = new System.Drawing.Size(101, 17);
+            this.normalization.Size = new System.Drawing.Size(127, 21);
             this.normalization.TabIndex = 22;
             this.normalization.TabStop = true;
             this.normalization.Text = "Нормализация";
@@ -329,9 +338,11 @@
             // 
             this.groupBox3.Controls.Add(this.radioButton1);
             this.groupBox3.Controls.Add(this.radioButton2);
-            this.groupBox3.Location = new System.Drawing.Point(591, 8);
+            this.groupBox3.Location = new System.Drawing.Point(788, 10);
+            this.groupBox3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(131, 76);
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox3.Size = new System.Drawing.Size(175, 94);
             this.groupBox3.TabIndex = 28;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Упрощение правил";
@@ -339,9 +350,10 @@
             // radioButton1
             // 
             this.radioButton1.AutoSize = true;
-            this.radioButton1.Location = new System.Drawing.Point(6, 53);
+            this.radioButton1.Location = new System.Drawing.Point(8, 65);
+            this.radioButton1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.radioButton1.Name = "radioButton1";
-            this.radioButton1.Size = new System.Drawing.Size(44, 17);
+            this.radioButton1.Size = new System.Drawing.Size(54, 21);
             this.radioButton1.TabIndex = 23;
             this.radioButton1.Text = "Нет";
             this.radioButton1.UseVisualStyleBackColor = true;
@@ -350,20 +362,31 @@
             // 
             this.radioButton2.AutoSize = true;
             this.radioButton2.Checked = true;
-            this.radioButton2.Location = new System.Drawing.Point(6, 30);
+            this.radioButton2.Location = new System.Drawing.Point(8, 37);
+            this.radioButton2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.radioButton2.Name = "radioButton2";
-            this.radioButton2.Size = new System.Drawing.Size(40, 17);
+            this.radioButton2.Size = new System.Drawing.Size(48, 21);
             this.radioButton2.TabIndex = 22;
             this.radioButton2.TabStop = true;
             this.radioButton2.Text = "Да";
             this.radioButton2.UseVisualStyleBackColor = true;
             // 
+            // dataGridView1
+            // 
+            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView1.Location = new System.Drawing.Point(16, 594);
+            this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.RowTemplate.Height = 24;
+            this.dataGridView1.Size = new System.Drawing.Size(1167, 155);
+            this.dataGridView1.TabIndex = 29;
+            // 
             // Main
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
-            this.ClientSize = new System.Drawing.Size(747, 483);
+            this.ClientSize = new System.Drawing.Size(1805, 761);
+            this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -387,9 +410,11 @@
             this.Controls.Add(this.maxUncoveredCasesCount);
             this.Controls.Add(this.convergenceStopValue);
             this.Controls.Add(this.antsCount);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "Main";
             this.ShowIcon = false;
-            this.Text = "Form1";
+            this.Text = "Ants Classifier";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             ((System.ComponentModel.ISupportInitialize)(this.antsCount)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.convergenceStopValue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.maxUncoveredCasesCount)).EndInit();
@@ -400,6 +425,7 @@
             this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -436,7 +462,7 @@
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.RadioButton radioButton1;
         private System.Windows.Forms.RadioButton radioButton2;
-
+        private System.Windows.Forms.DataGridView dataGridView1;
     }
 }
 
