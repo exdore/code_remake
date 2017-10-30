@@ -12,8 +12,6 @@ namespace MAClassification
 {
     public partial class Main : Form
     {
-        public enum Types { basic, greedy, euristic };
-
         public Main()
         {
             InitializeComponent();
@@ -25,24 +23,29 @@ namespace MAClassification
         private List<Rule> _discoveredRules;
         private Table _trainingTable;
         private Table _testingTable;
-        private List<Ant> _chosenAnts;
+        private List<Agent> _chosenAgents;
+        private string _dataPath;
 
         private void startButton_Click(object sender, EventArgs e)
         {
-            _discoveredRules = new List<Rule>();
             var maxAntsGenerationsNumber = antsCount.Value;
             var maxNumberForConvergence = convergenceStopValue.Value;
             var maxUncoveredCases = maxUncoveredCasesCount.Value;
             var minCasesPerRule = minNumberPerRule.Value;
-            Table data;
-            Attributes attributes;
-            List<string> results;
-            Terms terms;
             _discoveredRules = new List<Rule>();
-            _chosenAnts = new List<Ant>();
-            Initialize(trainingPathLabel.Text, out data, out attributes, out results, out terms);
+            _chosenAgents = new List<Agent>();
+            var data = _trainingTable;
+            var terms = Initialize(data, out Attributes attributes, out List<string> results);
             data.Serialize();
-            terms.Serialize("");
+            terms.Serialize();
+            maxAntsGenerationsNumber = data.Cases.Count / 10;
+            maxNumberForConvergence = (int)Math.Sqrt((double)maxAntsGenerationsNumber);
+            maxUncoveredCases = maxAntsGenerationsNumber / 5;
+            minCasesPerRule = maxUncoveredCases * 2;
+            antsCount.Value = maxAntsGenerationsNumber;
+            convergenceStopValue.Value = maxNumberForConvergence;
+            maxUncoveredCasesCount.Value = maxUncoveredCases;
+            minNumberPerRule.Value = minCasesPerRule;
             File.Delete(@"rules.xml");
             while (data.GetCasesCount() > maxUncoveredCases)
             {
@@ -51,36 +54,33 @@ namespace MAClassification
                 var currentCases = data.GetCases();
                 var currentRules = new List<Rule>();
                 var socialTerms = terms.Deserialize();
-                socialTerms.MaxValue = 0.8;
-                socialTerms.MinValue = 0.001;
+                socialTerms.TermType = TermTypes.Euristic;
                 var basicTerms = terms.Deserialize();
-                basicTerms.MaxValue = 0.8;
-                basicTerms.MinValue = 0.001;
+                basicTerms.TermType = TermTypes.Basic;
                 var greedyTerms = terms.Deserialize();
-                greedyTerms.MaxValue = 0.8;
-                greedyTerms.MinValue = 0.001;
+                greedyTerms.TermType = TermTypes.Greedy;
                 if (CheckUsedTerms(terms, data))
                 {
                     var antsPopulation = IterateGeneration(maxAntsGenerationsNumber, maxNumberForConvergence, minCasesPerRule,
-                        data, attributes, results, ref currentAnt, ref currentNumberForConvergence, currentCases, currentRules, 
+                        data, attributes, results, ref currentAnt, ref currentNumberForConvergence, currentCases, currentRules,
                         socialTerms, basicTerms, greedyTerms);
                     antsPopulation = antsPopulation.OrderByDescending(item => item.Rule.Quality).ToList();
-                    _chosenAnts.Add(antsPopulation.Where(item => (item.Rule.Quality - antsPopulation.First().Rule.Quality)
+                    _chosenAgents.Add(antsPopulation.Where(item => (item.Rule.Quality - antsPopulation.First().Rule.Quality)
                         < 1e-5).OrderByDescending(item => new Random().Next()).First());
-                    _discoveredRules.Add(_chosenAnts.Last().Rule);
-                    data.Cases = data.Cases.Except(_discoveredRules.Last().CoveredCases).ToList();
+                    _discoveredRules.Add(_chosenAgents.Last().Rule);
+                    data.Cases = data.Cases.Except(_chosenAgents.Last().Rule.CoveredCases).ToList();
                 }
             }
             listBox1.HorizontalScrollbar = true;
             listBox1.DataSource = _discoveredRules.OrderByDescending(item => item.Result).ToList();
-            XmlSerializer xmlsr = new XmlSerializer(typeof(List<Ant>));
+            XmlSerializer xmlsr = new XmlSerializer(typeof(List<Agent>));
             StreamWriter strwr = new StreamWriter(@"list_ants.xml");
-            xmlsr.Serialize(strwr, _chosenAnts);
+            xmlsr.Serialize(strwr, _chosenAgents);
             strwr.Close();
         }
 
-        private List<Ant> IterateGeneration(decimal maxAntsGenerationsNumber, decimal maxNumberForConvergence, decimal minCasesPerRule, 
-            Table data, Attributes attributes, List<string> results, ref int currentAnt, ref int currentNumberForConvergence, 
+        private List<Ant> IterateGeneration(decimal maxAntsGenerationsNumber, decimal maxNumberForConvergence, decimal minCasesPerRule,
+            Table data, Attributes attributes, List<string> results, ref int currentAnt, ref int currentNumberForConvergence,
             List<Case> currentCases, List<Rule> currentRules, Terms socialTerms, Terms basicTerms, Terms greedyTerms)
         {
             var antsPopulation = new List<Ant>();
@@ -91,19 +91,19 @@ namespace MAClassification
                 {
                     Alpha = 1,
                     Beta = 1,
-                    Type = Types.basic.ToString()
+                    AntType = AntTypes.Basic
                 };
                 var greedyAnt = new Ant
                 {
                     Alpha = rnd.Next(200, 500) / 100.0,
                     Beta = rnd.Next(500, 1000) / 100.0,
-                    Type = Types.greedy.ToString()
+                    AntType = AntTypes.Greedy
                 };
                 var socialAnt = new Ant
                 {
                     Alpha = rnd.Next(500, 1000) / 100.0,
                     Beta = rnd.Next(200, 500) / 100.0,
-                    Type = Types.euristic.ToString()
+                    AntType = AntTypes.Euristic
                 };
                 GetAntResult(basicAnt, currentCases, minCasesPerRule, basicTerms, data, attributes, results, currentRules, groupBox1, groupBox2, groupBox3, ref currentNumberForConvergence, ref currentAnt);
                 GetAntResult(greedyAnt, currentCases, minCasesPerRule, greedyTerms, data, attributes, results, currentRules, groupBox1, groupBox2, groupBox3, ref currentNumberForConvergence, ref currentAnt);
@@ -111,9 +111,9 @@ namespace MAClassification
                 antsPopulation.Add(basicAnt);
                 antsPopulation.Add(greedyAnt);
                 antsPopulation.Add(socialAnt);
-                greedyTerms.Serialize("greedy");
-                socialTerms.Serialize("social");
-                basicTerms.Serialize("basic");
+                greedyTerms.Serialize();
+                socialTerms.Serialize();
+                basicTerms.Serialize();
             }
             return antsPopulation;
         }
@@ -121,7 +121,7 @@ namespace MAClassification
         private static void GetAntResult(Ant ant, List<Case> currentCases, decimal minCasesPerRule, Terms terms, Table data,
             Attributes attributes, List<string> results, List<Rule> currentRules, GroupBox groupBox1, GroupBox groupBox2, GroupBox groupBox3, ref int currentNumberForConvergence, ref int currentAnt)
         {
-            ant.RunAnt(currentCases, minCasesPerRule, terms, data, attributes, results, groupBox2);
+            ant.BuildRule(currentCases, minCasesPerRule, terms, data, attributes, results, groupBox2);
             var currentAntRule = ant.Rule;
             var pruningActive = groupBox3.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked);
             if (pruningActive != null && pruningActive.Text == @"Да")
@@ -132,16 +132,12 @@ namespace MAClassification
                 currentAntRule.CalculateRuleQuality(data);
                 terms.UpdateWeights(currentAntRule, groupBox2, currentAnt);
             }
-            var equal = false;
             if (currentRules.Count > 0)
-                equal = currentAntRule.ConditionsList.SequenceEqual(currentRules.Last().ConditionsList);
-            if (equal)
             {
-                currentNumberForConvergence++;
-            }
-            else
-            {
-                currentNumberForConvergence = 0;
+                if (currentAntRule.Equals(currentRules.Last()))
+                    currentNumberForConvergence++;
+                else
+                    currentNumberForConvergence = 0;
             }
             currentRules.Add(currentAntRule);
             foreach (var attribute in attributes)
@@ -180,13 +176,15 @@ namespace MAClassification
             return availableTermsCount != 0;
         }
 
-        private void Initialize(string path, out Table data, out Attributes attributes, out List<string> results, out Terms initialTerms)
+        private Terms Initialize(Table data, out Attributes attributes, out List<string> results)
         {
-            data = _trainingTable ?? Table.ReadData(path);
             PopulateDataGrid();
             attributes = data.GetAttributesInfo();
             results = data.GetResultsInfo();
-            initialTerms = new Terms();
+            var initialTerms = new Terms
+            {
+                TermType = TermTypes.Basic
+            };
             foreach (var attribute in attributes)
             {
                 initialTerms.Add(new List<Term>());
@@ -201,13 +199,12 @@ namespace MAClassification
                 }
             }
             initialTerms.FullInitialize(attributes, groupBox1, data.Cases);
-            initialTerms.Serialize("initial");
+            return initialTerms;
         }
 
         private void PopulateDataGrid()
         {
-            var data = _testingTable;
-            data.Cases.AddRange(_trainingTable.Cases);
+            var data = _fullData;
             var dt = new DataTable();
             dt.Columns.Add(new DataColumn("Number", typeof(int)));
             for (int i = 0; i < data.Header.Count; i++)
@@ -222,7 +219,7 @@ namespace MAClassification
 
         private void testButton_Click(object sender, EventArgs e)
         {
-            var data = _testingTable ?? Table.ReadData(testPathLabel.Text);
+            var data = _testingTable;
             var realResults = new List<string>();
             foreach (var item in data.Cases)
             {
@@ -258,25 +255,28 @@ namespace MAClassification
             var openFileDialog1 = new OpenFileDialog { Filter = @"txt files (*.txt)|*.txt|All files (*.*)|*.*" };
             openFileDialog1.ShowDialog();
             label2.Text = openFileDialog1.FileName;
+            _dataPath = label2.Text;
             button4.Enabled = true;
         }
 
-        private Table _fullData; 
+        private Table _fullData;
 
         private void button4_Click(object sender, EventArgs e)
         {
-            _fullData = Table.ReadData(label2.Text);
+            _fullData = Table.ReadData(_dataPath);
             _fullData.Cases = _fullData.Cases.OrderBy(item => Guid.NewGuid()).ToList();
             var count = (int)Math.Floor(_fullData.Cases.Count * 0.8);
             _trainingTable = new Table
             {
                 Cases = _fullData.Cases.GetRange(0, count).ToList(),
-                Header = _fullData.Header
+                Header = _fullData.Header,
+                TableType = TableTypes.Training
             };
             _testingTable = new Table
             {
                 Cases = _fullData.Cases.GetRange(count, _fullData.Cases.Count - count).ToList(),
-                Header = _fullData.Header
+                Header = _fullData.Header,
+                TableType = TableTypes.Testing
             };
             testButton.Enabled = true;
             startButton.Enabled = true;

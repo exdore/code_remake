@@ -8,13 +8,17 @@ using System.Xml.Serialization;
 namespace MAClassification
 {
     [Serializable]
+    public enum TermTypes { Basic, Greedy, Euristic }
+
+    [Serializable]
+    [XmlInclude(typeof(TermTypes))]
     public class Terms : List<List<Term>>
     {
         private double SumEuristic { get; set; }
         private double SumEntropy { get; set; }
-        [XmlText]
         public double MinValue { get; set; }
         public double MaxValue { get; set; }
+        public TermTypes TermType { get; set; }
 
         public void Merge(Terms socialTerms, Terms basicTerms, Terms greedyTerms)
         {
@@ -79,10 +83,10 @@ namespace MAClassification
             return 1.0 / sigma / Math.Sqrt(2 * Math.PI) * Math.Exp(-currentAnt ^ 2 / 2 / sigma ^ 2);
         }
 
-        public void Serialize(string type)
+        public void Serialize()
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Terms));
-            StreamWriter streamWriter = new StreamWriter(@"terms" + type + ".xml");
+            StreamWriter streamWriter = new StreamWriter(TermType + @"terms.xml");
             xmlSerializer.Serialize(streamWriter, this);
             streamWriter.Close();
         }
@@ -90,7 +94,9 @@ namespace MAClassification
         public Terms Deserialize()
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Terms));
-            var streamReader = new StreamReader(@"terms.xml");
+            var streamReader = File.Exists(TermType + @"terms.xml")
+                ? new StreamReader(TermType + @"terms.xml")
+                : new StreamReader(@"Basicterms.xml");
             Terms currentTerms = (Terms)xmlSerializer.Deserialize(streamReader);
             streamReader.Close();
             return currentTerms;
@@ -130,7 +136,7 @@ namespace MAClassification
             if (euristicType != null && euristicType.Name == "entropy")
                 CalculateEuristicFunctionValues(attributes);
             else CalculateEuristicsByDensity(attributes, cases);
-            CalculateProbabilities(attributes,ant.Alpha, ant.Beta);
+            CalculateProbabilities(attributes, ant.Alpha, ant.Beta);
         }
 
         private void InitializeWeights(Attributes attributes)

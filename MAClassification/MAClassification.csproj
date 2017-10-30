@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Agent.cs" />
     <Compile Include="Ant.cs" />
     <Compile Include="Attribute.cs" />
     <Compile Include="Attributes.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rule.cs" />
+    <Compile Include="Solver.cs" />
     <Compile Include="Table.cs" />
     <Compile Include="Term.cs" />
     <Compile Include="Terms.cs" />

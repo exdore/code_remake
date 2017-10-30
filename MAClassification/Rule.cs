@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 using System.Xml.Serialization;
 
 namespace MAClassification
 {
     [Serializable]
     [XmlInclude(typeof(Condition))]
-    public class Rule
+    public class Rule 
     {
         public List<Condition> ConditionsList { get; set; }
 
@@ -146,19 +147,72 @@ namespace MAClassification
         public Rule PruneRule(Table data, List<string> resultsList) //решение проблемы оверфиттинга через обобщение правил
         {
             var newRule = Clone();
-            if (newRule.ConditionsList.Count == 1) return newRule;
-            var rulesList = new List<Rule>();
-            for (int i = 0; i < ConditionsList.Count; i++)
+            try
             {
-                newRule = Clone();
-                newRule.ConditionsList.RemoveAt(i);
-                newRule.GetCoveredCases(data);
-                newRule.GetRuleResult(resultsList);
-                newRule.CalculateRuleQuality(data);
-                rulesList.Add(newRule);
+                if (newRule.ConditionsList.Count == 1)
+                    return newRule;
+                if (newRule.ConditionsList.Count == 0)
+                    throw (new RuleIsEmptyException(""));
+                var rulesList = new List<Rule>();
+                for (int i = 0; i < ConditionsList.Count; i++)
+                {
+                    newRule = Clone();
+                    newRule.ConditionsList.RemoveAt(i);
+                    newRule.GetCoveredCases(data);
+                    newRule.GetRuleResult(resultsList);
+                    newRule.CalculateRuleQuality(data);
+                    rulesList.Add(newRule);
+                }
+                var bestRule = rulesList.OrderByDescending(item => item.Quality).First();
+                return (bestRule.Quality > Quality) ? bestRule.PruneRule(data, resultsList) : this;
             }
-            var bestRule = rulesList.OrderByDescending(item => item.Quality).First();
-            return (bestRule.Quality > Quality) ? bestRule.PruneRule(data, resultsList) : this;
+            catch(RuleIsEmptyException)
+            {
+                return newRule;
+            }
+        }
+
+        public class RuleIsEmptyException: Exception
+        {
+            public RuleIsEmptyException(string message) : base(message)
+            {
+
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Rule);
+        }
+        public bool Equals(Rule other)
+        {
+            if (ReferenceEquals(other, null))
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            return Quality == other.Quality && CoveredCases.SequenceEqual(other.CoveredCases);
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = 541764673;
+            hashCode = hashCode * -1521134295 + EqualityComparer<List<Condition>>.Default.GetHashCode(ConditionsList);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Result);
+            hashCode = hashCode * -1521134295 + Quality.GetHashCode();
+            hashCode = hashCode * -1521134295 + Precision.GetHashCode();
+            hashCode = hashCode * -1521134295 + Specificity.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<List<Case>>.Default.GetHashCode(CoveredCases);
+            return hashCode;
+        }
+
+        public static bool operator ==(Rule rule1, Rule rule2)
+        {
+            return EqualityComparer<Rule>.Default.Equals(rule1, rule2);
+        }
+
+        public static bool operator !=(Rule rule1, Rule rule2)
+        {
+            return !(rule1 == rule2);
         }
     }
 }

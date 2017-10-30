@@ -6,20 +6,21 @@ using System.Xml.Serialization;
 
 namespace MAClassification
 {
+    public enum AntTypes { Greedy, Euristic, Basic}
     [Serializable]
     [XmlInclude(typeof(Rule))]
-    public class Ant
+    public class Ant : Agent
     {
         public double Alpha { get; set; }
         public double Beta { get; set; }
-        public string Type { get; set; }
         private Rule _rule;
-        public Rule Rule { get { return _rule; } set { _rule = value; } }
+        public override Rule Rule { get { return _rule; } set { _rule = value; } }
+        public AntTypes AntType { get; set; }
 
         public Ant()
         { }
 
-        public void RunAnt(List<Case> currentCases, decimal minCasesPerRule, Terms initialTerms, Table data,
+        public override void BuildRule(List<Case> currentCases, decimal minCasesPerRule, Terms initialTerms, Table data,
             Attributes attributes, List<string> results, GroupBox groupBox)
         {
             var currentAntRule = new Rule

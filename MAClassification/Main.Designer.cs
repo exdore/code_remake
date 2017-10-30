@@ -39,9 +39,7 @@
             this.uncoveredCasesLabel = new System.Windows.Forms.Label();
             this.casesPerRuleLabel = new System.Windows.Forms.Label();
             this.testButton = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
             this.trainingPathLabel = new System.Windows.Forms.Label();
-            this.button2 = new System.Windows.Forms.Button();
             this.testPathLabel = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -72,7 +70,7 @@
             // 
             this.antsCount.ForeColor = System.Drawing.SystemColors.WindowText;
             this.antsCount.Location = new System.Drawing.Point(185, 15);
-            this.antsCount.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.antsCount.Margin = new System.Windows.Forms.Padding(4);
             this.antsCount.Name = "antsCount";
             this.antsCount.Size = new System.Drawing.Size(160, 22);
             this.antsCount.TabIndex = 0;
@@ -85,7 +83,7 @@
             // convergenceStopValue
             // 
             this.convergenceStopValue.Location = new System.Drawing.Point(185, 47);
-            this.convergenceStopValue.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.convergenceStopValue.Margin = new System.Windows.Forms.Padding(4);
             this.convergenceStopValue.Name = "convergenceStopValue";
             this.convergenceStopValue.Size = new System.Drawing.Size(160, 22);
             this.convergenceStopValue.TabIndex = 1;
@@ -98,7 +96,7 @@
             // maxUncoveredCasesCount
             // 
             this.maxUncoveredCasesCount.Location = new System.Drawing.Point(184, 79);
-            this.maxUncoveredCasesCount.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.maxUncoveredCasesCount.Margin = new System.Windows.Forms.Padding(4);
             this.maxUncoveredCasesCount.Name = "maxUncoveredCasesCount";
             this.maxUncoveredCasesCount.Size = new System.Drawing.Size(160, 22);
             this.maxUncoveredCasesCount.TabIndex = 2;
@@ -111,7 +109,7 @@
             // minNumberPerRule
             // 
             this.minNumberPerRule.Location = new System.Drawing.Point(184, 111);
-            this.minNumberPerRule.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.minNumberPerRule.Margin = new System.Windows.Forms.Padding(4);
             this.minNumberPerRule.Name = "minNumberPerRule";
             this.minNumberPerRule.Size = new System.Drawing.Size(160, 22);
             this.minNumberPerRule.TabIndex = 3;
@@ -124,7 +122,7 @@
             // startButton
             // 
             this.startButton.Location = new System.Drawing.Point(16, 153);
-            this.startButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.startButton.Margin = new System.Windows.Forms.Padding(4);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(100, 28);
             this.startButton.TabIndex = 4;
@@ -137,7 +135,7 @@
             this.listBox1.FormattingEnabled = true;
             this.listBox1.ItemHeight = 16;
             this.listBox1.Location = new System.Drawing.Point(16, 386);
-            this.listBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.listBox1.Margin = new System.Windows.Forms.Padding(4);
             this.listBox1.Name = "listBox1";
             this.listBox1.Size = new System.Drawing.Size(708, 180);
             this.listBox1.TabIndex = 5;
@@ -185,7 +183,7 @@
             // testButton
             // 
             this.testButton.Location = new System.Drawing.Point(16, 242);
-            this.testButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.testButton.Margin = new System.Windows.Forms.Padding(4);
             this.testButton.Name = "testButton";
             this.testButton.Size = new System.Drawing.Size(100, 28);
             this.testButton.TabIndex = 12;
@@ -214,7 +212,7 @@
             // textBox1
             // 
             this.textBox1.Location = new System.Drawing.Point(184, 326);
-            this.textBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox1.Margin = new System.Windows.Forms.Padding(4);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(132, 22);
             this.textBox1.TabIndex = 17;
@@ -232,7 +230,7 @@
             // button3
             // 
             this.button3.Location = new System.Drawing.Point(380, 153);
-            this.button3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button3.Margin = new System.Windows.Forms.Padding(4);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(100, 28);
             this.button3.TabIndex = 19;
@@ -243,7 +241,7 @@
             // button4
             // 
             this.button4.Location = new System.Drawing.Point(380, 221);
-            this.button4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button4.Margin = new System.Windows.Forms.Padding(4);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(100, 28);
             this.button4.TabIndex = 20;
@@ -265,7 +263,7 @@
             this.entropy.AutoSize = true;
             this.entropy.Checked = true;
             this.entropy.Location = new System.Drawing.Point(8, 37);
-            this.entropy.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.entropy.Margin = new System.Windows.Forms.Padding(4);
             this.entropy.Name = "entropy";
             this.entropy.Size = new System.Drawing.Size(138, 21);
             this.entropy.TabIndex = 22;
@@ -277,7 +275,7 @@
             // 
             this.density.AutoSize = true;
             this.density.Location = new System.Drawing.Point(8, 65);
-            this.density.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.density.Margin = new System.Windows.Forms.Padding(4);
             this.density.Name = "density";
             this.density.Size = new System.Drawing.Size(142, 21);
             this.density.TabIndex = 23;
@@ -289,9 +287,9 @@
             this.groupBox1.Controls.Add(this.density);
             this.groupBox1.Controls.Add(this.entropy);
             this.groupBox1.Location = new System.Drawing.Point(380, 10);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox1.Size = new System.Drawing.Size(175, 94);
             this.groupBox1.TabIndex = 26;
             this.groupBox1.TabStop = false;
@@ -302,9 +300,9 @@
             this.groupBox2.Controls.Add(this.evaporation);
             this.groupBox2.Controls.Add(this.normalization);
             this.groupBox2.Location = new System.Drawing.Point(583, 10);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox2.Size = new System.Drawing.Size(175, 94);
             this.groupBox2.TabIndex = 27;
             this.groupBox2.TabStop = false;
@@ -314,7 +312,7 @@
             // 
             this.evaporation.AutoSize = true;
             this.evaporation.Location = new System.Drawing.Point(8, 65);
-            this.evaporation.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.evaporation.Margin = new System.Windows.Forms.Padding(4);
             this.evaporation.Name = "evaporation";
             this.evaporation.Size = new System.Drawing.Size(102, 21);
             this.evaporation.TabIndex = 23;
@@ -326,7 +324,7 @@
             this.normalization.AutoSize = true;
             this.normalization.Checked = true;
             this.normalization.Location = new System.Drawing.Point(8, 37);
-            this.normalization.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.normalization.Margin = new System.Windows.Forms.Padding(4);
             this.normalization.Name = "normalization";
             this.normalization.Size = new System.Drawing.Size(127, 21);
             this.normalization.TabIndex = 22;
@@ -339,9 +337,9 @@
             this.groupBox3.Controls.Add(this.radioButton1);
             this.groupBox3.Controls.Add(this.radioButton2);
             this.groupBox3.Location = new System.Drawing.Point(788, 10);
-            this.groupBox3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox3.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox3.Size = new System.Drawing.Size(175, 94);
             this.groupBox3.TabIndex = 28;
             this.groupBox3.TabStop = false;
@@ -351,7 +349,7 @@
             // 
             this.radioButton1.AutoSize = true;
             this.radioButton1.Location = new System.Drawing.Point(8, 65);
-            this.radioButton1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.radioButton1.Margin = new System.Windows.Forms.Padding(4);
             this.radioButton1.Name = "radioButton1";
             this.radioButton1.Size = new System.Drawing.Size(54, 21);
             this.radioButton1.TabIndex = 23;
@@ -363,7 +361,7 @@
             this.radioButton2.AutoSize = true;
             this.radioButton2.Checked = true;
             this.radioButton2.Location = new System.Drawing.Point(8, 37);
-            this.radioButton2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.radioButton2.Margin = new System.Windows.Forms.Padding(4);
             this.radioButton2.Name = "radioButton2";
             this.radioButton2.Size = new System.Drawing.Size(48, 21);
             this.radioButton2.TabIndex = 22;
@@ -396,9 +394,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.testPathLabel);
-            this.Controls.Add(this.button2);
             this.Controls.Add(this.trainingPathLabel);
-            this.Controls.Add(this.button1);
             this.Controls.Add(this.testButton);
             this.Controls.Add(this.casesPerRuleLabel);
             this.Controls.Add(this.uncoveredCasesLabel);
@@ -410,7 +406,7 @@
             this.Controls.Add(this.maxUncoveredCasesCount);
             this.Controls.Add(this.convergenceStopValue);
             this.Controls.Add(this.antsCount);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "Main";
             this.ShowIcon = false;
             this.Text = "Ants Classifier";
@@ -444,9 +440,7 @@
         private System.Windows.Forms.Label uncoveredCasesLabel;
         private System.Windows.Forms.Label casesPerRuleLabel;
         private System.Windows.Forms.Button testButton;
-        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label trainingPathLabel;
-        private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Label testPathLabel;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label1;

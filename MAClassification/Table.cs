@@ -7,11 +7,16 @@ using System.Xml.Serialization;
 namespace MAClassification
 {
     [Serializable]
+    public enum TableTypes { Full, Training, Testing }
+
+    [Serializable]
     [XmlInclude(typeof(Case))]
+    [XmlInclude(typeof(TableTypes))]
     public class Table
     {
         public List<string> Header { get; set; }
         public List<Case> Cases { get; set; }
+        public TableTypes TableType { get; set; }
 
         public Attributes GetAttributesInfo()
         {
@@ -32,19 +37,22 @@ namespace MAClassification
         {
 
         }
-
-        public Table(List<Case> cases, Table data )
-        {
-            Cases = cases;
-            Header = data.Header;
-        }
         
         public void Serialize()
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Table));
-            StreamWriter streamWriter = new StreamWriter(@"table.xml");
+            StreamWriter streamWriter = new StreamWriter(TableType.ToString() + @"table.xml");
             xmlSerializer.Serialize(streamWriter, this);
             streamWriter.Close();
+        }
+
+        public Table Deserialize()
+        {
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Table));
+            var streamReader = new StreamReader(TableType + @"terms.xml");
+            Table currentTable = (Table)xmlSerializer.Deserialize(streamReader);
+            streamReader.Close();
+            return currentTable;
         }
 
         public int GetCasesCount()
@@ -97,7 +105,8 @@ namespace MAClassification
                 return new Table
                 {
                     Header = header,
-                    Cases = sourceData
+                    Cases = sourceData,
+                    TableType = TableTypes.Full
                 };
             }
             return null;
