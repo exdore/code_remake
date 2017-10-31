@@ -20,7 +20,9 @@ namespace MAClassification
             button4.Enabled = false;
         }
 
+        private double _crossValidatonCoefficient;
         private List<Rule> _discoveredRules;
+        private Table _fullData;
         private Table _trainingTable;
         private Table _testingTable;
         private List<Agent> _chosenAgents;
@@ -28,24 +30,40 @@ namespace MAClassification
 
         private void startButton_Click(object sender, EventArgs e)
         {
+            _crossValidatonCoefficient = trackBar1.Value / 100.0;
             var maxAntsGenerationsNumber = antsCount.Value;
             var maxNumberForConvergence = convergenceStopValue.Value;
             var maxUncoveredCases = maxUncoveredCasesCount.Value;
             var minCasesPerRule = minNumberPerRule.Value;
             _discoveredRules = new List<Rule>();
             _chosenAgents = new List<Agent>();
-            var data = _trainingTable;
+            _fullData.Cases = _fullData.Cases.OrderBy(item => Guid.NewGuid()).ToList();
+            var count = (int)Math.Floor(_fullData.Cases.Count * _crossValidatonCoefficient);
+            _trainingTable = new Table
+            {
+                Cases = _fullData.Cases.GetRange(0, count).ToList(),
+                Header = _fullData.Header,
+                TableType = TableTypes.Training
+            };
+            _trainingTable.Serialize();
+            _testingTable = new Table
+            {
+                Cases = _fullData.Cases.GetRange(count, _fullData.Cases.Count - count).ToList(),
+                Header = _fullData.Header,
+                TableType = TableTypes.Testing
+            };
+            _testingTable.Serialize();
+            var data = _trainingTable.Deserialize();
             var terms = Initialize(data, out Attributes attributes, out List<string> results);
-            data.Serialize();
             terms.Serialize();
-            maxAntsGenerationsNumber = data.Cases.Count / 10;
-            maxNumberForConvergence = (int)Math.Sqrt((double)maxAntsGenerationsNumber);
-            maxUncoveredCases = maxAntsGenerationsNumber / 5;
-            minCasesPerRule = maxUncoveredCases * 2;
-            antsCount.Value = maxAntsGenerationsNumber;
-            convergenceStopValue.Value = maxNumberForConvergence;
-            maxUncoveredCasesCount.Value = maxUncoveredCases;
-            minNumberPerRule.Value = minCasesPerRule;
+            //maxAntsGenerationsNumber = data.Cases.Count / 10;
+            //maxNumberForConvergence = (int)Math.Sqrt((double)maxAntsGenerationsNumber);
+            //maxUncoveredCases = maxAntsGenerationsNumber / 5;
+            //minCasesPerRule = maxUncoveredCases * 2;
+            //antsCount.Value = maxAntsGenerationsNumber;
+            //convergenceStopValue.Value = maxNumberForConvergence;
+            //maxUncoveredCasesCount.Value = maxUncoveredCases;
+            //minNumberPerRule.Value = minCasesPerRule;
             File.Delete(@"rules.xml");
             while (data.GetCasesCount() > maxUncoveredCases)
             {
@@ -84,26 +102,30 @@ namespace MAClassification
             List<Case> currentCases, List<Rule> currentRules, Terms socialTerms, Terms basicTerms, Terms greedyTerms)
         {
             var antsPopulation = new List<Ant>();
-            while (antsPopulation.Count < maxAntsGenerationsNumber * 3 && currentNumberForConvergence < maxNumberForConvergence)
+            var count = 0;
+            while (count < maxAntsGenerationsNumber * 3 && currentNumberForConvergence < maxNumberForConvergence)
             {
                 var rnd = new Random();
                 var basicAnt = new Ant
                 {
                     Alpha = 1,
                     Beta = 1,
-                    AntType = AntTypes.Basic
+                    AntType = AntTypes.Basic,
+                    AntNumber = ++count
                 };
                 var greedyAnt = new Ant
                 {
                     Alpha = rnd.Next(200, 500) / 100.0,
                     Beta = rnd.Next(500, 1000) / 100.0,
-                    AntType = AntTypes.Greedy
+                    AntType = AntTypes.Greedy,
+                    AntNumber = ++count
                 };
                 var socialAnt = new Ant
                 {
                     Alpha = rnd.Next(500, 1000) / 100.0,
                     Beta = rnd.Next(200, 500) / 100.0,
-                    AntType = AntTypes.Euristic
+                    AntType = AntTypes.Euristic,
+                    AntNumber = ++count
                 };
                 GetAntResult(basicAnt, currentCases, minCasesPerRule, basicTerms, data, attributes, results, currentRules, groupBox1, groupBox2, groupBox3, ref currentNumberForConvergence, ref currentAnt);
                 GetAntResult(greedyAnt, currentCases, minCasesPerRule, greedyTerms, data, attributes, results, currentRules, groupBox1, groupBox2, groupBox3, ref currentNumberForConvergence, ref currentAnt);
@@ -111,9 +133,6 @@ namespace MAClassification
                 antsPopulation.Add(basicAnt);
                 antsPopulation.Add(greedyAnt);
                 antsPopulation.Add(socialAnt);
-                greedyTerms.Serialize();
-                socialTerms.Serialize();
-                basicTerms.Serialize();
             }
             return antsPopulation;
         }
@@ -154,7 +173,7 @@ namespace MAClassification
         private static bool CheckUsedTerms(Terms terms, Table data)
         {
             var availableTermsCount = 0;
-            foreach (var term in terms)
+            foreach (var term in terms.TermsList)
             {
                 foreach (var item in term)
                 {
@@ -183,14 +202,17 @@ namespace MAClassification
             results = data.GetResultsInfo();
             var initialTerms = new Terms
             {
-                TermType = TermTypes.Basic
+                TermsList = new List<List<Term>>(),
+                TermType = TermTypes.Basic,
+                MaxValue = 0.8,
+                MinValue = 0.01
             };
             foreach (var attribute in attributes)
             {
-                initialTerms.Add(new List<Term>());
+                initialTerms.TermsList.Add(new List<Term>());
                 foreach (var item in attribute.AttributeValues)
                 {
-                    initialTerms.Last().Add(new Term
+                    initialTerms.TermsList.Last().Add(new Term
                     {
                         AttributeName = attribute.AttributeName,
                         AttributeValue = item,
@@ -219,7 +241,8 @@ namespace MAClassification
 
         private void testButton_Click(object sender, EventArgs e)
         {
-            var data = _testingTable;
+            var data = _testingTable.Deserialize();
+            data.Cases = data.Cases.OrderBy(item => item.Number).ToList();
             var realResults = new List<string>();
             foreach (var item in data.Cases)
             {
@@ -236,6 +259,8 @@ namespace MAClassification
                 }
                 data.Cases = data.Cases.Except(discoveredRule.CoveredCases).ToList();
             }
+            data = _testingTable.Deserialize();
+
             var predictedResults = new List<string>();
             foreach (var item in data.Cases)
             {
@@ -259,27 +284,18 @@ namespace MAClassification
             button4.Enabled = true;
         }
 
-        private Table _fullData;
+        
 
         private void button4_Click(object sender, EventArgs e)
         {
             _fullData = Table.ReadData(_dataPath);
-            _fullData.Cases = _fullData.Cases.OrderBy(item => Guid.NewGuid()).ToList();
-            var count = (int)Math.Floor(_fullData.Cases.Count * 0.8);
-            _trainingTable = new Table
-            {
-                Cases = _fullData.Cases.GetRange(0, count).ToList(),
-                Header = _fullData.Header,
-                TableType = TableTypes.Training
-            };
-            _testingTable = new Table
-            {
-                Cases = _fullData.Cases.GetRange(count, _fullData.Cases.Count - count).ToList(),
-                Header = _fullData.Header,
-                TableType = TableTypes.Testing
-            };
             testButton.Enabled = true;
             startButton.Enabled = true;
+        }
+
+        private void trackBar1_ValueChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

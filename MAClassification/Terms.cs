@@ -12,32 +12,21 @@ namespace MAClassification
 
     [Serializable]
     [XmlInclude(typeof(TermTypes))]
-    public class Terms : List<List<Term>>
+    public class Terms
     {
-        private double SumEuristic { get; set; }
-        private double SumEntropy { get; set; }
+        public List<List<Term>> TermsList { get; set; }
         public double MinValue { get; set; }
         public double MaxValue { get; set; }
         public TermTypes TermType { get; set; }
-
-        public void Merge(Terms socialTerms, Terms basicTerms, Terms greedyTerms)
-        {
-            for (int i = 0; i < Count; i++)
-            {
-                for (int j = 0; j < this[i].Count; j++)
-                {
-                    this[i][j].WeightValue =
-                        Math.Max(Math.Max(socialTerms[i][j].WeightValue, basicTerms[i][j].WeightValue),
-                            greedyTerms[i][j].WeightValue);
-                }
-            }
-        }
+        private double SumEuristic { get; set; }
+        private double SumEntropy { get; set; }
+       
 
         public void UpdateWeights(Rule rule, GroupBox groupBox, int currentAnt)
         {
             var weightsType = groupBox.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked);
             double sumWeight = .0;
-            foreach (var items in this)
+            foreach (var items in TermsList)
             {
                 foreach (var item in items)
                 {
@@ -54,15 +43,16 @@ namespace MAClassification
                             var rate = CalculateEvaporationRate(currentAnt);
                             item.WeightValue = item.WeightValue * (1 - rate) + item.WeightValue * rule.Quality;
                         }
-                        if (item.WeightValue < MinValue)
-                            item.WeightValue = MinValue;
-                        if (item.WeightValue > MaxValue)
-                            item.WeightValue = MaxValue;
+       
                     }
+                    if (item.WeightValue < MinValue)
+                        item.WeightValue = MinValue;
+                    if (item.WeightValue > MaxValue)
+                        item.WeightValue = MaxValue;
                     sumWeight += item.WeightValue;
                 }
             }
-            foreach (var items in this)
+            foreach (var items in TermsList)
             {
                 foreach (var item in items)
                 {
@@ -86,7 +76,7 @@ namespace MAClassification
         public void Serialize()
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Terms));
-            StreamWriter streamWriter = new StreamWriter(TermType + @"terms.xml");
+            StreamWriter streamWriter = new StreamWriter(TermType + @"Terms.xml");
             xmlSerializer.Serialize(streamWriter, this);
             streamWriter.Close();
         }
@@ -94,9 +84,9 @@ namespace MAClassification
         public Terms Deserialize()
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Terms));
-            var streamReader = File.Exists(TermType + @"terms.xml")
-                ? new StreamReader(TermType + @"terms.xml")
-                : new StreamReader(@"Basicterms.xml");
+            var streamReader = File.Exists(TermType + @"Terms.xml")
+                ? new StreamReader(TermType + @"Terms.xml")
+                : new StreamReader(@"BasicTerms.xml");
             Terms currentTerms = (Terms)xmlSerializer.Deserialize(streamReader);
             streamReader.Close();
             return currentTerms;
@@ -109,21 +99,19 @@ namespace MAClassification
             if (euristicType != null && euristicType.Name == "entropy")
                 CalculateEuristicFunctionValues(attributes);
             else CalculateEuristicsByDensity(attributes, cases);
-            MinValue = 1e-4;
-            MaxValue = 0.8;
         }
 
         public double CumulativeProbability(Attributes attributes)
         {
             double res = 0;
-            for (int i = 0; i < Count; i++)
+            for (int i = 0; i < TermsList.Count; i++)
             {
-                var terms = this[i];
+                var terms = TermsList[i];
                 if (attributes[i].IsUsed) continue;
                 for (int index = 0; index < terms.Count; index++)
                 {
                     if (terms[index].IsChosen) continue;
-                    res += this[i][index].Probability;
+                    res += TermsList[i][index].Probability;
                 }
             }
             return res;
@@ -142,7 +130,7 @@ namespace MAClassification
         private void InitializeWeights(Attributes attributes)
         {
             var attributesCount = attributes.GetValuesCount();
-            foreach (var terms in this)
+            foreach (var terms in TermsList)
             {
                 foreach (var term in terms)
                 {
@@ -154,9 +142,9 @@ namespace MAClassification
         public void CalculateProbabilities(Attributes attributes, double alpha, double beta)
         {
             GetSumForEurictic(attributes, alpha, beta);
-            for (int i = 0; i < Count; i++)
+            for (int i = 0; i < TermsList.Count; i++)
             {
-                var terms = this[i];
+                var terms = TermsList[i];
                 if (attributes[i].IsUsed) continue;
                 foreach (var term in terms)
                 {
@@ -169,9 +157,9 @@ namespace MAClassification
         private void CalculateEuristicFunctionValues(Attributes attributes)
         {
             GetSumForEntopy(attributes);
-            for (int i = 0; i < Count; i++)
+            for (int i = 0; i < TermsList.Count; i++)
             {
-                var terms = this[i];
+                var terms = TermsList[i];
                 if (attributes[i].IsUsed) continue;
                 foreach (var term in terms)
                 {
@@ -183,7 +171,7 @@ namespace MAClassification
 
         private void CalculateEuristicsByDensity(Attributes attributes, List<Case> cases)
         {
-            foreach (var terms in this)
+            foreach (var terms in TermsList)
             {
                 foreach (var term in terms)
                 {
@@ -202,13 +190,13 @@ namespace MAClassification
         private void GetSumForEntopy(Attributes attributes)
         {
             double result = 0;
-            for (int i = 0; i < Count; i++)
+            for (int i = 0; i < TermsList.Count; i++)
             {
                 if (attributes[i].IsUsed) continue;
-                for (int j = 0; j < this[i].Count; j++)
+                for (int j = 0; j < TermsList[i].Count; j++)
                 {
-                    if (this[i][j].IsChosen) continue;
-                    result += Math.Log(attributes[i].AttributeValues.Count, 2) - this[i][j].Entropy;
+                    if (TermsList[i][j].IsChosen) continue;
+                    result += Math.Log(attributes[i].AttributeValues.Count, 2) - TermsList[i][j].Entropy;
                 }
             }
             SumEntropy = result;
@@ -217,13 +205,13 @@ namespace MAClassification
         private void GetSumForEurictic(Attributes attributes, double alpha, double beta)
         {
             double result = 0;
-            for (int i = 0; i < Count; i++)
+            for (int i = 0; i < TermsList.Count; i++)
             {
                 if (attributes[i].IsUsed) continue;
-                for (int j = 0; j < this[i].Count; j++)
+                for (int j = 0; j < TermsList[i].Count; j++)
                 {
-                    if (this[i][j].IsChosen) continue;
-                    result += Math.Pow(this[i][j].WeightValue, beta) * Math.Pow(this[i][j].EuristicFunctionValue, alpha);
+                    if (TermsList[i][j].IsChosen) continue;
+                    result += Math.Pow(TermsList[i][j].WeightValue, beta) * Math.Pow(TermsList[i][j].EuristicFunctionValue, alpha);
                 }
             }
             SumEuristic = result;

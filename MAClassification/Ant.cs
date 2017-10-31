@@ -16,7 +16,7 @@ namespace MAClassification
         private Rule _rule;
         public override Rule Rule { get { return _rule; } set { _rule = value; } }
         public AntTypes AntType { get; set; }
-
+        public int AntNumber { get; set; }
         public Ant()
         { }
 
@@ -38,8 +38,9 @@ namespace MAClassification
                 currentAntRule.GetRuleResult(results);
                 currentAntRule.CalculateRuleQuality(data);
                 initialTerms.Update(attributes, this, groupBox, currentCases);
+                initialTerms.UpdateWeights(currentAntRule, groupBox, AntNumber);
             }
-            if (currentAntRule.CoveredCases.Count < minCasesPerRule && currentAntRule.ConditionsList.Count > 1)
+            if (currentAntRule.ConditionsList.Count > 1 && currentAntRule.CoveredCases.Count < minCasesPerRule)
             {
                 attributes.Find(item => item.AttributeName == currentAntRule.ConditionsList.Last().AttributeName)
                     .IsUsed = false;

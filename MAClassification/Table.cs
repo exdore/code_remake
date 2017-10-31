@@ -41,7 +41,7 @@ namespace MAClassification
         public void Serialize()
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Table));
-            StreamWriter streamWriter = new StreamWriter(TableType.ToString() + @"table.xml");
+            StreamWriter streamWriter = new StreamWriter(TableType.ToString() + @"Table.xml");
             xmlSerializer.Serialize(streamWriter, this);
             streamWriter.Close();
         }
@@ -49,7 +49,7 @@ namespace MAClassification
         public Table Deserialize()
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Table));
-            var streamReader = new StreamReader(TableType + @"terms.xml");
+            var streamReader = new StreamReader(TableType + @"Table.xml");
             Table currentTable = (Table)xmlSerializer.Deserialize(streamReader);
             streamReader.Close();
             return currentTable;

@@ -91,7 +91,7 @@ namespace MAClassification
         public void AddConditionToRule(Terms terms, Table data)
         {
             var probability = new Random().NextDouble();
-            foreach (var term in terms)
+            foreach (var term in terms.TermsList)
             {
                 if (ConditionsList.Exists(item => item.AttributeName == term[0].AttributeName)) continue;
                 foreach (var item in term)

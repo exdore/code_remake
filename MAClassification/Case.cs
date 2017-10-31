@@ -20,7 +20,7 @@ namespace MAClassification
 
         public override string ToString()
         {
-            return Number + ValuesToString() + Result;
+            return Number + " " + ValuesToString() + Result;
         }
     }
 }
