@@ -13,9 +13,9 @@ namespace MAClassification
     {
         public List<Condition> ConditionsList { get; set; }
 
-        public string Result { get; set; }
+        public string Result { get; set; }             //make it array of probabilities to save likehood for every class 
 
-        public double Quality { get; set; }
+        public double Quality { get; private set; }
         private double _precision { get; set; }
         private double _specificity { get; set; }
 
@@ -88,7 +88,7 @@ namespace MAClassification
             Quality = Precision * Specificity;
         }
 
-        public void AddConditionToRule(Terms terms, Table data)
+        public void AddConditionToRule(Terms terms)
         {
             var probability = new Random().NextDouble();
             foreach (var term in terms.TermsList)
@@ -152,7 +152,9 @@ namespace MAClassification
                 if (newRule.ConditionsList.Count == 1)
                     return newRule;
                 if (newRule.ConditionsList.Count == 0)
+                {
                     throw (new RuleIsEmptyException(""));
+                }
                 var rulesList = new List<Rule>();
                 for (int i = 0; i < ConditionsList.Count; i++)
                 {
@@ -168,6 +170,7 @@ namespace MAClassification
             }
             catch(RuleIsEmptyException)
             {
+                MessageBox.Show("Empty rule!!!");
                 return newRule;
             }
         }

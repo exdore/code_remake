@@ -88,17 +88,17 @@ namespace MAClassification
             var line = streamReader.ReadLine();
             if (line != null)
             {
-                var header = line.Split(' ').ToList();
+                var header = line.Split('\t').ToList();
                 header.RemoveAt(header.Count - 1);
                 var count = 0;
                 while ((line = streamReader.ReadLine()) != null)
                 {
-                    var sourceList = line.Split(' ').ToList();
+                    var sourceList = line.Split('\t').ToList();
                     sourceData.Add(new Case
                     {
                         Number = ++count,
-                        AttributesValuesList = sourceList.GetRange(1, sourceList.Count - 3),
-                        Result = sourceList[sourceList.Count - 2]
+                        AttributesValuesList = sourceList.GetRange(0, header.Count),
+                        Result = sourceList[header.Count]
                     });
                 }
                 streamReader.Close();

@@ -22,9 +22,8 @@ namespace MAClassification
         private double SumEntropy { get; set; }
        
 
-        public void UpdateWeights(Rule rule, GroupBox groupBox, int currentAnt)
+        public void UpdateWeights(Rule rule, string type, int currentAnt)
         {
-            var weightsType = groupBox.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked);
             double sumWeight = .0;
             foreach (var items in TermsList)
             {
@@ -36,7 +35,7 @@ namespace MAClassification
                                                                 condition.AttributeValue == item.AttributeValue))
                     {
                         item.IsChosen = true;
-                        if (weightsType != null && weightsType.Name == "normalization")
+                        if (type == "normalization")
                             item.WeightValue += item.WeightValue * rule.Quality;
                         else
                         {
@@ -92,11 +91,10 @@ namespace MAClassification
             return currentTerms;
         }
 
-        public void FullInitialize(Attributes attributes, GroupBox groupBox, List<Case> cases)
+        public void FullInitialize(Attributes attributes, string type, List<Case> cases)
         {
             InitializeWeights(attributes);
-            var euristicType = groupBox.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked);
-            if (euristicType != null && euristicType.Name == "entropy")
+            if (type == "entropy")
                 CalculateEuristicFunctionValues(attributes);
             else CalculateEuristicsByDensity(attributes, cases);
         }
@@ -117,14 +115,13 @@ namespace MAClassification
             return res;
         }
 
-        public void Update(Attributes attributes, Ant ant, GroupBox groupBox, List<Case> cases)
+        public void Update(Attributes attributes, double a, double b, string type, List<Case> cases)
         {
             CalculateEuristicFunctionValues(attributes);
-            var euristicType = groupBox.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked);
-            if (euristicType != null && euristicType.Name == "entropy")
+            if (type == "entropy")
                 CalculateEuristicFunctionValues(attributes);
             else CalculateEuristicsByDensity(attributes, cases);
-            CalculateProbabilities(attributes, ant.Alpha, ant.Beta);
+            CalculateProbabilities(attributes, a, b);
         }
 
         private void InitializeWeights(Attributes attributes)

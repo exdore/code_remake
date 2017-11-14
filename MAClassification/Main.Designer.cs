@@ -44,26 +44,28 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.button3 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.entropy = new System.Windows.Forms.RadioButton();
             this.density = new System.Windows.Forms.RadioButton();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.euristicFunctionType = new System.Windows.Forms.GroupBox();
+            this.PheromonesUpdateMethod = new System.Windows.Forms.GroupBox();
             this.evaporation = new System.Windows.Forms.RadioButton();
             this.normalization = new System.Windows.Forms.RadioButton();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.radioButton1 = new System.Windows.Forms.RadioButton();
-            this.radioButton2 = new System.Windows.Forms.RadioButton();
+            this.RulesPruningStatus = new System.Windows.Forms.GroupBox();
+            this.pruningInactive = new System.Windows.Forms.RadioButton();
+            this.pruningActive = new System.Windows.Forms.RadioButton();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.trackBar1 = new System.Windows.Forms.TrackBar();
+            this.trainingCount = new System.Windows.Forms.Label();
+            this.testingCount = new System.Windows.Forms.Label();
+            this.trackBarValue = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.antsCount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.convergenceStopValue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.maxUncoveredCasesCount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.minNumberPerRule)).BeginInit();
-            this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
-            this.groupBox3.SuspendLayout();
+            this.euristicFunctionType.SuspendLayout();
+            this.PheromonesUpdateMethod.SuspendLayout();
+            this.RulesPruningStatus.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
             this.SuspendLayout();
@@ -240,17 +242,6 @@
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
-            // button4
-            // 
-            this.button4.Location = new System.Drawing.Point(380, 221);
-            this.button4.Margin = new System.Windows.Forms.Padding(4);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(100, 28);
-            this.button4.TabIndex = 20;
-            this.button4.Text = "Divide";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
-            // 
             // label2
             // 
             this.label2.AutoSize = true;
@@ -284,31 +275,31 @@
             this.density.Text = "Через плотность";
             this.density.UseVisualStyleBackColor = true;
             // 
-            // groupBox1
+            // euristicFunctionType
             // 
-            this.groupBox1.Controls.Add(this.density);
-            this.groupBox1.Controls.Add(this.entropy);
-            this.groupBox1.Location = new System.Drawing.Point(380, 10);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox1.Size = new System.Drawing.Size(175, 94);
-            this.groupBox1.TabIndex = 26;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Эвристическая функция";
+            this.euristicFunctionType.Controls.Add(this.density);
+            this.euristicFunctionType.Controls.Add(this.entropy);
+            this.euristicFunctionType.Location = new System.Drawing.Point(380, 10);
+            this.euristicFunctionType.Margin = new System.Windows.Forms.Padding(4);
+            this.euristicFunctionType.Name = "euristicFunctionType";
+            this.euristicFunctionType.Padding = new System.Windows.Forms.Padding(4);
+            this.euristicFunctionType.Size = new System.Drawing.Size(175, 94);
+            this.euristicFunctionType.TabIndex = 26;
+            this.euristicFunctionType.TabStop = false;
+            this.euristicFunctionType.Text = "Эвристическая функция";
             // 
-            // groupBox2
+            // PheromonesUpdateMethod
             // 
-            this.groupBox2.Controls.Add(this.evaporation);
-            this.groupBox2.Controls.Add(this.normalization);
-            this.groupBox2.Location = new System.Drawing.Point(583, 10);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(4);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox2.Size = new System.Drawing.Size(175, 94);
-            this.groupBox2.TabIndex = 27;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Пересчет феромона";
+            this.PheromonesUpdateMethod.Controls.Add(this.evaporation);
+            this.PheromonesUpdateMethod.Controls.Add(this.normalization);
+            this.PheromonesUpdateMethod.Location = new System.Drawing.Point(583, 10);
+            this.PheromonesUpdateMethod.Margin = new System.Windows.Forms.Padding(4);
+            this.PheromonesUpdateMethod.Name = "PheromonesUpdateMethod";
+            this.PheromonesUpdateMethod.Padding = new System.Windows.Forms.Padding(4);
+            this.PheromonesUpdateMethod.Size = new System.Drawing.Size(175, 94);
+            this.PheromonesUpdateMethod.TabIndex = 27;
+            this.PheromonesUpdateMethod.TabStop = false;
+            this.PheromonesUpdateMethod.Text = "Пересчет феромона";
             // 
             // evaporation
             // 
@@ -334,42 +325,42 @@
             this.normalization.Text = "Нормализация";
             this.normalization.UseVisualStyleBackColor = true;
             // 
-            // groupBox3
+            // RulesPruningStatus
             // 
-            this.groupBox3.Controls.Add(this.radioButton1);
-            this.groupBox3.Controls.Add(this.radioButton2);
-            this.groupBox3.Location = new System.Drawing.Point(788, 10);
-            this.groupBox3.Margin = new System.Windows.Forms.Padding(4);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox3.Size = new System.Drawing.Size(175, 94);
-            this.groupBox3.TabIndex = 28;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Упрощение правил";
+            this.RulesPruningStatus.Controls.Add(this.pruningInactive);
+            this.RulesPruningStatus.Controls.Add(this.pruningActive);
+            this.RulesPruningStatus.Location = new System.Drawing.Point(788, 10);
+            this.RulesPruningStatus.Margin = new System.Windows.Forms.Padding(4);
+            this.RulesPruningStatus.Name = "RulesPruningStatus";
+            this.RulesPruningStatus.Padding = new System.Windows.Forms.Padding(4);
+            this.RulesPruningStatus.Size = new System.Drawing.Size(175, 94);
+            this.RulesPruningStatus.TabIndex = 28;
+            this.RulesPruningStatus.TabStop = false;
+            this.RulesPruningStatus.Text = "Упрощение правил";
             // 
-            // radioButton1
+            // pruningInactive
             // 
-            this.radioButton1.AutoSize = true;
-            this.radioButton1.Location = new System.Drawing.Point(8, 65);
-            this.radioButton1.Margin = new System.Windows.Forms.Padding(4);
-            this.radioButton1.Name = "radioButton1";
-            this.radioButton1.Size = new System.Drawing.Size(54, 21);
-            this.radioButton1.TabIndex = 23;
-            this.radioButton1.Text = "Нет";
-            this.radioButton1.UseVisualStyleBackColor = true;
+            this.pruningInactive.AutoSize = true;
+            this.pruningInactive.Location = new System.Drawing.Point(8, 65);
+            this.pruningInactive.Margin = new System.Windows.Forms.Padding(4);
+            this.pruningInactive.Name = "pruningInactive";
+            this.pruningInactive.Size = new System.Drawing.Size(54, 21);
+            this.pruningInactive.TabIndex = 23;
+            this.pruningInactive.Text = "Нет";
+            this.pruningInactive.UseVisualStyleBackColor = true;
             // 
-            // radioButton2
+            // pruningActive
             // 
-            this.radioButton2.AutoSize = true;
-            this.radioButton2.Checked = true;
-            this.radioButton2.Location = new System.Drawing.Point(8, 37);
-            this.radioButton2.Margin = new System.Windows.Forms.Padding(4);
-            this.radioButton2.Name = "radioButton2";
-            this.radioButton2.Size = new System.Drawing.Size(48, 21);
-            this.radioButton2.TabIndex = 22;
-            this.radioButton2.TabStop = true;
-            this.radioButton2.Text = "Да";
-            this.radioButton2.UseVisualStyleBackColor = true;
+            this.pruningActive.AutoSize = true;
+            this.pruningActive.Checked = true;
+            this.pruningActive.Location = new System.Drawing.Point(8, 37);
+            this.pruningActive.Margin = new System.Windows.Forms.Padding(4);
+            this.pruningActive.Name = "pruningActive";
+            this.pruningActive.Size = new System.Drawing.Size(48, 21);
+            this.pruningActive.TabIndex = 22;
+            this.pruningActive.TabStop = true;
+            this.pruningActive.Text = "Да";
+            this.pruningActive.UseVisualStyleBackColor = true;
             // 
             // dataGridView1
             // 
@@ -390,19 +381,45 @@
             this.trackBar1.Value = 80;
             this.trackBar1.ValueChanged += new System.EventHandler(this.trackBar1_ValueChanged);
             // 
+            // trainingCount
+            // 
+            this.trainingCount.AutoSize = true;
+            this.trainingCount.Location = new System.Drawing.Point(145, 159);
+            this.trainingCount.Name = "trainingCount";
+            this.trainingCount.Size = new System.Drawing.Size(0, 17);
+            this.trainingCount.TabIndex = 31;
+            // 
+            // testingCount
+            // 
+            this.testingCount.AutoSize = true;
+            this.testingCount.Location = new System.Drawing.Point(145, 248);
+            this.testingCount.Name = "testingCount";
+            this.testingCount.Size = new System.Drawing.Size(0, 17);
+            this.testingCount.TabIndex = 32;
+            // 
+            // trackBarValue
+            // 
+            this.trackBarValue.AutoSize = true;
+            this.trackBarValue.Location = new System.Drawing.Point(802, 163);
+            this.trackBarValue.Name = "trackBarValue";
+            this.trackBarValue.Size = new System.Drawing.Size(0, 17);
+            this.trackBarValue.TabIndex = 33;
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(1805, 761);
+            this.Controls.Add(this.trackBarValue);
+            this.Controls.Add(this.testingCount);
+            this.Controls.Add(this.trainingCount);
             this.Controls.Add(this.trackBar1);
             this.Controls.Add(this.dataGridView1);
-            this.Controls.Add(this.groupBox3);
-            this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.RulesPruningStatus);
+            this.Controls.Add(this.PheromonesUpdateMethod);
+            this.Controls.Add(this.euristicFunctionType);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.button4);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBox1);
@@ -428,12 +445,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.convergenceStopValue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.maxUncoveredCasesCount)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.minNumberPerRule)).EndInit();
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
-            this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
+            this.euristicFunctionType.ResumeLayout(false);
+            this.euristicFunctionType.PerformLayout();
+            this.PheromonesUpdateMethod.ResumeLayout(false);
+            this.PheromonesUpdateMethod.PerformLayout();
+            this.RulesPruningStatus.ResumeLayout(false);
+            this.RulesPruningStatus.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
             this.ResumeLayout(false);
@@ -459,19 +476,21 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.RadioButton entropy;
         private System.Windows.Forms.RadioButton density;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.GroupBox euristicFunctionType;
+        private System.Windows.Forms.GroupBox PheromonesUpdateMethod;
         private System.Windows.Forms.RadioButton evaporation;
         private System.Windows.Forms.RadioButton normalization;
-        private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.RadioButton radioButton1;
-        private System.Windows.Forms.RadioButton radioButton2;
+        private System.Windows.Forms.GroupBox RulesPruningStatus;
+        private System.Windows.Forms.RadioButton pruningInactive;
+        private System.Windows.Forms.RadioButton pruningActive;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.TrackBar trackBar1;
+        private System.Windows.Forms.Label trainingCount;
+        private System.Windows.Forms.Label testingCount;
+        private System.Windows.Forms.Label trackBarValue;
     }
 }
 

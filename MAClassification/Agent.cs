@@ -10,13 +10,23 @@ namespace MAClassification
 {
     [Serializable]
     [XmlInclude(typeof(Ant))]
+    [XmlInclude(typeof(Rule))]
     public abstract class Agent
     {
         public abstract Rule Rule { get; set; }
-        private enum AgentTypes { ant }
 
-        public abstract void BuildRule(List<Case> currentCases, decimal minCasesPerRule, Terms initialTerms, Table data,
-            Attributes attributes, List<string> results, GroupBox groupBox);
+        public enum AgentTypes { ant }
 
+        public AgentTypes AgentType { get; set; }
+
+        protected Agent()
+        {
+        }
+
+        public abstract void BuildRule(decimal minCasesPerRule, Terms initialTerms, Table data,
+            Attributes attributes, List<string> results, string type);
+
+        public abstract void GetAntResult(decimal minCasesPerRule, Terms terms, Table data,
+            Attributes attributes, List<string> results, List<Rule> currentRules, string euristicType, string pheromonesType, string pruningType, ref int currentNumberForConvergence, ref int currentAnt);
     }
 }

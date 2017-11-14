@@ -6,9 +6,10 @@ using System.Xml.Serialization;
 
 namespace MAClassification
 {
-    public enum AntTypes { Greedy, Euristic, Basic}
+    public enum AntTypes { Greedy, Euristic, Basic }
     [Serializable]
     [XmlInclude(typeof(Rule))]
+    [XmlInclude(typeof(AntTypes))]
     public class Ant : Agent
     {
         public double Alpha { get; set; }
@@ -20,25 +21,25 @@ namespace MAClassification
         public Ant()
         { }
 
-        public override void BuildRule(List<Case> currentCases, decimal minCasesPerRule, Terms initialTerms, Table data,
-            Attributes attributes, List<string> results, GroupBox groupBox)
+        public override void BuildRule(decimal minCasesPerRule, Terms initialTerms, Table data, Attributes attributes,
+            List<string> results, string type)
         {
             var currentAntRule = new Rule
             {
                 ConditionsList = new List<Condition>(),
-                CoveredCases = currentCases
+                CoveredCases = data.Cases
             };
             _rule = currentAntRule;
             initialTerms.CalculateProbabilities(attributes, Alpha, Beta);
             while (currentAntRule.CoveredCases.Count > minCasesPerRule)
             {
-                currentAntRule.AddConditionToRule(initialTerms, data);
+                currentAntRule.AddConditionToRule(initialTerms);
                 currentAntRule.CheckUsedAttributes(attributes);
                 currentAntRule.GetCoveredCases(data);
                 currentAntRule.GetRuleResult(results);
                 currentAntRule.CalculateRuleQuality(data);
-                initialTerms.Update(attributes, this, groupBox, currentCases);
-                initialTerms.UpdateWeights(currentAntRule, groupBox, AntNumber);
+                initialTerms.Update(attributes, Alpha, Beta, type, data.Cases);
+                initialTerms.UpdateWeights(currentAntRule, type, AntNumber);
             }
             if (currentAntRule.ConditionsList.Count > 1 && currentAntRule.CoveredCases.Count < minCasesPerRule)
             {
@@ -49,7 +50,72 @@ namespace MAClassification
                 currentAntRule.GetRuleResult(results);
                 currentAntRule.CalculateRuleQuality(data);
             }
+            if(currentAntRule.CoveredCases.Count == 0)
+            {
+                int k = 5;
+            }
             _rule = currentAntRule;
+        }
+
+        public override void GetAntResult(decimal minCasesPerRule, Terms terms, Table data,
+            Attributes attributes, List<string> results, List<Rule> currentRules, string euristicType, string pheromonesType, string pruningType, ref int currentNumberForConvergence, ref int currentAnt)
+        {
+            {
+                CheckUsedTerms(data, terms);
+                BuildRule(minCasesPerRule, terms, data, attributes, results, pheromonesType);
+                var currentAntRule = Rule;
+                if (pruningType == @"pruningActive")
+                {
+                    currentAntRule = currentAntRule.PruneRule(data, results);
+                    currentAntRule.GetCoveredCases(data);
+                    currentAntRule.GetRuleResult(results);
+                    currentAntRule.CalculateRuleQuality(data);
+                    terms.UpdateWeights(currentAntRule, pheromonesType, currentAnt);
+                }
+                if (currentRules.Count > 0)
+                {
+                    if (currentAntRule.Equals(currentRules.Last()))
+                        currentNumberForConvergence++;
+                    else
+                        currentNumberForConvergence = 0;
+                }
+                currentRules.Add(currentAntRule);
+                foreach (var attribute in attributes)
+                {
+                    attribute.IsUsed = false;
+                }
+                terms.Update(attributes, Alpha, Beta, euristicType, data.Cases);
+                currentAnt++;
+                if (pruningType == @"pruningActive")
+                {
+                    Rule = currentAntRule;
+                }
+            }
+        }
+
+        private bool CheckUsedTerms(Table data, Terms terms)
+        {
+            var availableTermsCount = 0;
+            foreach (var term in terms.TermsList)
+            {
+                foreach (var item in term)
+                {
+                    item.IsChosen = false;
+                    var fl = false;
+                    var index = data.Header.IndexOf(item.AttributeName);
+                    foreach (var dataCase in data.Cases)
+                    {
+                        if (dataCase.AttributesValuesList[index] == item.AttributeValue)
+                        {
+                            availableTermsCount++;
+                            fl = true;
+                            break;
+                        }
+                    }
+                    if (!fl) item.IsChosen = true;
+                }
+            }
+            return availableTermsCount != 0;
         }
     }
 }
