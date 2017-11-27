@@ -15,32 +15,20 @@ namespace MAClassification
 
         public string Result { get; set; }             //make it array of probabilities to save likehood for every class 
 
-        public double Quality { get; private set; }
+        public double Quality { get; set; }
         private double _precision { get; set; }
         private double _specificity { get; set; }
 
         public double Precision
         {
-            get
-            {
-                return _precision;
-            }
-            set
-            {
-                _precision = value;
-            }
+            get => _precision;
+            set => _precision = value;
         }
 
         public double Specificity
         {
-            get
-            {
-                return _specificity;
-            }
-            set
-            {
-                _specificity = value;
-            }
+            get => _specificity;
+            set => _specificity = value;
         }
 
         [XmlIgnore]
@@ -48,6 +36,7 @@ namespace MAClassification
 
         public override string ToString()
         {
+            ConditionsList = ConditionsList.OrderBy(item => item.AttributeName).ToList();
             var res = "Conditions: ";
             foreach (var condition in ConditionsList)
             {
@@ -111,6 +100,18 @@ namespace MAClassification
             }
         }
 
+        public bool CheckIfCovers(Case @case, Attributes attributes)
+        {
+            foreach (var condition in ConditionsList)
+            {
+                if (condition.AttributeValue != @case.AttributesValuesList[attributes.
+                    FindIndex(item => item.AttributeName == condition.AttributeName)])
+                    return false;
+            }
+
+            return true;
+        }
+
         public void GetCoveredCases(Table data)
         {
             var cases = data.GetCases();
@@ -170,7 +171,7 @@ namespace MAClassification
             }
             catch(RuleIsEmptyException)
             {
-                MessageBox.Show("Empty rule!!!");
+                MessageBox.Show(@"Empty rule!!!");
                 return newRule;
             }
         }
@@ -187,13 +188,14 @@ namespace MAClassification
         {
             return Equals(obj as Rule);
         }
+
         public bool Equals(Rule other)
         {
             if (ReferenceEquals(other, null))
                 return false;
             if (ReferenceEquals(this, other))
                 return true;
-            return Quality == other.Quality && CoveredCases.SequenceEqual(other.CoveredCases);
+            return Math.Abs(Quality - other.Quality) < 1e-6 && CoveredCases.SequenceEqual(other.CoveredCases);
         }
 
         public override int GetHashCode()

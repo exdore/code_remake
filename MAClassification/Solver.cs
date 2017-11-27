@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace MAClassification
 {
@@ -34,27 +33,38 @@ namespace MAClassification
         private Terms _terms { get; set; }
         private List<Agent> _chosenAgents { get; set; }
 
-        public Table InitializeDataTables()
+        public Table GetFullData()
         {
-            Data = Table.ReadData(_dataPath);
-            _fullData.Cases = _fullData.Cases.OrderBy(item => Guid.NewGuid()).ToList();
-            _fullData.Serialize();
-            var count = (int)Math.Floor(_fullData.Cases.Count * _crossValidationCoefficient);
-            _trainingTable = new Table
+            return _fullData;
+        }
+
+        public void InitializeDataTables()
+        {
+            if (_dataPath != "")
             {
-                Cases = _fullData.Cases.GetRange(0, count).ToList(),
-                Header = _fullData.Header,
-                TableType = TableTypes.Training
-            };
-            _trainingTable.Serialize();
-            _testingTable = new Table
+                Data = Table.ReadData(_dataPath);
+                _fullData.Cases = _fullData.Cases.OrderBy(item => Guid.NewGuid()).ToList();
+                _fullData.Serialize();
+                _testingTable = new Table
+                {
+                    Cases = _fullData.Cases,
+                    Header = _fullData.Header,
+                    TableType = TableTypes.Testing
+                };
+                _testingTable.Serialize();
+            }
+            else
             {
-                Cases = _fullData.Cases.GetRange(count, _fullData.Cases.Count - count).ToList(),
-                Header = _fullData.Header,
-                TableType = TableTypes.Testing
-            };
-            _testingTable.Serialize();
-            return _trainingTable;
+                var openFileDialog1 = new OpenFileDialog { Filter = @"txt files (*.txt)|*.txt|All files (*.*)|*.*" };
+                openFileDialog1.ShowDialog();
+                var path = openFileDialog1.FileName;
+                _trainingTable = Table.ReadData(path);
+                openFileDialog1 = new OpenFileDialog { Filter = @"txt files (*.txt)|*.txt|All files (*.*)|*.*" };
+                openFileDialog1.ShowDialog();
+                path = openFileDialog1.FileName;
+                _testingTable = Table.ReadData(path);
+                Data = _trainingTable;
+            }
         }
 
         public Terms InitializeTerms()
@@ -86,14 +96,14 @@ namespace MAClassification
             return initialTerms;
         }
 
-        public List<Rule> FindSolution()
+        public List<Rule> FindSolution(Table data)
         {
+            _discoveredRules = new List<Rule>();
             _chosenAgents = new List<Agent>();
-            while (Data.GetCasesCount() > MaxUncoveredCases)
+            while (data.GetCasesCount() > MaxUncoveredCases)
             {
                 var currentAgent = 0;
                 var currentNumberForConvergence = 0;
-                var currentCases = Data.GetCases();
                 var currentRules = new List<Rule>();
                 var socialTerms = _terms.Deserialize();
                 socialTerms.TermType = TermTypes.Euristic;
@@ -101,20 +111,19 @@ namespace MAClassification
                 basicTerms.TermType = TermTypes.Basic;
                 var greedyTerms = _terms.Deserialize();
                 greedyTerms.TermType = TermTypes.Greedy;
-                var agentsPopulation = IterateGeneration(Data, Attributes, Results, ref currentAgent, ref currentNumberForConvergence, currentCases, currentRules,
+                var agentsPopulation = IterateGeneration(data, Attributes, Results, ref currentAgent, ref currentNumberForConvergence, currentRules,
                     socialTerms, basicTerms, greedyTerms);
                 agentsPopulation = agentsPopulation.OrderByDescending(item => item.Rule.Quality).ToList();
                 var bestAgent = agentsPopulation.First();
-                _chosenAgents.Add(agentsPopulation.Where(item => (item.Rule.Quality - bestAgent.Rule.Quality)
-                    < 1e-5).OrderByDescending(item => Guid.NewGuid()).First());
+                _chosenAgents.Add(agentsPopulation.Where(item => (item.Rule.Quality - bestAgent.Rule.Quality) < 1e-5)
+                    .OrderByDescending(item => Guid.NewGuid()).First());
                 _discoveredRules.Add(_chosenAgents.Last().Rule);
-                Data.Cases = Data.Cases.Except(_chosenAgents.Last().Rule.CoveredCases).ToList();
+                data.Cases = data.Cases.Except(_chosenAgents.Last().Rule.CoveredCases).ToList();
             }
             return _discoveredRules;
         }
 
-        private List<Agent> IterateGeneration(Table data, Attributes attributes, List<string> results, ref int currentAnt, ref int currentNumberForConvergence,
-            List<Case> currentCases, List<Rule> currentRules, Terms socialTerms, Terms basicTerms, Terms greedyTerms)
+        private List<Agent> IterateGeneration(Table data, Attributes attributes, List<string> results, ref int currentAnt, ref int currentNumberForConvergence, List<Rule> currentRules, Terms socialTerms, Terms basicTerms, Terms greedyTerms)
         {
             var agentsPopulation = new List<Agent>();
             var count = 0;
@@ -155,9 +164,10 @@ namespace MAClassification
             return agentsPopulation;
         }
 
-        public int Test()
+        public int Test(List<Rule> discoveredRules)                             //move to other class -> should work with List<List<Rule>> from all trees
         {
-            var data = _fullData.Deserialize();
+            //var data = _fullData.Deserialize();
+            var data = _testingTable;
             data.Cases = data.Cases.OrderBy(item => item.Number).ToList();
             var realResults = new List<string>();
             foreach (var item in data.Cases)
@@ -165,21 +175,34 @@ namespace MAClassification
                 realResults.Add(item.Result);
                 item.Result = "";
             }
-            foreach (var discoveredRule in _discoveredRules)
+            //foreach (var discoveredRule in discoveredRules)
+            //{
+            //    discoveredRule.GetCoveredCases(data);
+            //    foreach (var discoveredRuleCoveredCase in discoveredRule.CoveredCases)
+            //    {
+            //        data.Cases.Find(item => item.Number == discoveredRuleCoveredCase.Number).Result =
+            //            discoveredRule.Result;
+            //    }
+            //    data.Cases = data.Cases.Except(discoveredRule.CoveredCases).ToList();
+            //}
+            var rules = new List<List<Rule>>();
+            foreach (var @case in data.Cases)
             {
-                discoveredRule.GetCoveredCases(data);
-                foreach (var discoveredRuleCoveredCase in discoveredRule.CoveredCases)
+                var res = new List<Rule>();
+                foreach (var rule in discoveredRules)
                 {
-                    data.Cases.Find(item => item.Number == discoveredRuleCoveredCase.Number).Result =
-                        discoveredRule.Result;
+                    if (rule.CheckIfCovers(@case, Attributes))
+                        res.Add(rule);
                 }
-                data.Cases = data.Cases.Except(discoveredRule.CoveredCases).ToList();
+                if(res.Count != 0)
+                    rules.Add(res);
             }
-            data = _testingTable.Deserialize();
             var predictedResults = new List<string>();
-            foreach (var item in data.Cases)
+            foreach (var items in rules)
             {
-                predictedResults.Add(item.Result);
+                predictedResults.Add(items.GroupBy(s => s.Result)
+                    .OrderByDescending(s => s.Count())
+                    .First().Key);
             }
             var count = 0;
             for (var index = 0; index < predictedResults.Count; index++)
