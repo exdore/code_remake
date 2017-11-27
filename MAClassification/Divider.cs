@@ -20,7 +20,6 @@ namespace MAClassification
                     data.Cases = data.Cases.OrderBy(item => new Guid()).ToList();
                     var k = size / (n - 1);
                     Step = (size - k) / (n - 1);
-
                     for (int i = 0; i < n; i++)
                     {
                         if (i != n - 1)
@@ -38,6 +37,7 @@ namespace MAClassification
                     }
                     count -= n;
                 }
+                return tables;
             }
             tables.Add(data);
             return tables;

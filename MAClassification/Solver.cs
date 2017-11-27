@@ -200,9 +200,9 @@ namespace MAClassification
             var predictedResults = new List<string>();
             foreach (var items in rules)
             {
-                predictedResults.Add(items.GroupBy(s => s.Result)
-                    .OrderByDescending(s => s.Count())
-                    .First().Key);
+                var groups = items.GroupBy(s => s.Result).ToList();
+                groups = groups.OrderByDescending(s => s.Sum(item => item.Quality)).ToList();
+                predictedResults.Add(groups.First().Key);
             }
             var count = 0;
             for (var index = 0; index < predictedResults.Count; index++)

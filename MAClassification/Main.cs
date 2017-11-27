@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 
@@ -16,16 +15,16 @@ namespace MAClassification
         {
             InitializeComponent();
             trackBarValue.Text = Convert.ToString(trackBar1.Value);
-            N = trackBar1.Value;
+            _n = trackBar1.Value;
         }
 
-        List<Rule> rulesSets;
-        Solver solver;
-        int N;
+        private List<Rule> _rulesSets;
+        private Solver _solver;
+        private int _n;
 
         private void startButton_Click(object sender, EventArgs e)
         {
-            solver = new Solver
+            _solver = new Solver
             {
                 _dataPath = label2.Text,
                 MaxAntsGenerationsNumber = (int)antsCount.Value,
@@ -36,42 +35,39 @@ namespace MAClassification
                 Rules = new List<Rule>(),
                 Data = new Table(),
                 Agents = new List<Agent>(),
-                EuristicFunctionType = euristicFunctionType.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked).Name,
-                PheromonesUpdateMethod = PheromonesUpdateMethod.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked).Name,
-                RulesPruningStatus = RulesPruningStatus.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked).Name
+                EuristicFunctionType = euristicFunctionType.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked)?.Name,
+                PheromonesUpdateMethod = PheromonesUpdateMethod.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked)?.Name,
+                RulesPruningStatus = RulesPruningStatus.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked)?.Name
             };
-            solver.InitializeDataTables();
+            _solver.InitializeDataTables();
             var divider = new Divider();
-            var tables = divider.Divide(N, solver.Data);
+            var tables = divider.Divide(_n, _solver.Data);
             //var tables = divider.DivideByClass(solver.Data);
-            testingCount.Text = solver._testingTable.GetCasesCount().ToString();
-            var terms = solver.InitializeTerms();
+            testingCount.Text = _solver._testingTable.GetCasesCount().ToString();
+            var terms = _solver.InitializeTerms();
             terms.Serialize();
             File.Delete(@"rules.xml");
             PopulateDataGrid();
-            rulesSets = new List<Rule>();
-            for (int i = 0; i < tables.Count; i++)
+            _rulesSets = new List<Rule>();
+            foreach (Table table in tables)
             {
-                var _discoveredRules = new List<Rule>();
-                _discoveredRules = solver.FindSolution(tables[i]);
-                rulesSets.AddRange(_discoveredRules);
+                _rulesSets.AddRange(_solver.FindSolution(table));
             }
-            rulesSets = rulesSets.OrderByDescending(item => item.CoveredCases.Count).ToList();
-            var _chosenAgents = solver.Agents;
-            listBox1.DataSource = rulesSets;
+            //_rulesSets = _rulesSets.OrderByDescending(item => item.CoveredCases.Count).ToList();
+            listBox1.DataSource = _rulesSets;
             XmlSerializer xmlsr = new XmlSerializer(typeof(List<Agent>));
             StreamWriter strwr = new StreamWriter(@"list_ants.xml");
-            xmlsr.Serialize(strwr, _chosenAgents);
+            xmlsr.Serialize(strwr, _solver.Agents);
             strwr.Close();
         }
 
         private void PopulateDataGrid()
         {
-            var data = solver.Data;
+            var data = _solver.Data;
             var dt = new DataTable();
             dt.Columns.Add(new DataColumn("Number", typeof(int)));
-            for (int i = 0; i < data.Header.Count; i++)
-                dt.Columns.Add(new DataColumn(data.Header[i], typeof(string)));
+            foreach (string item in data.Header)
+                dt.Columns.Add(new DataColumn(item, typeof(string)));
             dt.Columns.Add(new DataColumn("Class", typeof(string)));
             foreach (var item in data.Cases)
             {
@@ -87,13 +83,13 @@ namespace MAClassification
 
         private void testButton_Click(object sender, EventArgs e)  //not working as intended for now
         {
-            textBox1.Text = solver.Test(rulesSets).ToString();
+            textBox1.Text = _solver.Test(_rulesSets).ToString();
         }
 
         private void trackBar1_ValueChanged(object sender, EventArgs e)
         {
             trackBarValue.Text = Convert.ToString(trackBar1.Value);
-            N = trackBar1.Value;
+            _n = trackBar1.Value;
         }
 
         private void button3_Click(object sender, EventArgs e)

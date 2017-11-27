@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
 using System.Xml.Serialization;
 
 namespace MAClassification
@@ -20,8 +19,6 @@ namespace MAClassification
         }
         public AntTypes AntType { get; set; }
         public int AntNumber { get; set; }
-        public Ant()
-        { }
 
         public override void BuildRule(decimal minCasesPerRule, Terms initialTerms, Table data, Attributes attributes,
             List<string> results, string type)
@@ -51,10 +48,6 @@ namespace MAClassification
                 currentAntRule.GetCoveredCases(data);
                 currentAntRule.GetRuleResult(results);
                 currentAntRule.CalculateRuleQuality(data);
-            }
-            if(currentAntRule.CoveredCases.Count == 0)
-            {
-                int k = 5;
             }
             _rule = currentAntRule;
         }
@@ -95,9 +88,8 @@ namespace MAClassification
             }
         }
 
-        private bool CheckUsedTerms(Table data, Terms terms)
+        private void CheckUsedTerms(Table data, Terms terms)
         {
-            var availableTermsCount = 0;
             foreach (var term in terms.TermsList)
             {
                 foreach (var item in term)
@@ -109,7 +101,6 @@ namespace MAClassification
                     {
                         if (dataCase.AttributesValuesList[index] == item.AttributeValue)
                         {
-                            availableTermsCount++;
                             fl = true;
                             break;
                         }
@@ -117,7 +108,6 @@ namespace MAClassification
                     if (!fl) item.IsChosen = true;
                 }
             }
-            return availableTermsCount != 0;
         }
     }
 }
