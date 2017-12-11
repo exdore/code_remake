@@ -7,11 +7,16 @@ using System.Xml.Serialization;
 namespace MAClassification
 {
     [Serializable]
+    public enum TableTypes { Full, Training, Testing }
+
+    [Serializable]
     [XmlInclude(typeof(Case))]
+    [XmlInclude(typeof(TableTypes))]
     public class Table
     {
         public List<string> Header { get; set; }
         public List<Case> Cases { get; set; }
+        public TableTypes TableType { get; set; }
 
         public Attributes GetAttributesInfo()
         {
@@ -32,19 +37,22 @@ namespace MAClassification
         {
 
         }
-
-        public Table(List<Case> cases, Table data )
-        {
-            Cases = cases;
-            Header = data.Header;
-        }
         
         public void Serialize()
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Table));
-            StreamWriter streamWriter = new StreamWriter(@"table.xml");
+            StreamWriter streamWriter = new StreamWriter(TableType.ToString() + @"Table.xml");
             xmlSerializer.Serialize(streamWriter, this);
             streamWriter.Close();
+        }
+
+        public Table Deserialize()
+        {
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Table));
+            var streamReader = new StreamReader(TableType + @"Table.xml");
+            Table currentTable = (Table)xmlSerializer.Deserialize(streamReader);
+            streamReader.Close();
+            return currentTable;
         }
 
         public int GetCasesCount()
@@ -81,23 +89,24 @@ namespace MAClassification
             if (line != null)
             {
                 var header = line.Split('\t').ToList();
-                header.RemoveAt(0);
                 header.RemoveAt(header.Count - 1);
+                var count = 0;
                 while ((line = streamReader.ReadLine()) != null)
                 {
                     var sourceList = line.Split('\t').ToList();
                     sourceData.Add(new Case
                     {
-                        Number = Convert.ToInt32(sourceList[0]),
-                        AttributesValuesList = sourceList.GetRange(1, sourceList.Count - 2),
-                        Result = sourceList[sourceList.Count - 1]
+                        Number = ++count,
+                        AttributesValuesList = sourceList.GetRange(0, header.Count),
+                        Result = sourceList[header.Count]
                     });
                 }
                 streamReader.Close();
                 return new Table
                 {
                     Header = header,
-                    Cases = sourceData
+                    Cases = sourceData,
+                    TableType = TableTypes.Full
                 };
             }
             return null;

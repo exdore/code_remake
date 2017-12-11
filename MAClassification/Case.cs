@@ -9,5 +9,18 @@ namespace MAClassification
         public int Number { get; set; }
         public List<string> AttributesValuesList { get; set; }
         public string Result { get; set; }
+
+        private string ValuesToString()
+        {
+            var temp = "";
+            foreach (var item in AttributesValuesList)
+                temp += item + " ";
+            return temp;
+        }
+
+        public override string ToString()
+        {
+            return Number + " " + ValuesToString() + Result;
+        }
     }
 }

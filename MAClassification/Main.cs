@@ -1,5 +1,7 @@
-﻿using System;
+﻿using ArffSharp;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -13,273 +15,100 @@ namespace MAClassification
         public Main()
         {
             InitializeComponent();
-            startButton.Enabled = false;
-            testButton.Enabled = false;
-            button4.Enabled = false;
+            trackBarValue.Text = Convert.ToString(trackBar1.Value);
+            _n = trackBar1.Value;
         }
 
-        private List<Rule> _discoveredRules;
-        private Table _trainingTable;
-        private Table _testingTable;
-        private List<Ant> _chosenAnts;
+        private List<Rule> _rulesSets;
+        private Solver _solver;
+        private int _n;
 
         private void startButton_Click(object sender, EventArgs e)
         {
-            _discoveredRules = new List<Rule>();
-            var maxAntsGenerationsNumber = antsCount.Value;
-            var maxNumberForConvergence = convergenceStopValue.Value;
-            var maxUncoveredCases = maxUncoveredCasesCount.Value;
-            var minCasesPerRule = minNumberPerRule.Value;
-            Table data;
-            Attributes attributes;
-            List<string> results;
-            Terms terms;
-            _discoveredRules = new List<Rule>();
-            _chosenAnts = new List<Ant>();
-            Initialize(trainingPathLabel.Text, out data, out attributes, out results, out terms);
-            data.Serialize();
-            File.Delete(@"rules.xml");
-            while (data.GetCasesCount() > maxUncoveredCases)
+            _solver = new Solver
             {
-                var currentAnt = 0;
-                var currentNumberForConvergence = 0;
-                var currentCases = data.GetCases();
-                var currentRules = new List<Rule>();
-                var socialTerms = terms.Deserialize();
-                socialTerms.MaxValue = 0.8;
-                socialTerms.MinValue = 0.001;
-                var basicTerms = terms.Deserialize();
-                basicTerms.MaxValue = 0.8;
-                basicTerms.MinValue = 0.001;
-                var greedyTerms = terms.Deserialize();
-                greedyTerms.MaxValue = 0.8;
-                greedyTerms.MinValue = 0.001;          
-                //var mergingTerms = terms.Deserialize();
-                if (CheckUsedTerms(terms, data))
-                {
-                    var antsPopulation = new List<Ant>();
-                    var rnd = new Random();
-                    var basicAnt = new Ant
-                    {
-                        Alpha = 2,
-                        Beta = 2,
-                        Type = "basic"
-                    };
-                    var greedyAnt = new Ant
-                    {
-                        Alpha = rnd.Next(2, 5),
-                        Beta = rnd.Next(5, 10),
-                        Type = "euristic"
-                    };
-                    var socialAnt = new Ant
-                    {
-                        Alpha = rnd.Next(5, 10),
-                        Beta = rnd.Next(2, 5),
-                        Type = "social"
-                    };
-                    //var mergingAnt = new Ant
-                    //{
-                    //    Alpha = 1,
-                    //    Beta = 1,
-                    //    Type = "merging"
-                    //};
-                    while (antsPopulation.Count < maxAntsGenerationsNumber * 3 && currentNumberForConvergence < maxNumberForConvergence)
-                    {
-                        GetAntResult(basicAnt, currentCases, minCasesPerRule, basicTerms, data, attributes, results, currentRules, groupBox1, groupBox2, groupBox3, ref currentNumberForConvergence, ref currentAnt);
-                        GetAntResult(greedyAnt, currentCases, minCasesPerRule, greedyTerms, data, attributes, results, currentRules, groupBox1, groupBox2, groupBox3, ref currentNumberForConvergence, ref currentAnt);
-                        GetAntResult(socialAnt, currentCases, minCasesPerRule, socialTerms, data, attributes, results, currentRules, groupBox1, groupBox2, groupBox3, ref currentNumberForConvergence, ref currentAnt);
-                        //mergingTerms.Merge(socialTerms, basicTerms, greedyTerms);
-                        //mergingTerms.UpdateWeights(new Rule(), groupBox2, currentAnt);
-                        //mergingTerms.Update(attributes, mergingAnt, groupBox1, currentCases);
-                        //GetAntResult(mergingAnt, currentCases, minCasesPerRule, mergingTerms, data, attributes, results, currentRules, groupBox1, groupBox2, groupBox3, ref currentNumberForConvergence, ref currentAnt);
-                        antsPopulation.Add(basicAnt);
-                        antsPopulation.Add(greedyAnt);
-                        antsPopulation.Add(socialAnt);
-                        //antsPopulation.Add(mergingAnt);
-                        greedyTerms.Serialize("greedy");
-                        socialTerms.Serialize("social");
-                        basicTerms.Serialize("basic");
-                    }
-                    antsPopulation = antsPopulation.OrderByDescending(item => item.GetRule().Quality).ToList();
-                    //_discoveredRules.Add(antsPopulation.First().Rule);
-                    _chosenAnts.Add(antsPopulation.Where(item => (item.GetRule().Quality - antsPopulation.First().GetRule().Quality) 
-                        < 1e-5).OrderByDescending(item => new Random().Next()).First());
-                    _discoveredRules.Add(_chosenAnts.Last().GetRule());
-                    data.Cases = data.Cases.Except(_discoveredRules.Last().CoveredCases).ToList();
-                    //_discoveredRules.Last().Serialize();
-                }
+                _dataPath = label2.Text,
+                MaxAntsGenerationsNumber = (int)antsCount.Value,
+                MaxNumberForConvergence = (int)convergenceStopValue.Value,
+                MaxUncoveredCases = (int)maxUncoveredCasesCount.Value,
+                MinCasesPerRule = (int)minNumberPerRule.Value,
+                _crossValidationCoefficient = trackBar1.Value,
+                Rules = new List<Rule>(),
+                Data = new Table(),
+                Agents = new List<Agent>(),
+                EuristicFunctionType = euristicFunctionType.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked)?.Name,
+                PheromonesUpdateMethod = PheromonesUpdateMethod.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked)?.Name,
+                RulesPruningStatus = RulesPruningStatus.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked)?.Name
+            };
+            _solver.InitializeDataTables();
+            var divider = new Divider();
+            var tables = divider.Divide(_n, _solver.Data);
+            //var tables = divider.DivideByClass(solver.Data);
+            testingCount.Text = _solver._testingTable.GetCasesCount().ToString();
+            var terms = _solver.InitializeTerms();
+            terms.Serialize();
+            File.Delete(@"rules.xml");
+            PopulateDataGrid();
+            _rulesSets = new List<Rule>();
+            foreach (Table table in tables)
+            {
+                _rulesSets.AddRange(_solver.FindSolution(table));
             }
-            listBox1.HorizontalScrollbar = true;
-            listBox1.DataSource = _discoveredRules.OrderByDescending(item => item.Result).ToList();
-            XmlSerializer xmlsr = new XmlSerializer(typeof(List<Ant>));
+            //_rulesSets = _rulesSets.OrderByDescending(item => item.CoveredCases.Count).ToList();
+            listBox1.DataSource = _rulesSets;
+            XmlSerializer xmlsr = new XmlSerializer(typeof(List<Agent>));
             StreamWriter strwr = new StreamWriter(@"list_ants.xml");
-            xmlsr.Serialize(strwr, _chosenAnts);
+            xmlsr.Serialize(strwr, _solver.Agents);
             strwr.Close();
         }
 
-        private static void GetAntResult(Ant ant, List<Case> currentCases, decimal minCasesPerRule, Terms terms, Table data,
-            Attributes attributes, List<string> results, List<Rule> currentRules, GroupBox groupBox1, GroupBox groupBox2, GroupBox groupBox3, ref int currentNumberForConvergence, ref int currentAnt)
+        private void PopulateDataGrid()
         {
-            ant.RunAnt(currentCases, minCasesPerRule, terms, data, attributes, results, groupBox2);
-            var currentAntRule = ant.GetRule();
-            var pruningActive = groupBox3.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked);
-            if (pruningActive != null && pruningActive.Text == @"Да")
-            {
-                currentAntRule = currentAntRule.PruneRule(data, results);
-                currentAntRule.GetCoveredCases(data);
-                currentAntRule.GetRuleResult(results);
-                currentAntRule.CalculateRuleQuality(data);
-                terms.UpdateWeights(currentAntRule, groupBox2, currentAnt);
-            }
-            var equal = false;
-            if (currentRules.Count > 0)
-                 equal = currentAntRule.ConditionsList.SequenceEqual(currentRules.Last().ConditionsList);
-            if (equal)
-            {
-                currentNumberForConvergence++;
-            }
-            else
-            {
-                currentNumberForConvergence = 0;
-            }
-            currentRules.Add(currentAntRule);
-            foreach (var attribute in attributes)
-            {
-                attribute.IsUsed = false;
-            }
-            CheckUsedTerms(terms, data);
-            terms.Update(attributes, ant, groupBox1, currentCases);
-            currentAnt++;
-            if (pruningActive != null && pruningActive.Text == @"Да") 
-                ant.SetRule(currentAntRule);
-        }
-
-        private static bool CheckUsedTerms(Terms terms, Table data)
-        {
-            var availableTermsCount = 0;
-            foreach (var term in terms)
-            {
-                foreach (var item in term)
-                {
-                    item.IsChosen = false;
-                    var fl = false;
-                    var index = data.Header.IndexOf(item.AttributeName);
-                    foreach (var dataCase in data.Cases)
-                    {
-                        if (dataCase.AttributesValuesList[index] == item.AttributeValue)
-                        {
-                            availableTermsCount++;
-                            fl = true;
-                            break;
-                        }
-                    }
-                    if (!fl) item.IsChosen = true;
-                }
-            }
-            return availableTermsCount != 0;
-        }
-
-        private void Initialize(string path, out Table data, out Attributes attributes, out List<string> results, out Terms initialTerms)
-        {
-            data = _trainingTable ?? Table.ReadData(path);
-            attributes = data.GetAttributesInfo();
-            results = data.GetResultsInfo();
-            initialTerms = new Terms();
-            foreach (var attribute in attributes)
-            {
-                initialTerms.Add(new List<Term>());
-                foreach (var item in attribute.AttributeValues)
-                {
-                    initialTerms.Last().Add(new Term
-                    {
-                        AttributeName = attribute.AttributeName,
-                        AttributeValue = item,
-                        Entropy = data.CalculateGain(attribute.AttributeName, item, results)
-                    });
-                }
-            }
-            initialTerms.FullInitialize(attributes, groupBox1, data.Cases);
-            initialTerms.Serialize("initial");
-        }
-
-        private void testButton_Click(object sender, EventArgs e)
-        {
-            var data = _testingTable ?? Table.ReadData(testPathLabel.Text);
-            var realResults = new List<string>();
+            var data = _solver.Data;
+            var dt = new DataTable();
+            dt.Columns.Add(new DataColumn("Number", typeof(int)));
+            foreach (string item in data.Header)
+                dt.Columns.Add(new DataColumn(item, typeof(string)));
+            dt.Columns.Add(new DataColumn("Class", typeof(string)));
             foreach (var item in data.Cases)
             {
-                realResults.Add(item.Result);
-                item.Result = "";
+                var row = dt.NewRow();
+                row[0] = item.Number;
+                for (int i = 1; i <= item.AttributesValuesList.Count; i++)
+                    row[i] = item.AttributesValuesList[i - 1];
+                row[data.Header.Count + 1] = item.Result;
+                dt.Rows.Add(row);    
             }
-            foreach (var discoveredRule in _discoveredRules)
-            {
-                discoveredRule.GetCoveredCases(data);
-                foreach (var discoveredRuleCoveredCase in discoveredRule.CoveredCases)
-                {
-                    data.Cases.Find(item => item.Number == discoveredRuleCoveredCase.Number).Result =
-                        discoveredRule.Result;      
-                }
-                data.Cases = data.Cases.Except(discoveredRule.CoveredCases).ToList();
-            }
-            var predictedResults = new List<string>();
-            foreach (var item in data.Cases)
-            {
-                predictedResults.Add(item.Result);
-            }
-            var count = 0;
-            for (var index = 0; index < predictedResults.Count; index++)
-            {
-                if (predictedResults[index] != realResults[index])
-                    count++;
-            }
-            textBox1.Text = count.ToString();
+            dataGridView1.DataSource = dt;
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void testButton_Click(object sender, EventArgs e)  //not working as intended for now
         {
-            var openFileDialog1 = new OpenFileDialog {Filter = @"txt files (*.txt)|*.txt|All files (*.*)|*.*"};
-            openFileDialog1.ShowDialog();
-            var file = openFileDialog1.FileName;
-            trainingPathLabel.Text = file;
-            startButton.Enabled = true;
+            textBox1.Text = _solver.Test(_rulesSets).ToString();
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void trackBar1_ValueChanged(object sender, EventArgs e)
         {
-            var openFileDialog1 = new OpenFileDialog {Filter = @"txt files (*.txt)|*.txt|All files (*.*)|*.*"};
-            openFileDialog1.ShowDialog();
-            var file = openFileDialog1.FileName;
-            testPathLabel.Text = file;
-            testButton.Enabled = true;
+            trackBarValue.Text = Convert.ToString(trackBar1.Value);
+            _n = trackBar1.Value;
         }
+
+        private List<ArffRecord> records;
 
         private void button3_Click(object sender, EventArgs e)
         {
             var openFileDialog1 = new OpenFileDialog { Filter = @"txt files (*.txt)|*.txt|All files (*.*)|*.*" };
             openFileDialog1.ShowDialog();
             label2.Text = openFileDialog1.FileName;
-            button4.Enabled = true;
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            var data = Table.ReadData(label2.Text);
-            data.Cases = data.Cases.OrderBy(item => Guid.NewGuid()).ToList();
-            var count = data.Cases.Count / 5;
-            _trainingTable = new Table
+            records = new List<ArffRecord>();
+            using (ArffReader reader = new ArffReader(@"data\dataset_31_credit-g.arff"))
             {
-                Cases = data.Cases.GetRange(0, count).ToList(),
-                Header = data.Header
-            };
-            _testingTable = new Table
-            {
-                Cases = data.Cases.GetRange(count, data.Cases.Count - count).ToList(),
-                Header = data.Header
-            };
-            testButton.Enabled = true;
-            startButton.Enabled = true;
-            button1.Enabled = false;
-            button2.Enabled = false;
+                ArffRecord record;
+                while ((record = reader.ReadNextRecord()) != null)
+                {
+                    records.Add(record);
+                }
+            }
         }
     }
 }

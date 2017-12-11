@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Agent.cs" />
     <Compile Include="Ant.cs" />
     <Compile Include="Attribute.cs" />
     <Compile Include="Attributes.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="DataInfo.Designer.cs">
       <DependentUpon>DataInfo.cs</DependentUpon>
     </Compile>
+    <Compile Include="Divider.cs" />
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -64,6 +66,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rule.cs" />
+    <Compile Include="Solver.cs" />
     <Compile Include="Table.cs" />
     <Compile Include="Term.cs" />
     <Compile Include="Terms.cs" />
@@ -82,7 +85,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <None Include="ClassDiagram1.cd" />
+    <None Include="data\dataset_31_credit-g.arff" />
+    <None Include="data\tiny.arff">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -98,6 +104,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Downloads\arffsharp-master\arffsharp-master\ArffSharp.csproj">
+      <Project>{7f570ba3-65f5-45e6-a0bf-8a7bc3de9989}</Project>
+      <Name>ArffSharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
