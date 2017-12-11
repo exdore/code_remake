@@ -14,7 +14,9 @@ namespace MAClassification
         public double Alpha { get; set; }
         public double Beta { get; set; }
         private Rule _rule;
-        public override Rule Rule { get => _rule;
+        public override Rule Rule
+        {
+            get => _rule;
             set => _rule = value;
         }
         public AntTypes AntType { get; set; }

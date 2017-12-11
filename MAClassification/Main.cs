@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ArffSharp;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -92,11 +93,22 @@ namespace MAClassification
             _n = trackBar1.Value;
         }
 
+        private List<ArffRecord> records;
+
         private void button3_Click(object sender, EventArgs e)
         {
             var openFileDialog1 = new OpenFileDialog { Filter = @"txt files (*.txt)|*.txt|All files (*.*)|*.*" };
             openFileDialog1.ShowDialog();
             label2.Text = openFileDialog1.FileName;
+            records = new List<ArffRecord>();
+            using (ArffReader reader = new ArffReader(@"data\dataset_31_credit-g.arff"))
+            {
+                ArffRecord record;
+                while ((record = reader.ReadNextRecord()) != null)
+                {
+                    records.Add(record);
+                }
+            }
         }
     }
 }
