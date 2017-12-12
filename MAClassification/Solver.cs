@@ -41,31 +41,13 @@ namespace MAClassification
 
         public void InitializeDataTables()
         {
-            if (_dataPath != "")
+            _testingTable = new Table
             {
-                Data = Table.ReadData(_dataPath);
-                _fullData.Cases = _fullData.Cases.OrderBy(item => Guid.NewGuid()).ToList();
-                _fullData.Serialize();
-                _testingTable = new Table
-                {
-                    Cases = _fullData.Cases,
-                    Header = _fullData.Header,
-                    TableType = TableTypes.Testing
-                };
-                _testingTable.Serialize();
-            }
-            else
-            {
-                var openFileDialog1 = new OpenFileDialog { Filter = @"txt files (*.txt)|*.txt|All files (*.*)|*.*" };
-                openFileDialog1.ShowDialog();
-                var path = openFileDialog1.FileName;
-                _trainingTable = Table.ReadData(path);
-                openFileDialog1 = new OpenFileDialog { Filter = @"txt files (*.txt)|*.txt|All files (*.*)|*.*" };
-                openFileDialog1.ShowDialog();
-                path = openFileDialog1.FileName;
-                _testingTable = Table.ReadData(path);
-                Data = _trainingTable;
-            }
+                Cases = _fullData.Cases,
+                Header = _fullData.Header,
+                TableType = Table.TableTypes.Testing
+            };
+            _testingTable.Serialize();
         }
 
         public Terms InitializeTerms()
@@ -195,7 +177,7 @@ namespace MAClassification
                     if (rule.CheckIfCovers(@case, Attributes))
                         res.Add(rule);
                 }
-                if(res.Count != 0)
+                if (res.Count != 0)
                     rules.Add(res);
             }
             var predictedResults = new List<string>();

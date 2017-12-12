@@ -2,55 +2,86 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml.Serialization;
+using ArffSharp;
 
 namespace MAClassification
 {
     [Serializable]
-    public enum TableTypes { Full, Training, Testing }
-
-    [Serializable]
     [XmlInclude(typeof(Case))]
     [XmlInclude(typeof(TableTypes))]
+
     public class Table
     {
+        public enum TableTypes
+        {
+            Full,
+            Training,
+            Testing
+        }
+
         public List<string> Header { get; set; }
         public List<Case> Cases { get; set; }
         public TableTypes TableType { get; set; }
 
+        public static Table CreateTable(List<ArffRecord> records, ArffReader reader)
+        {
+            Table t = new Table
+            {
+                Header = new List<string>(),
+                Cases = new List<Case>()
+            };
+            for (var i = 0; i < reader.Attributes.Count - 1; i++)
+            {
+                var attribute = reader.Attributes[i];
+                t.Header.Add(attribute.Name);
+            }
+            var count = 1;
+            foreach (var record in records)
+            {
+                var cs = new Case
+                {
+                    Number = count,
+                    AttributesValuesList = new List<string>(),
+                    Result = reader.Attributes.Last().NominalValues[record.Values.Last().NominalValueIndex]
+                };
+                for (var i = 0; i < record.Values.Length - 1; i++)
+                {
+                    cs.AttributesValuesList.Add(reader.Attributes[i].NominalValues[record.Values[i].NominalValueIndex]);
+                }
+                count++;
+                t.Cases.Add(cs);
+            }
+            return t;
+        }
+
         public Attributes GetAttributesInfo()
         {
-            Attributes attributes = new Attributes();
-            for (int i = 0; i < Header.Count; i++)
-            {
+            var attributes = new Attributes();
+            for (var i = 0; i < Header.Count; i++)
                 attributes.Add(new Attribute
                 {
                     AttributeName = Header[i],
                     AttributeValues = Cases.Select(item => item.AttributesValuesList[i]).Distinct().ToList(),
                     IsUsed = false
                 });
-            }
             return attributes;
         }
 
-        public Table()
-        {
-
-        }
-        
         public void Serialize()
         {
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Table));
-            StreamWriter streamWriter = new StreamWriter(TableType.ToString() + @"Table.xml");
+            var xmlSerializer = new XmlSerializer(typeof(Table));
+            var streamWriter = new StreamWriter(TableType + @"Table.xml");
             xmlSerializer.Serialize(streamWriter, this);
             streamWriter.Close();
         }
 
         public Table Deserialize()
         {
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Table));
+            var xmlSerializer = new XmlSerializer(typeof(Table));
             var streamReader = new StreamReader(TableType + @"Table.xml");
-            Table currentTable = (Table)xmlSerializer.Deserialize(streamReader);
+            var currentTable = (Table) xmlSerializer.Deserialize(streamReader);
             streamReader.Close();
             return currentTable;
         }
@@ -69,21 +100,22 @@ namespace MAClassification
         {
             double result = 0;
             var attributeIndex = Header.IndexOf(attributeName);
-            var apropriateCases = Cases.Where(item => item.AttributesValuesList[attributeIndex] == attributeValue).ToList();
+            var apropriateCases = Cases.Where(item => item.AttributesValuesList[attributeIndex] == attributeValue)
+                .ToList();
             var apropriateCasesCount = apropriateCases.Count;
             foreach (var sample in resultsList)
             {
                 var casesWithSetResultCount = apropriateCases.Count(item => item.Result == sample);
                 if (casesWithSetResultCount != 0)
                     result -= (double) casesWithSetResultCount / apropriateCasesCount *
-                              Math.Log((double) casesWithSetResultCount / apropriateCasesCount, 2); 
+                              Math.Log((double) casesWithSetResultCount / apropriateCasesCount, 2);
             }
             return result;
         }
 
         public static Table ReadData(string path)
         {
-            var streamReader = new StreamReader(path, System.Text.Encoding.GetEncoding(1251));
+            var streamReader = new StreamReader(path, Encoding.GetEncoding(1251));
             var sourceData = new List<Case>();
             var line = streamReader.ReadLine();
             if (line != null)

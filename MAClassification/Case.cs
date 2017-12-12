@@ -14,7 +14,7 @@ namespace MAClassification
         {
             var temp = "";
             foreach (var item in AttributesValuesList)
-                temp += item + " ";
+                temp += item + ", ";
             return temp;
         }
 

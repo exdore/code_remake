@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Serialization;
-
+using ArffSharp;
 
 namespace MAClassification
 {
@@ -25,6 +25,16 @@ namespace MAClassification
 
         private void startButton_Click(object sender, EventArgs e)
         {
+            Records = new List<ArffRecord>();
+            ArffReader reader = new ArffReader(@"data\dataset_31_credit-g.arff");
+            ArffRecord record;
+            while ((record = reader.ReadNextRecord()) != null)
+            {
+                Records.Add(record);
+            }
+            reader.BuildIntervals();
+            Records = reader.Discretize(Records);
+            var t = Table.CreateTable(Records, reader);
             _solver = new Solver
             {
                 _dataPath = label2.Text,
@@ -40,11 +50,12 @@ namespace MAClassification
                 PheromonesUpdateMethod = PheromonesUpdateMethod.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked)?.Name,
                 RulesPruningStatus = RulesPruningStatus.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked)?.Name
             };
+            _solver.Data = t;
             _solver.InitializeDataTables();
             var divider = new Divider();
-            var tables = divider.Divide(_n, _solver.Data);
+            var tables = divider.Divide(_n, t);
             //var tables = divider.DivideByClass(solver.Data);
-            testingCount.Text = _solver._testingTable.GetCasesCount().ToString();
+            //testingCount.Text = _solver._testingTable.GetCasesCount().ToString();
             var terms = _solver.InitializeTerms();
             terms.Serialize();
             File.Delete(@"rules.xml");
@@ -77,7 +88,7 @@ namespace MAClassification
                 for (int i = 1; i <= item.AttributesValuesList.Count; i++)
                     row[i] = item.AttributesValuesList[i - 1];
                 row[data.Header.Count + 1] = item.Result;
-                dt.Rows.Add(row);    
+                dt.Rows.Add(row);
             }
             dataGridView1.DataSource = dt;
         }
@@ -93,22 +104,13 @@ namespace MAClassification
             _n = trackBar1.Value;
         }
 
-        private List<ArffRecord> records;
+        public List<ArffRecord> Records { get; set; }
 
         private void button3_Click(object sender, EventArgs e)
         {
             var openFileDialog1 = new OpenFileDialog { Filter = @"txt files (*.txt)|*.txt|All files (*.*)|*.*" };
             openFileDialog1.ShowDialog();
             label2.Text = openFileDialog1.FileName;
-            records = new List<ArffRecord>();
-            using (ArffReader reader = new ArffReader(@"data\dataset_31_credit-g.arff"))
-            {
-                ArffRecord record;
-                while ((record = reader.ReadNextRecord()) != null)
-                {
-                    records.Add(record);
-                }
-            }
         }
     }
 }
