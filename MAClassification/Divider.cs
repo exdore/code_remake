@@ -12,12 +12,12 @@ namespace MAClassification
         {
             var size = data.GetCasesCount();
             var tables = new List<Table>();
-            var count = 51;
+            var count = n * 5;
             if (n != 1)
             {
+                data.Cases = data.Cases.OrderBy(a => Guid.NewGuid()).ToList();
                 while (count > 0)
                 {
-                    data.Cases = data.Cases.OrderBy(item => new Guid()).ToList();
                     var k = size / (n - 1);
                     Step = (size - k) / (n - 1);
                     for (int i = 0; i < n; i++)
