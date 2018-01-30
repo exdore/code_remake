@@ -57,6 +57,7 @@
       <DependentUpon>DataInfo.cs</DependentUpon>
     </Compile>
     <Compile Include="Divider.cs" />
+    <Compile Include="GeneticsOptimizer.cs" />
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -106,7 +107,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Downloads\arffsharp-master\arffsharp-master\ArffSharp.csproj">
+    <ProjectReference Include="..\arffsharp-master\ArffSharp.csproj">
       <Project>{7f570ba3-65f5-45e6-a0bf-8a7bc3de9989}</Project>
       <Name>ArffSharp</Name>
     </ProjectReference>

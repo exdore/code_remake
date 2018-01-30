@@ -48,19 +48,6 @@ namespace ArffSharp
                 {
                     var min = attribute.RealValues.Min();
                     var max = attribute.RealValues.Max();
-                    attribute.WasRecalculated = true;
-                    if (Double.IsNaN(min))
-                    {
-                        var res = attribute.RealValues.FindIndex(double.IsNaN);
-                        attribute.RealValues[res] = -1;
-                        min = -1;
-                    }
-                    if (Double.IsNaN(max))
-                    {
-                        var res = attribute.RealValues.FindIndex(double.IsNaN);
-                        attribute.RealValues[res] = 1e5;
-                        max = 1e5;
-                    }
                     int intervals = 5;                           //magic const
                     double lenght = (max - min) / intervals;
                     attribute.NominalValues.RemoveAt(0);
@@ -82,8 +69,7 @@ namespace ArffSharp
             foreach (var nominalValue in Attributes[i].NominalValues)
             {
                 var res = new Regex("\\d+\\D?\\d*").Match(nominalValue).ToString();
-                Double.TryParse(res, out var value);
-                borders.Add(value);
+                borders.Add(Convert.ToDouble(res, NumberFormatInfo.CurrentInfo));
             }
             return borders;
         }
@@ -93,7 +79,7 @@ namespace ArffSharp
             for (var i = 0; i < Attributes.Count; i++)
             {
                 var values = Attributes[i].RealValues;
-                if (values.Count > 0 && Attributes[i].WasRecalculated)
+                if (values.Count > 0)
                 {
                     var borders = GetBorders(i);
                     foreach (var item in records)
@@ -137,9 +123,10 @@ namespace ArffSharp
                 else
                 {
                     var arffVal = record.Values[i] = new ArffValue();
+                    var val = 0.0;
                     if (csvReader[i].Unescape() != "?")
                     {
-                        var val = double.Parse(csvReader[i].Unescape(), NumberStyles.Float, CultureInfo.InvariantCulture);
+                        val = double.Parse(csvReader[i].Unescape(), NumberStyles.Float, CultureInfo.InvariantCulture);
                         var index = Attributes[i].RealValues.IndexOf(val);
                         if (index == -1)
                         {
@@ -149,7 +136,7 @@ namespace ArffSharp
                     }
                     else
                     {
-                        var val = double.NaN;
+                        val = Double.NaN;
                         var index = Attributes[i].RealValues.IndexOf(val);
                         if (index == -1)
                         {
@@ -180,7 +167,7 @@ namespace ArffSharp
                 string[] values;
                 if (!line.Contains("{"))
                 {
-                    split = line.Split(new char[] { ' ', '\t' });
+                    split = line.Split(new char[] {' ', '\t'});
                     name = split[0].Trim().Unescape();
                     values = new string[1];
                     values[0] = split[1];

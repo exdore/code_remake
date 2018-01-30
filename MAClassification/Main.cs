@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Serialization;
-using ArffSharp;
 
 namespace MAClassification
 {
@@ -26,7 +25,7 @@ namespace MAClassification
         private void startButton_Click(object sender, EventArgs e)
         {
             Records = new List<ArffRecord>();
-            ArffReader reader = new ArffReader(@"data\dataset_31_credit-g.arff");
+            ArffReader reader = new ArffReader(label2.Text);
             ArffRecord record;
             while ((record = reader.ReadNextRecord()) != null)
             {
@@ -59,7 +58,7 @@ namespace MAClassification
             var terms = _solver.InitializeTerms();
             terms.Serialize();
             File.Delete(@"rules.xml");
-            PopulateDataGrid();
+            //PopulateDataGrid();
             _rulesSets = new List<Rule>();
             foreach (Table table in tables)
             {
@@ -108,7 +107,7 @@ namespace MAClassification
 
         private void button3_Click(object sender, EventArgs e)
         {
-            var openFileDialog1 = new OpenFileDialog { Filter = @"txt files (*.txt)|*.txt|All files (*.*)|*.*" };
+            var openFileDialog1 = new OpenFileDialog { Filter = @"txt files (*.txt)|*.txt|All files (*.*)|*.* |arff files (*.arff)|*.arff" };
             openFileDialog1.ShowDialog();
             label2.Text = openFileDialog1.FileName;
         }

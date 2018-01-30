@@ -59,7 +59,7 @@ namespace MAClassification
                 TermsList = new List<List<Term>>(),
                 TermType = TermTypes.Basic,
                 MaxValue = 0.8,
-                MinValue = 0.01
+                MinValue = 1e-5
             };
             foreach (var attribute in _attributes)
             {

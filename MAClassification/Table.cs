@@ -48,7 +48,12 @@ namespace MAClassification
                 };
                 for (var i = 0; i < record.Values.Length - 1; i++)
                 {
-                    cs.AttributesValuesList.Add(reader.Attributes[i].NominalValues[record.Values[i].NominalValueIndex]);
+                    if (record.Values[i].NominalValueIndex != -1)
+                        cs.AttributesValuesList.Add(reader.Attributes[i]
+                            .NominalValues[record.Values[i].NominalValueIndex]);
+                    else
+                        cs.AttributesValuesList.Add(reader.Attributes[i]
+                            .NominalValues[0]);
                 }
                 count++;
                 t.Cases.Add(cs);
