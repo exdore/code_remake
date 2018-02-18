@@ -74,22 +74,7 @@ namespace MAClassification
             return attributes;
         }
 
-        public void Serialize()
-        {
-            var xmlSerializer = new XmlSerializer(typeof(Table));
-            var streamWriter = new StreamWriter(TableType + @"Table.xml");
-            xmlSerializer.Serialize(streamWriter, this);
-            streamWriter.Close();
-        }
-
-        public Table Deserialize()
-        {
-            var xmlSerializer = new XmlSerializer(typeof(Table));
-            var streamReader = new StreamReader(TableType + @"Table.xml");
-            var currentTable = (Table) xmlSerializer.Deserialize(streamReader);
-            streamReader.Close();
-            return currentTable;
-        }
+        
 
         public int GetCasesCount()
         {
@@ -116,37 +101,6 @@ namespace MAClassification
                               Math.Log((double) casesWithSetResultCount / apropriateCasesCount, 2);
             }
             return result;
-        }
-
-        public static Table ReadData(string path)
-        {
-            var streamReader = new StreamReader(path, Encoding.GetEncoding(1251));
-            var sourceData = new List<Case>();
-            var line = streamReader.ReadLine();
-            if (line != null)
-            {
-                var header = line.Split('\t').ToList();
-                header.RemoveAt(header.Count - 1);
-                var count = 0;
-                while ((line = streamReader.ReadLine()) != null)
-                {
-                    var sourceList = line.Split('\t').ToList();
-                    sourceData.Add(new Case
-                    {
-                        Number = ++count,
-                        AttributesValuesList = sourceList.GetRange(0, header.Count),
-                        Result = sourceList[header.Count]
-                    });
-                }
-                streamReader.Close();
-                return new Table
-                {
-                    Header = header,
-                    Cases = sourceData,
-                    TableType = TableTypes.Full
-                };
-            }
-            return null;
         }
 
         public List<string> GetResultsInfo()

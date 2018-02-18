@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
 using System.Xml.Serialization;
 
 namespace MAClassification
@@ -72,24 +71,7 @@ namespace MAClassification
             return 1.0 / sigma / Math.Sqrt(2 * Math.PI) * Math.Exp(-currentAnt ^ 2 / 2 / sigma ^ 2);
         }
 
-        public void Serialize()
-        {
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Terms));
-            StreamWriter streamWriter = new StreamWriter(TermType + @"Terms.xml");
-            xmlSerializer.Serialize(streamWriter, this);
-            streamWriter.Close();
-        }
-
-        public Terms Deserialize()
-        {
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Terms));
-            var streamReader = File.Exists(TermType + @"Terms.xml")
-                ? new StreamReader(TermType + @"Terms.xml")
-                : new StreamReader(@"BasicTerms.xml");
-            Terms currentTerms = (Terms)xmlSerializer.Deserialize(streamReader);
-            streamReader.Close();
-            return currentTerms;
-        }
+       
 
         public void FullInitialize(Attributes attributes, string type, List<Case> cases)
         {

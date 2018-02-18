@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
+using MAClassification.Serializators;
 
 namespace MAClassification
 {
@@ -56,14 +58,19 @@ namespace MAClassification
             //var tables = divider.DivideByClass(solver.Data);
             //testingCount.Text = _solver._testingTable.GetCasesCount().ToString();
             var terms = _solver.InitializeTerms();
-            terms.Serialize();
+            TermsSerializer ts = new TermsSerializer();
+            ts.Serialize(terms);
             File.Delete(@"rules.xml");
             //PopulateDataGrid();
             _rulesSets = new List<Rule>();
-            foreach (Table table in tables)
+            Parallel.ForEach(tables, (table) =>
             {
                 _rulesSets.AddRange(_solver.FindSolution(table));
-            }
+            });
+            //foreach (Table table in tables)
+            //{
+            //    _rulesSets.AddRange(_solver.FindSolution(table));
+            //}
             //_rulesSets = _rulesSets.OrderByDescending(item => item.CoveredCases.Count).ToList();
             listBox1.DataSource = _rulesSets;
             XmlSerializer xmlsr = new XmlSerializer(typeof(List<Agent>));

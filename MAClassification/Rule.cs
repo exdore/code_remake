@@ -105,7 +105,7 @@ namespace MAClassification
             foreach (var condition in ConditionsList)
             {
                 if (condition.AttributeValue != @case.AttributesValuesList[attributes.
-                    FindIndex(item => item.AttributeName == condition.AttributeName)])
+                    FindIndex(item => item.AttributeName == condition.AttributeName)]) // Rewrite in Dictionary, make Dictionary(key - rule index?, values - bool[] - Numbers of covered cases)
                     return false;
             }
 

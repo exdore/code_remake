@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using ArffSharp;
+using MAClassification.Models;
+using MAClassification.Serializators;
 
 namespace MAClassification
 {
@@ -47,7 +49,6 @@ namespace MAClassification
                 Header = _fullData.Header,
                 TableType = Table.TableTypes.Testing
             };
-            _testingTable.Serialize();
         }
 
         public Terms InitializeTerms()
@@ -85,15 +86,13 @@ namespace MAClassification
             _chosenAgents = new List<Agent>();
             while (data.GetCasesCount() > MaxUncoveredCases)
             {
+                TermsSerializer ts = new TermsSerializer();
                 var currentAgent = 0;
                 var currentNumberForConvergence = 0;
                 var currentRules = new List<Rule>();
-                var socialTerms = _terms.Deserialize();
-                socialTerms.TermType = TermTypes.Euristic;
-                var basicTerms = _terms.Deserialize();
-                basicTerms.TermType = TermTypes.Basic;
-                var greedyTerms = _terms.Deserialize();
-                greedyTerms.TermType = TermTypes.Greedy;
+                var socialTerms = ts.Deserialize(TermTypes.Euristic);
+                var basicTerms = ts.Deserialize(TermTypes.Basic);
+                var greedyTerms = ts.Deserialize(TermTypes.Greedy);
                 var agentsPopulation = IterateGeneration(data, Attributes, Results, ref currentAgent, ref currentNumberForConvergence, currentRules,
                     socialTerms, basicTerms, greedyTerms);
                 agentsPopulation = agentsPopulation.OrderByDescending(item => item.Rule.Quality).ToList();
@@ -137,9 +136,19 @@ namespace MAClassification
                     AntType = AntTypes.Euristic,
                     AntNumber = ++count
                 };
-                basicAnt.GetAntResult(MinCasesPerRule, basicTerms, data, attributes, results, currentRules, EuristicFunctionType, PheromonesUpdateMethod, RulesPruningStatus, ref currentNumberForConvergence, ref currentAnt);
-                greedyAnt.GetAntResult(MinCasesPerRule, greedyTerms, data, attributes, results, currentRules, EuristicFunctionType, PheromonesUpdateMethod, RulesPruningStatus, ref currentNumberForConvergence, ref currentAnt);
-                socialAnt.GetAntResult(MinCasesPerRule, socialTerms, data, attributes, results, currentRules, EuristicFunctionType, PheromonesUpdateMethod, RulesPruningStatus, ref currentNumberForConvergence, ref currentAnt);
+                RuleData ruleData = new RuleData()
+                {
+                    Attributes = attributes,
+                    Classes = results,
+                    MinCasesPerRule = this.MinCasesPerRule,
+                    Table = data,
+                    Terms = basicTerms
+                };
+                basicAnt.GetAntResult(ruleData, currentRules, EuristicFunctionType, PheromonesUpdateMethod, RulesPruningStatus, ref currentNumberForConvergence, ref currentAnt);
+                ruleData.Terms = greedyTerms;
+                greedyAnt.GetAntResult(ruleData, currentRules, EuristicFunctionType, PheromonesUpdateMethod, RulesPruningStatus, ref currentNumberForConvergence, ref currentAnt);
+                ruleData.Terms = socialTerms;
+                socialAnt.GetAntResult(ruleData, currentRules, EuristicFunctionType, PheromonesUpdateMethod, RulesPruningStatus, ref currentNumberForConvergence, ref currentAnt);
                 agentsPopulation.Add(basicAnt);
                 agentsPopulation.Add(greedyAnt);
                 agentsPopulation.Add(socialAnt);
