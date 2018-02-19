@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
-using ArffSharp;
 using MAClassification.Models;
 using MAClassification.Serializators;
 
@@ -10,51 +8,30 @@ namespace MAClassification
 {
     class Solver
     {
-        public Table Data { get => _fullData; set => _fullData = value; }
-        public List<Agent> Agents { get => _chosenAgents; set => _chosenAgents = value; }
-        public List<Rule> Rules { get => _discoveredRules; set => _discoveredRules = value; }
-        public Attributes Attributes { get => _attributes; set => _attributes = value; }
-        public List<string> Results { get => _results; set => _results = value; }
+        public Table Data { get; set; }
+        public List<Agent> Agents { get; set; }
+        public List<Rule> Rules { get; set; }
+        public Attributes Attributes { get; set; }
+        public List<string> Results { get; set; }
 
-        public int MaxAntsGenerationsNumber { get; set; }
-        public int MaxNumberForConvergence { get; set; }
-        public int MaxUncoveredCases { get; set; }
-        public int MinCasesPerRule { get; set; }
+        private Terms Terms { get; set; }
 
-        public string EuristicFunctionType { get; set; }
-        public string PheromonesUpdateMethod { get; set; }
-        public string RulesPruningStatus { get; set; }
+        public CalculationOptions CalculationOptions { get; set; }
 
-        public double _crossValidationCoefficient { get; set; }
-        private List<Rule> _discoveredRules { get; set; }
-        private Table _fullData { get; set; }
-        public Table _trainingTable { get; private set; }
-        public Table _testingTable { get; private set; }
-        public string _dataPath { get; set; }
-        private Attributes _attributes { get; set; }
-        private List<string> _results { get; set; }
-        private Terms _terms { get; set; }
-        private List<Agent> _chosenAgents { get; set; }
-
-        public Table GetFullData()
+        public Table InitializeDataTables()
         {
-            return _fullData;
-        }
-
-        public void InitializeDataTables()
-        {
-            _testingTable = new Table
+            return new Table
             {
-                Cases = _fullData.Cases,
-                Header = _fullData.Header,
+                Cases = Data.Cases,
+                Header = Data.Header,
                 TableType = Table.TableTypes.Testing
             };
         }
 
         public Terms InitializeTerms()
         {
-            _attributes = _fullData.GetAttributesInfo();
-            _results = _fullData.GetResultsInfo();
+            Attributes = Data.GetAttributesInfo();
+            Results = Data.GetResultsInfo();
             var initialTerms = new Terms
             {
                 TermsList = new List<List<Term>>(),
@@ -62,7 +39,7 @@ namespace MAClassification
                 MaxValue = 0.8,
                 MinValue = 1e-5
             };
-            foreach (var attribute in _attributes)
+            foreach (var attribute in Attributes)
             {
                 initialTerms.TermsList.Add(new List<Term>());
                 foreach (var item in attribute.AttributeValues)
@@ -71,20 +48,20 @@ namespace MAClassification
                     {
                         AttributeName = attribute.AttributeName,
                         AttributeValue = item,
-                        Entropy = _fullData.CalculateGain(attribute.AttributeName, item, _results)
+                        Entropy = Data.CalculateGain(attribute.AttributeName, item, Results)
                     });
                 }
             }
-            initialTerms.FullInitialize(_attributes, EuristicFunctionType, _fullData.Cases);
-            _terms = initialTerms;
+            initialTerms.FullInitialize(Attributes, CalculationOptions.EuristicType, Data.Cases);
+            Terms = initialTerms;
             return initialTerms;
         }
 
         public List<Rule> FindSolution(Table data)
         {
-            _discoveredRules = new List<Rule>();
-            _chosenAgents = new List<Agent>();
-            while (data.GetCasesCount() > MaxUncoveredCases)
+            Rules = new List<Rule>();
+            Agents = new List<Agent>();
+            while (data.GetCasesCount() > CalculationOptions.MaxUncoveredCases)
             {
                 TermsSerializer ts = new TermsSerializer();
                 var currentAgent = 0;
@@ -97,24 +74,24 @@ namespace MAClassification
                     socialTerms, basicTerms, greedyTerms);
                 agentsPopulation = agentsPopulation.OrderByDescending(item => item.Rule.Quality).ToList();
                 var bestAgent = agentsPopulation.First();
-                _chosenAgents.Add(agentsPopulation.Where(item => (item.Rule.Quality - bestAgent.Rule.Quality) < 1e-5)
+                Agents.Add(agentsPopulation.Where(item => (item.Rule.Quality - bestAgent.Rule.Quality) < 1e-5)
                     .OrderByDescending(item => Guid.NewGuid()).First());
-                _discoveredRules.Add(_chosenAgents.Last().Rule);
-                data.Cases = data.Cases.Except(_chosenAgents.Last().Rule.CoveredCases).ToList();
+                Rules.Add(Agents.Last().Rule);
+                data.Cases = data.Cases.Except(Agents.Last().Rule.CoveredCases).ToList();
             }
-            return _discoveredRules;
+            return Rules;
         }
 
         private List<Agent> IterateGeneration(Table data, Attributes attributes, List<string> results, ref int currentAnt, ref int currentNumberForConvergence, List<Rule> currentRules, Terms socialTerms, Terms basicTerms, Terms greedyTerms)
         {
             var agentsPopulation = new List<Agent>();
             var count = 0;
-            while (count < MaxAntsGenerationsNumber * 3 && currentNumberForConvergence < MaxNumberForConvergence)
+            while (count < CalculationOptions.MaxAntsGenerationsNumber * 3 && currentNumberForConvergence < CalculationOptions.MaxNumberForConvergence)
             {
                 var rnd = new Random();
                 var basicAnt = new Ant
                 {
-                    AgentType = Agent.AgentTypes.ant,   // rewrite
+                    AgentType = AgentTypes.ant,   // rewrite
                     Alpha = 1,
                     Beta = 1,
                     AntType = AntTypes.Basic,
@@ -122,7 +99,7 @@ namespace MAClassification
                 };
                 var greedyAnt = new Ant
                 {
-                    AgentType = Agent.AgentTypes.ant,
+                    AgentType = AgentTypes.ant,
                     Alpha = rnd.Next(200, 500) / 100.0,
                     Beta = rnd.Next(500, 1000) / 100.0,
                     AntType = AntTypes.Greedy,
@@ -130,7 +107,7 @@ namespace MAClassification
                 };
                 var socialAnt = new Ant
                 {
-                    AgentType = Agent.AgentTypes.ant,
+                    AgentType = AgentTypes.ant,
                     Alpha = rnd.Next(500, 1000) / 100.0,
                     Beta = rnd.Next(200, 500) / 100.0,
                     AntType = AntTypes.Euristic,
@@ -140,15 +117,17 @@ namespace MAClassification
                 {
                     Attributes = attributes,
                     Classes = results,
-                    MinCasesPerRule = this.MinCasesPerRule,
+                    MinCasesPerRule = this.CalculationOptions.MinCasesPerRule,
                     Table = data,
                     Terms = basicTerms
                 };
-                basicAnt.GetAntResult(ruleData, currentRules, EuristicFunctionType, PheromonesUpdateMethod, RulesPruningStatus, ref currentNumberForConvergence, ref currentAnt);
+
+                
+                basicAnt.GetAntResult(ruleData, currentRules, CalculationOptions, ref currentNumberForConvergence, ref currentAnt);
                 ruleData.Terms = greedyTerms;
-                greedyAnt.GetAntResult(ruleData, currentRules, EuristicFunctionType, PheromonesUpdateMethod, RulesPruningStatus, ref currentNumberForConvergence, ref currentAnt);
+                greedyAnt.GetAntResult(ruleData, currentRules, CalculationOptions, ref currentNumberForConvergence, ref currentAnt);
                 ruleData.Terms = socialTerms;
-                socialAnt.GetAntResult(ruleData, currentRules, EuristicFunctionType, PheromonesUpdateMethod, RulesPruningStatus, ref currentNumberForConvergence, ref currentAnt);
+                socialAnt.GetAntResult(ruleData, currentRules, CalculationOptions, ref currentNumberForConvergence, ref currentAnt);
                 agentsPopulation.Add(basicAnt);
                 agentsPopulation.Add(greedyAnt);
                 agentsPopulation.Add(socialAnt);
@@ -159,7 +138,7 @@ namespace MAClassification
         public int Test(List<Rule> discoveredRules)                             //move to other class -> should work with List<List<Rule>> from all trees
         {
             //var data = _fullData.Deserialize();
-            var data = _testingTable;
+            var data = InitializeDataTables();
             data.Cases = data.Cases.OrderBy(item => item.Number).ToList();
             var realResults = new List<string>();
             foreach (var item in data.Cases)

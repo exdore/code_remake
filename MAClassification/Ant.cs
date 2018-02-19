@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
+using MAClassification.Models;
 
 namespace MAClassification
 {
@@ -22,71 +23,67 @@ namespace MAClassification
         public AntTypes AntType { get; set; }
         public int AntNumber { get; set; }
 
-        public override void BuildRule(decimal minCasesPerRule, Terms initialTerms, Table data, Attributes attributes,
-            List<string> results, string type)
+        public override void BuildRule(RuleData data, EuristicTypes euristicType, PheromonesTypes pheromonesTypes)
         {
             var currentAntRule = new Rule
             {
                 ConditionsList = new List<Condition>(),
-                CoveredCases = data.Cases
+                CoveredCases = data.Table.Cases
             };
             _rule = currentAntRule;
-            initialTerms.CalculateProbabilities(attributes, Alpha, Beta);
-            while (currentAntRule.CoveredCases.Count > minCasesPerRule)
+            data.Terms.CalculateProbabilities(data.Attributes, Alpha, Beta);
+            while (currentAntRule.CoveredCases.Count > data.MinCasesPerRule)
             {
-                currentAntRule.AddConditionToRule(initialTerms);
-                currentAntRule.CheckUsedAttributes(attributes);
-                currentAntRule.GetCoveredCases(data);
-                currentAntRule.GetRuleResult(results);
-                currentAntRule.CalculateRuleQuality(data);
-                initialTerms.Update(attributes, Alpha, Beta, type, data.Cases);
-                initialTerms.UpdateWeights(currentAntRule, type, AntNumber);
+                currentAntRule.AddConditionToRule(data.Terms);
+                currentAntRule.CheckUsedAttributes(data.Attributes);
+                currentAntRule.GetCoveredCases(data.Table);
+                currentAntRule.GetRuleResult(data.Classes);
+                currentAntRule.CalculateRuleQuality(data.Table);
+                data.Terms.Update(data.Attributes, Alpha, Beta, euristicType, data.Table.Cases);
+                data.Terms.UpdateWeights(currentAntRule, pheromonesTypes, AntNumber);
             }
-            if (currentAntRule.ConditionsList.Count > 1 && currentAntRule.CoveredCases.Count < minCasesPerRule)
+            if (currentAntRule.ConditionsList.Count > 1 && currentAntRule.CoveredCases.Count < data.MinCasesPerRule)
             {
-                attributes.Find(item => item.AttributeName == currentAntRule.ConditionsList.Last().AttributeName)
+                data.Attributes.Find(item => item.AttributeName == currentAntRule.ConditionsList.Last().AttributeName)
                     .IsUsed = false;
                 currentAntRule.ConditionsList.RemoveAt(currentAntRule.ConditionsList.Count - 1);
-                currentAntRule.GetCoveredCases(data);
-                currentAntRule.GetRuleResult(results);
-                currentAntRule.CalculateRuleQuality(data);
+                currentAntRule.GetCoveredCases(data.Table);
+                currentAntRule.GetRuleResult(data.Classes);
+                currentAntRule.CalculateRuleQuality(data.Table);
             }
             _rule = currentAntRule;
         }
 
-        public override void GetAntResult(decimal minCasesPerRule, Terms terms, Table data,
-            Attributes attributes, List<string> results, List<Rule> currentRules, string euristicType, string pheromonesType, string pruningType, ref int currentNumberForConvergence, ref int currentAnt)
+        public override void GetAntResult(RuleData ruleData, List<Rule> currentRules, CalculationOptions options, ref int currentNumberForConvergence, ref int currentAnt)
         {
+            CheckUsedTerms(ruleData.Table, ruleData.Terms);
+            BuildRule(ruleData, options.EuristicType, options.PheromonesType);
+            var currentAntRule = Rule;
+            if (options.IsPruned)
             {
-                CheckUsedTerms(data, terms);
-                BuildRule(minCasesPerRule, terms, data, attributes, results, pheromonesType);
-                var currentAntRule = Rule;
-                if (pruningType == @"pruningActive")
-                {
-                    currentAntRule = currentAntRule.PruneRule(data, results);
-                    currentAntRule.GetCoveredCases(data);
-                    currentAntRule.GetRuleResult(results);
-                    currentAntRule.CalculateRuleQuality(data);
-                    terms.UpdateWeights(currentAntRule, pheromonesType, currentAnt);
-                }
-                if (currentRules.Count > 0)
-                {
-                    if (currentAntRule.Equals(currentRules.Last()))
-                        currentNumberForConvergence++;
-                    else
-                        currentNumberForConvergence = 0;
-                }
-                currentRules.Add(currentAntRule);
-                foreach (var attribute in attributes)
-                {
-                    attribute.IsUsed = false;
-                }
-                terms.Update(attributes, Alpha, Beta, euristicType, data.Cases);
-                currentAnt++;
-                if (pruningType == @"pruningActive")
-                {
-                    Rule = currentAntRule;
-                }
+                currentAntRule = currentAntRule.PruneRule(ruleData.Table, ruleData.Classes);
+                currentAntRule.GetCoveredCases(ruleData.Table);
+                currentAntRule.GetRuleResult(ruleData.Classes);
+                currentAntRule.CalculateRuleQuality(ruleData.Table);
+                ruleData.Terms.UpdateWeights(currentAntRule, options.PheromonesType, currentAnt);
+            }
+            if (currentRules.Count > 0)
+            {
+                if (currentAntRule.Equals(currentRules.Last()))
+                    currentNumberForConvergence++;
+                else
+                    currentNumberForConvergence = 0;
+            }
+            currentRules.Add(currentAntRule);
+            foreach (var attribute in ruleData.Attributes)
+            {
+                attribute.IsUsed = false;
+            }
+            ruleData.Terms.Update(ruleData.Attributes, Alpha, Beta, options.EuristicType, ruleData.Table.Cases);
+            currentAnt++;
+            if (options.IsPruned)
+            {
+                Rule = currentAntRule;
             }
         }
 

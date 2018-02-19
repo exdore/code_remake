@@ -1,7 +1,6 @@
 ﻿namespace ArffSharp
 {
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
 
     public class ArffAttribute
     {

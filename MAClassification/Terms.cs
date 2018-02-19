@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 
@@ -21,7 +20,7 @@ namespace MAClassification
         private double SumEntropy { get; set; }
        
 
-        public void UpdateWeights(Rule rule, string type, int currentAnt)
+        public void UpdateWeights(Rule rule, PheromonesTypes type, int currentAnt)
         {
             double sumWeight = .0;
             foreach (var items in TermsList)
@@ -34,7 +33,7 @@ namespace MAClassification
                                                                 condition.AttributeValue == item.AttributeValue))
                     {
                         item.IsChosen = true;
-                        if (type == "normalization")
+                        if (type == PheromonesTypes.Normalization)
                             item.WeightValue += item.WeightValue * rule.Quality;
                         else
                         {
@@ -73,10 +72,10 @@ namespace MAClassification
 
        
 
-        public void FullInitialize(Attributes attributes, string type, List<Case> cases)
+        public void FullInitialize(Attributes attributes, EuristicTypes type, List<Case> cases)
         {
             InitializeWeights(attributes);
-            if (type == "entropy")
+            if (type == EuristicTypes.Entropy)
                 CalculateEuristicFunctionValues(attributes);
             else CalculateEuristicsByDensity(attributes, cases);
         }
@@ -97,10 +96,10 @@ namespace MAClassification
             return res;
         }
 
-        public void Update(Attributes attributes, double a, double b, string type, List<Case> cases)
+        public void Update(Attributes attributes, double a, double b, EuristicTypes type, List<Case> cases)
         {
             CalculateEuristicFunctionValues(attributes);
-            if (type == "entropy")
+            if (type == EuristicTypes.Entropy)
                 CalculateEuristicFunctionValues(attributes);
             else CalculateEuristicsByDensity(attributes, cases);
             CalculateProbabilities(attributes, a, b);

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
+using MAClassification.Models;
 using MAClassification.Serializators;
 
 namespace MAClassification
@@ -36,20 +37,48 @@ namespace MAClassification
             reader.BuildIntervals();
             Records = reader.Discretize(Records);
             var t = Table.CreateTable(Records, reader);
-            _solver = new Solver
+
+            Dictionary<string, EuristicTypes> euristicMapper = new Dictionary<string, EuristicTypes>
             {
-                _dataPath = label2.Text,
+                {"entropy", EuristicTypes.Entropy},
+                {"density", EuristicTypes.Density}
+            };
+
+            Dictionary<string, PheromonesTypes> pheromonesMapper = new Dictionary<string, PheromonesTypes>
+            {
+                {"evaporation", PheromonesTypes.Evaporation},
+                {"normalization", PheromonesTypes.Normalization}
+            };
+
+
+            var EuristicFunctionType = euristicFunctionType.Controls.OfType<RadioButton>()
+                .FirstOrDefault(item => item.Checked)?.Name;
+            var PheromonesFunctionType = PheromonesUpdateMethod.Controls.OfType<RadioButton>()
+                .FirstOrDefault(item => item.Checked)?.Name;
+            var PruningStatus = RulesPruningStatus.Controls.OfType<RadioButton>()
+                .FirstOrDefault(item => item.Checked)?.Name;
+
+            bool isPruned = PruningStatus == "pruningActive";
+
+            CalculationOptions options = new CalculationOptions()
+            {
+                EuristicType = euristicMapper[EuristicFunctionType],
+                PheromonesType = pheromonesMapper[PheromonesFunctionType],
+                IsPruned = isPruned,
+                DataPath = label2.Text,
                 MaxAntsGenerationsNumber = (int)antsCount.Value,
                 MaxNumberForConvergence = (int)convergenceStopValue.Value,
                 MaxUncoveredCases = (int)maxUncoveredCasesCount.Value,
                 MinCasesPerRule = (int)minNumberPerRule.Value,
-                _crossValidationCoefficient = trackBar1.Value,
+                CrossValidationCoefficient = trackBar1.Value,
+            };
+
+            _solver = new Solver
+            {
                 Rules = new List<Rule>(),
                 Data = new Table(),
                 Agents = new List<Agent>(),
-                EuristicFunctionType = euristicFunctionType.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked)?.Name,
-                PheromonesUpdateMethod = PheromonesUpdateMethod.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked)?.Name,
-                RulesPruningStatus = RulesPruningStatus.Controls.OfType<RadioButton>().FirstOrDefault(item => item.Checked)?.Name
+                CalculationOptions = options
             };
             _solver.Data = t;
             _solver.InitializeDataTables();

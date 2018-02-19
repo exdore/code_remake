@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Windows.Forms;
 using System.Xml.Serialization;
 
 namespace MAClassification
@@ -16,20 +14,8 @@ namespace MAClassification
         public string Result { get; set; }             //make it array of probabilities to save likehood for every class 
 
         public double Quality { get; set; }
-        private double _precision { get; set; }
-        private double _specificity { get; set; }
-
-        public double Precision
-        {
-            get => _precision;
-            set => _precision = value;
-        }
-
-        public double Specificity
-        {
-            get => _specificity;
-            set => _specificity = value;
-        }
+        private double Precision { get; set; }
+        private double Specificity { get; set; }
 
         [XmlIgnore]
         public List<Case> CoveredCases { get; set; }
@@ -154,7 +140,7 @@ namespace MAClassification
                     return newRule;
                 if (newRule.ConditionsList.Count == 0)
                 {
-                    throw (new RuleIsEmptyException(""));
+                    throw (new Exception(""));
                 }
                 var rulesList = new List<Rule>();
                 for (int i = 0; i < ConditionsList.Count; i++)
@@ -169,18 +155,10 @@ namespace MAClassification
                 var bestRule = rulesList.OrderByDescending(item => item.Quality).First();
                 return (bestRule.Quality > Quality) ? bestRule.PruneRule(data, resultsList) : this;
             }
-            catch(RuleIsEmptyException)
+            catch(Exception)
             {
-                MessageBox.Show(@"Empty rule!!!");
-                return newRule;
-            }
-        }
-
-        public class RuleIsEmptyException: Exception
-        {
-            public RuleIsEmptyException(string message) : base(message)
-            {
-
+                throw (new Exception(@"Empty rule!!!"));
+                //return newRule;
             }
         }
 
