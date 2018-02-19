@@ -50,20 +50,28 @@ namespace MAClassification
                 {"normalization", PheromonesTypes.Normalization}
             };
 
+            Dictionary<string, DivideTypes> divideMapper = new Dictionary<string, DivideTypes>
+            {
+                {"byClass", DivideTypes.ByClass},
+                {"crossValidation", DivideTypes.CrossValidation}
+            };
 
-            var EuristicFunctionType = euristicFunctionType.Controls.OfType<RadioButton>()
+
+            var EuristicFunctionType = EuristicFunction.Controls.OfType<RadioButton>()
                 .FirstOrDefault(item => item.Checked)?.Name;
             var PheromonesFunctionType = PheromonesUpdateMethod.Controls.OfType<RadioButton>()
                 .FirstOrDefault(item => item.Checked)?.Name;
             var PruningStatus = RulesPruningStatus.Controls.OfType<RadioButton>()
                 .FirstOrDefault(item => item.Checked)?.Name;
+            var DivideMethod = TrainingSetDivideMethod.Controls.OfType<RadioButton>()
+                .FirstOrDefault(item => item.Checked)?.Name;
 
             bool isPruned = PruningStatus == "pruningActive";
-
             CalculationOptions options = new CalculationOptions()
             {
                 EuristicType = euristicMapper[EuristicFunctionType],
                 PheromonesType = pheromonesMapper[PheromonesFunctionType],
+                DivideType = divideMapper[DivideMethod],
                 IsPruned = isPruned,
                 DataPath = label2.Text,
                 MaxAntsGenerationsNumber = (int)antsCount.Value,
@@ -83,14 +91,13 @@ namespace MAClassification
             _solver.Data = t;
             _solver.InitializeDataTables();
             var divider = new Divider();
-            var tables = divider.Divide(_n, t);
-            //var tables = divider.DivideByClass(solver.Data);
-            //testingCount.Text = _solver._testingTable.GetCasesCount().ToString();
+            var tables = divider.MakeTables(_solver.CalculationOptions.DivideType, _solver.Data, _n);
+            testingCount.Text = _solver.InitializeDataTables().GetCasesCount().ToString();
             var terms = _solver.InitializeTerms();
             TermsSerializer ts = new TermsSerializer();
             ts.Serialize(terms);
             File.Delete(@"rules.xml");
-            //PopulateDataGrid();
+            PopulateDataGrid();
             _rulesSets = new List<Rule>();
             Parallel.ForEach(tables, (table) =>
             {
@@ -143,7 +150,7 @@ namespace MAClassification
 
         private void button3_Click(object sender, EventArgs e)
         {
-            var openFileDialog1 = new OpenFileDialog { Filter = @"txt files (*.txt)|*.txt|All files (*.*)|*.* |arff files (*.arff)|*.arff" };
+            var openFileDialog1 = new OpenFileDialog { Filter = @"arff files (*.arff)|*.arff" };
             openFileDialog1.ShowDialog();
             label2.Text = openFileDialog1.FileName;
         }

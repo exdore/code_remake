@@ -4,6 +4,7 @@
     {
         public EuristicTypes EuristicType { get; set; }
         public PheromonesTypes PheromonesType { get; set; }
+        public DivideTypes DivideType { get; set; }
         public bool IsPruned { get; set; }
 
         public int MaxAntsGenerationsNumber { get; set; }

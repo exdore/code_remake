@@ -47,7 +47,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.entropy = new System.Windows.Forms.RadioButton();
             this.density = new System.Windows.Forms.RadioButton();
-            this.euristicFunctionType = new System.Windows.Forms.GroupBox();
+            this.EuristicFunction = new System.Windows.Forms.GroupBox();
             this.PheromonesUpdateMethod = new System.Windows.Forms.GroupBox();
             this.evaporation = new System.Windows.Forms.RadioButton();
             this.normalization = new System.Windows.Forms.RadioButton();
@@ -59,15 +59,19 @@
             this.trainingCount = new System.Windows.Forms.Label();
             this.testingCount = new System.Windows.Forms.Label();
             this.trackBarValue = new System.Windows.Forms.Label();
+            this.TrainingSetDivideMethod = new System.Windows.Forms.GroupBox();
+            this.crossValidation = new System.Windows.Forms.RadioButton();
+            this.byClass = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.antsCount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.convergenceStopValue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.maxUncoveredCasesCount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.minNumberPerRule)).BeginInit();
-            this.euristicFunctionType.SuspendLayout();
+            this.EuristicFunction.SuspendLayout();
             this.PheromonesUpdateMethod.SuspendLayout();
             this.RulesPruningStatus.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
+            this.TrainingSetDivideMethod.SuspendLayout();
             this.SuspendLayout();
             // 
             // antsCount
@@ -259,10 +263,10 @@
             this.entropy.Location = new System.Drawing.Point(8, 37);
             this.entropy.Margin = new System.Windows.Forms.Padding(4);
             this.entropy.Name = "entropy";
-            this.entropy.Size = new System.Drawing.Size(138, 21);
+            this.entropy.Size = new System.Drawing.Size(78, 21);
             this.entropy.TabIndex = 22;
             this.entropy.TabStop = true;
-            this.entropy.Text = "Через энтропию";
+            this.entropy.Text = "Entropy";
             this.entropy.UseVisualStyleBackColor = true;
             // 
             // density
@@ -271,23 +275,23 @@
             this.density.Location = new System.Drawing.Point(8, 65);
             this.density.Margin = new System.Windows.Forms.Padding(4);
             this.density.Name = "density";
-            this.density.Size = new System.Drawing.Size(142, 21);
+            this.density.Size = new System.Drawing.Size(76, 21);
             this.density.TabIndex = 23;
-            this.density.Text = "Через плотность";
+            this.density.Text = "Density";
             this.density.UseVisualStyleBackColor = true;
             // 
-            // euristicFunctionType
+            // EuristicFunction
             // 
-            this.euristicFunctionType.Controls.Add(this.density);
-            this.euristicFunctionType.Controls.Add(this.entropy);
-            this.euristicFunctionType.Location = new System.Drawing.Point(380, 10);
-            this.euristicFunctionType.Margin = new System.Windows.Forms.Padding(4);
-            this.euristicFunctionType.Name = "euristicFunctionType";
-            this.euristicFunctionType.Padding = new System.Windows.Forms.Padding(4);
-            this.euristicFunctionType.Size = new System.Drawing.Size(175, 94);
-            this.euristicFunctionType.TabIndex = 26;
-            this.euristicFunctionType.TabStop = false;
-            this.euristicFunctionType.Text = "Эвристическая функция";
+            this.EuristicFunction.Controls.Add(this.density);
+            this.EuristicFunction.Controls.Add(this.entropy);
+            this.EuristicFunction.Location = new System.Drawing.Point(380, 10);
+            this.EuristicFunction.Margin = new System.Windows.Forms.Padding(4);
+            this.EuristicFunction.Name = "EuristicFunction";
+            this.EuristicFunction.Padding = new System.Windows.Forms.Padding(4);
+            this.EuristicFunction.Size = new System.Drawing.Size(175, 94);
+            this.EuristicFunction.TabIndex = 26;
+            this.EuristicFunction.TabStop = false;
+            this.EuristicFunction.Text = "Euristic Function";
             // 
             // PheromonesUpdateMethod
             // 
@@ -300,7 +304,7 @@
             this.PheromonesUpdateMethod.Size = new System.Drawing.Size(175, 94);
             this.PheromonesUpdateMethod.TabIndex = 27;
             this.PheromonesUpdateMethod.TabStop = false;
-            this.PheromonesUpdateMethod.Text = "Пересчет феромона";
+            this.PheromonesUpdateMethod.Text = "Pheromones Recalculation";
             // 
             // evaporation
             // 
@@ -308,9 +312,9 @@
             this.evaporation.Location = new System.Drawing.Point(8, 65);
             this.evaporation.Margin = new System.Windows.Forms.Padding(4);
             this.evaporation.Name = "evaporation";
-            this.evaporation.Size = new System.Drawing.Size(102, 21);
+            this.evaporation.Size = new System.Drawing.Size(105, 21);
             this.evaporation.TabIndex = 23;
-            this.evaporation.Text = "Испарение";
+            this.evaporation.Text = "Evaporation";
             this.evaporation.UseVisualStyleBackColor = true;
             // 
             // normalization
@@ -320,10 +324,10 @@
             this.normalization.Location = new System.Drawing.Point(8, 37);
             this.normalization.Margin = new System.Windows.Forms.Padding(4);
             this.normalization.Name = "normalization";
-            this.normalization.Size = new System.Drawing.Size(127, 21);
+            this.normalization.Size = new System.Drawing.Size(115, 21);
             this.normalization.TabIndex = 22;
             this.normalization.TabStop = true;
-            this.normalization.Text = "Нормализация";
+            this.normalization.Text = "Normalization";
             this.normalization.UseVisualStyleBackColor = true;
             // 
             // RulesPruningStatus
@@ -337,7 +341,7 @@
             this.RulesPruningStatus.Size = new System.Drawing.Size(175, 94);
             this.RulesPruningStatus.TabIndex = 28;
             this.RulesPruningStatus.TabStop = false;
-            this.RulesPruningStatus.Text = "Упрощение правил";
+            this.RulesPruningStatus.Text = "Rule Pruning";
             // 
             // pruningInactive
             // 
@@ -345,9 +349,9 @@
             this.pruningInactive.Location = new System.Drawing.Point(8, 65);
             this.pruningInactive.Margin = new System.Windows.Forms.Padding(4);
             this.pruningInactive.Name = "pruningInactive";
-            this.pruningInactive.Size = new System.Drawing.Size(54, 21);
+            this.pruningInactive.Size = new System.Drawing.Size(47, 21);
             this.pruningInactive.TabIndex = 23;
-            this.pruningInactive.Text = "Нет";
+            this.pruningInactive.Text = "No";
             this.pruningInactive.UseVisualStyleBackColor = true;
             // 
             // pruningActive
@@ -357,10 +361,10 @@
             this.pruningActive.Location = new System.Drawing.Point(8, 37);
             this.pruningActive.Margin = new System.Windows.Forms.Padding(4);
             this.pruningActive.Name = "pruningActive";
-            this.pruningActive.Size = new System.Drawing.Size(48, 21);
+            this.pruningActive.Size = new System.Drawing.Size(53, 21);
             this.pruningActive.TabIndex = 22;
             this.pruningActive.TabStop = true;
-            this.pruningActive.Text = "Да";
+            this.pruningActive.Text = "Yes";
             this.pruningActive.UseVisualStyleBackColor = true;
             // 
             // dataGridView1
@@ -407,12 +411,50 @@
             this.trackBarValue.Size = new System.Drawing.Size(0, 17);
             this.trackBarValue.TabIndex = 33;
             // 
+            // TrainingSetDivideMethod
+            // 
+            this.TrainingSetDivideMethod.Controls.Add(this.crossValidation);
+            this.TrainingSetDivideMethod.Controls.Add(this.byClass);
+            this.TrainingSetDivideMethod.Location = new System.Drawing.Point(991, 10);
+            this.TrainingSetDivideMethod.Margin = new System.Windows.Forms.Padding(4);
+            this.TrainingSetDivideMethod.Name = "TrainingSetDivideMethod";
+            this.TrainingSetDivideMethod.Padding = new System.Windows.Forms.Padding(4);
+            this.TrainingSetDivideMethod.Size = new System.Drawing.Size(175, 94);
+            this.TrainingSetDivideMethod.TabIndex = 27;
+            this.TrainingSetDivideMethod.TabStop = false;
+            this.TrainingSetDivideMethod.Text = "Training Set Divide Method";
+            // 
+            // crossValidation
+            // 
+            this.crossValidation.AutoSize = true;
+            this.crossValidation.Location = new System.Drawing.Point(8, 65);
+            this.crossValidation.Margin = new System.Windows.Forms.Padding(4);
+            this.crossValidation.Name = "crossValidation";
+            this.crossValidation.Size = new System.Drawing.Size(130, 21);
+            this.crossValidation.TabIndex = 23;
+            this.crossValidation.Text = "Cross-validation";
+            this.crossValidation.UseVisualStyleBackColor = true;
+            // 
+            // byClass
+            // 
+            this.byClass.AutoSize = true;
+            this.byClass.Checked = true;
+            this.byClass.Location = new System.Drawing.Point(8, 37);
+            this.byClass.Margin = new System.Windows.Forms.Padding(4);
+            this.byClass.Name = "byClass";
+            this.byClass.Size = new System.Drawing.Size(83, 21);
+            this.byClass.TabIndex = 22;
+            this.byClass.TabStop = true;
+            this.byClass.Text = "By Class";
+            this.byClass.UseVisualStyleBackColor = true;
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(1805, 761);
+            this.Controls.Add(this.TrainingSetDivideMethod);
             this.Controls.Add(this.trackBarValue);
             this.Controls.Add(this.testingCount);
             this.Controls.Add(this.trainingCount);
@@ -420,7 +462,7 @@
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.RulesPruningStatus);
             this.Controls.Add(this.PheromonesUpdateMethod);
-            this.Controls.Add(this.euristicFunctionType);
+            this.Controls.Add(this.EuristicFunction);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.label1);
@@ -447,14 +489,16 @@
             ((System.ComponentModel.ISupportInitialize)(this.convergenceStopValue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.maxUncoveredCasesCount)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.minNumberPerRule)).EndInit();
-            this.euristicFunctionType.ResumeLayout(false);
-            this.euristicFunctionType.PerformLayout();
+            this.EuristicFunction.ResumeLayout(false);
+            this.EuristicFunction.PerformLayout();
             this.PheromonesUpdateMethod.ResumeLayout(false);
             this.PheromonesUpdateMethod.PerformLayout();
             this.RulesPruningStatus.ResumeLayout(false);
             this.RulesPruningStatus.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
+            this.TrainingSetDivideMethod.ResumeLayout(false);
+            this.TrainingSetDivideMethod.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -481,7 +525,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.RadioButton entropy;
         private System.Windows.Forms.RadioButton density;
-        private System.Windows.Forms.GroupBox euristicFunctionType;
+        private System.Windows.Forms.GroupBox EuristicFunction;
         private System.Windows.Forms.GroupBox PheromonesUpdateMethod;
         private System.Windows.Forms.RadioButton evaporation;
         private System.Windows.Forms.RadioButton normalization;
@@ -493,6 +537,9 @@
         private System.Windows.Forms.Label trainingCount;
         private System.Windows.Forms.Label testingCount;
         private System.Windows.Forms.Label trackBarValue;
+        private System.Windows.Forms.GroupBox TrainingSetDivideMethod;
+        private System.Windows.Forms.RadioButton crossValidation;
+        private System.Windows.Forms.RadioButton byClass;
     }
 }
 

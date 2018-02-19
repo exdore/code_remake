@@ -8,7 +8,12 @@ namespace MAClassification
     {
         int Step { get; set; }
 
-        public List<Table> Divide(int n, Table data)
+        public List<Table> MakeTables(DivideTypes divideType, Table data, int n)
+        {
+            return divideType == DivideTypes.ByClass ? DivideByClass(data) : Divide(n, data);
+        }
+
+        private List<Table> Divide(int n, Table data)
         {
             var size = data.GetCasesCount();
             var tables = new List<Table>();
@@ -45,7 +50,7 @@ namespace MAClassification
             return tables;
         }
 
-        public List<Table> DivideByClass(Table data)
+        private List<Table> DivideByClass(Table data)
         {
             var tables = new List<Table>();
             var results = data.Cases.Select(item => item.Result).Distinct();
