@@ -53,12 +53,12 @@ namespace MAClassification
         private List<Table> DivideByClass(Table data)
         {
             var tables = new List<Table>();
-            var results = data.Cases.Select(item => item.Result).Distinct();
+            var results = data.Cases.Select(item => item.Class).Distinct();
             foreach (var result in results)
             {
                 tables.Add(new Table
                 {
-                    Cases = data.Cases.Where(item => item.Result == result).ToList(),
+                    Cases = data.Cases.Where(item => item.Class == result).ToList(),
                     Header = data.Header
                 });
             }

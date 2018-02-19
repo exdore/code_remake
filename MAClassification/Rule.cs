@@ -11,7 +11,7 @@ namespace MAClassification
     {
         public List<Condition> ConditionsList { get; set; }
 
-        public string Result { get; set; }             //make it array of probabilities to save likehood for every class 
+        public string Class { get; set; }             //make it array of probabilities to save likehood for every class 
 
         public double Quality { get; set; }
         private double Precision { get; set; }
@@ -29,7 +29,7 @@ namespace MAClassification
                 res += condition + " & ";
             }
             if (res.Length > 0) res = res.Remove(res.Length - 2);
-            res += " Result: " + Result + " Covered Cases Count: " + CoveredCases.Count;
+            res += " Class: " + Class + " Covered Cases Count: " + CoveredCases.Count;
             return res;
         }
 
@@ -39,23 +39,23 @@ namespace MAClassification
             int max = 0;
             foreach (var item in resultsList)
             {
-                var currentResultCases = CoveredCases.Count(@case => @case.Result == item);
+                var currentResultCases = CoveredCases.Count(@case => @case.Class == item);
                 if (max < currentResultCases)
                 {
                     result = item;
                     max = currentResultCases;
                 }
             }
-            Result = result;
+            Class = result;
         }
 
         public void CalculateRuleQuality(Table data)
         {
-            int truePositive = CoveredCases.Count(item => item.Result == Result);
-            int falsePositive = CoveredCases.Count(item => item.Result != Result);
+            int truePositive = CoveredCases.Count(item => item.Class == Class);
+            int falsePositive = CoveredCases.Count(item => item.Class != Class);
             var uncoveredData = data.GetCases().Except(CoveredCases).ToList();
-            int trueNegative = uncoveredData.Count(item => item.Result == Result);
-            int falseNegative = uncoveredData.Count(item => item.Result != Result);
+            int trueNegative = uncoveredData.Count(item => item.Class == Class);
+            int falseNegative = uncoveredData.Count(item => item.Class != Class);
             Precision = double.IsNaN((double)truePositive / (truePositive + falseNegative)) ? 0
                         : (double)truePositive / (truePositive + falseNegative);
             Specificity = double.IsNaN((double)trueNegative / (falsePositive + trueNegative)) ? 0
@@ -127,7 +127,7 @@ namespace MAClassification
                 Specificity = Specificity,
                 Quality = Quality,
                 CoveredCases = CoveredCases.ToList(),
-                Result = Result
+                Class = Class
             };
         }
 
@@ -153,7 +153,7 @@ namespace MAClassification
                     rulesList.Add(newRule);
                 }
                 var bestRule = rulesList.OrderByDescending(item => item.Quality).First();
-                return (bestRule.Quality > Quality) ? bestRule.PruneRule(data, resultsList) : this;
+                return bestRule.Quality > Quality ? bestRule.PruneRule(data, resultsList) : this;
             }
             catch(Exception)
             {
@@ -180,7 +180,7 @@ namespace MAClassification
         {
             var hashCode = 541764673;
             hashCode = hashCode * -1521134295 + EqualityComparer<List<Condition>>.Default.GetHashCode(ConditionsList);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Result);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Class);
             hashCode = hashCode * -1521134295 + Quality.GetHashCode();
             hashCode = hashCode * -1521134295 + Precision.GetHashCode();
             hashCode = hashCode * -1521134295 + Specificity.GetHashCode();

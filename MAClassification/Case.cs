@@ -8,7 +8,7 @@ namespace MAClassification
     {
         public int Number { get; set; }
         public List<string> AttributesValuesList { get; set; }
-        public string Result { get; set; }
+        public string Class { get; set; }
 
         private string ValuesToString()
         {
@@ -20,7 +20,7 @@ namespace MAClassification
 
         public override string ToString()
         {
-            return Number + " " + ValuesToString() + Result;
+            return Number + " " + ValuesToString() + Class;
         }
     }
 }

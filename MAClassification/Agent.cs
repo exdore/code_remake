@@ -5,7 +5,7 @@ using MAClassification.Models;
 
 namespace MAClassification
 {
-    public enum AgentTypes { ant }
+    public enum AgentTypes { Ant }
     public enum EuristicTypes { Entropy, Density }
     public enum PheromonesTypes { Normalization, Evaporation}
     public enum DivideTypes { CrossValidation, ByClass }

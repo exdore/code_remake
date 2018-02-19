@@ -7,17 +7,19 @@ using ArffSharp;
 namespace MAClassification
 {
     [Serializable]
+    
+    public enum TableTypes
+    {
+        Full,
+        Training,
+        Testing
+    }
+
     [XmlInclude(typeof(Case))]
     [XmlInclude(typeof(TableTypes))]
-
     public class Table
     {
-        public enum TableTypes
-        {
-            Full,
-            Training,
-            Testing
-        }
+        
 
         public List<string> Header { get; set; }
         public List<Case> Cases { get; set; }
@@ -42,7 +44,7 @@ namespace MAClassification
                 {
                     Number = count,
                     AttributesValuesList = new List<string>(),
-                    Result = reader.Attributes.Last().NominalValues[record.Values.Last().NominalValueIndex]
+                    Class = reader.Attributes.Last().NominalValues[record.Values.Last().NominalValueIndex]
                 };
                 for (var i = 0; i < record.Values.Length - 1; i++)
                 {
@@ -93,7 +95,7 @@ namespace MAClassification
             var apropriateCasesCount = apropriateCases.Count;
             foreach (var sample in resultsList)
             {
-                var casesWithSetResultCount = apropriateCases.Count(item => item.Result == sample);
+                var casesWithSetResultCount = apropriateCases.Count(item => item.Class == sample);
                 if (casesWithSetResultCount != 0)
                     result -= (double) casesWithSetResultCount / apropriateCasesCount *
                               Math.Log((double) casesWithSetResultCount / apropriateCasesCount, 2);
@@ -103,7 +105,7 @@ namespace MAClassification
 
         public List<string> GetResultsInfo()
         {
-            return Cases.Select(item => item.Result).Distinct().ToList();
+            return Cases.Select(item => item.Class).Distinct().ToList();
         }
     }
 }

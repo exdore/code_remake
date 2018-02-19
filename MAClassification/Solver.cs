@@ -12,7 +12,7 @@ namespace MAClassification
         public List<Agent> Agents { get; set; }
         public List<Rule> Rules { get; set; }
         public Attributes Attributes { get; set; }
-        public List<string> Results { get; set; }
+        public List<string> Classes { get; set; }
 
         private Terms Terms { get; set; }
 
@@ -24,14 +24,14 @@ namespace MAClassification
             {
                 Cases = Data.Cases,
                 Header = Data.Header,
-                TableType = Table.TableTypes.Testing
+                TableType = TableTypes.Testing
             };
         }
 
         public Terms InitializeTerms()
         {
             Attributes = Data.GetAttributesInfo();
-            Results = Data.GetResultsInfo();
+            Classes = Data.GetResultsInfo();
             var initialTerms = new Terms
             {
                 TermsList = new List<List<Term>>(),
@@ -48,7 +48,7 @@ namespace MAClassification
                     {
                         AttributeName = attribute.AttributeName,
                         AttributeValue = item,
-                        Entropy = Data.CalculateGain(attribute.AttributeName, item, Results)
+                        Entropy = Data.CalculateGain(attribute.AttributeName, item, Classes)
                     });
                 }
             }
@@ -70,19 +70,17 @@ namespace MAClassification
                 var socialTerms = ts.Deserialize(TermTypes.Euristic);
                 var basicTerms = ts.Deserialize(TermTypes.Basic);
                 var greedyTerms = ts.Deserialize(TermTypes.Greedy);
-                var agentsPopulation = IterateGeneration(data, Attributes, Results, ref currentAgent, ref currentNumberForConvergence, currentRules,
+                var agentsPopulation = IterateGeneration(data, ref currentAgent, ref currentNumberForConvergence, currentRules,
                     socialTerms, basicTerms, greedyTerms);
                 agentsPopulation = agentsPopulation.OrderByDescending(item => item.Rule.Quality).ToList();
                 var bestAgent = agentsPopulation.First();
-                Agents.Add(agentsPopulation.Where(item => (item.Rule.Quality - bestAgent.Rule.Quality) < 1e-5)
-                    .OrderByDescending(item => Guid.NewGuid()).First());
-                Rules.Add(Agents.Last().Rule);
-                data.Cases = data.Cases.Except(Agents.Last().Rule.CoveredCases).ToList();
+                Rules.Add(bestAgent.Rule);
+                data.Cases = data.Cases.Except(bestAgent.Rule.CoveredCases).ToList();
             }
             return Rules;
         }
 
-        private List<Agent> IterateGeneration(Table data, Attributes attributes, List<string> results, ref int currentAnt, ref int currentNumberForConvergence, List<Rule> currentRules, Terms socialTerms, Terms basicTerms, Terms greedyTerms)
+        private List<Agent> IterateGeneration(Table data, ref int currentAnt, ref int currentNumberForConvergence, List<Rule> currentRules, Terms socialTerms, Terms basicTerms, Terms greedyTerms)
         {
             var agentsPopulation = new List<Agent>();
             var count = 0;
@@ -91,7 +89,7 @@ namespace MAClassification
                 var rnd = new Random();
                 var basicAnt = new Ant
                 {
-                    AgentType = AgentTypes.ant,   // rewrite
+                    AgentType = AgentTypes.Ant,   // rewrite
                     Alpha = 1,
                     Beta = 1,
                     AntType = AntTypes.Basic,
@@ -99,7 +97,7 @@ namespace MAClassification
                 };
                 var greedyAnt = new Ant
                 {
-                    AgentType = AgentTypes.ant,
+                    AgentType = AgentTypes.Ant,
                     Alpha = rnd.Next(200, 500) / 100.0,
                     Beta = rnd.Next(500, 1000) / 100.0,
                     AntType = AntTypes.Greedy,
@@ -107,7 +105,7 @@ namespace MAClassification
                 };
                 var socialAnt = new Ant
                 {
-                    AgentType = AgentTypes.ant,
+                    AgentType = AgentTypes.Ant,
                     Alpha = rnd.Next(500, 1000) / 100.0,
                     Beta = rnd.Next(200, 500) / 100.0,
                     AntType = AntTypes.Euristic,
@@ -115,8 +113,8 @@ namespace MAClassification
                 };
                 RuleData ruleData = new RuleData()
                 {
-                    Attributes = attributes,
-                    Classes = results,
+                    Attributes = Attributes,
+                    Classes = Classes,
                     MinCasesPerRule = this.CalculationOptions.MinCasesPerRule,
                     Table = data,
                     Terms = basicTerms
@@ -143,16 +141,16 @@ namespace MAClassification
             var realResults = new List<string>();
             foreach (var item in data.Cases)
             {
-                realResults.Add(item.Result);
-                item.Result = "";
+                realResults.Add(item.Class);
+                item.Class = "";
             }
             //foreach (var discoveredRule in discoveredRules)
             //{
             //    discoveredRule.GetCoveredCases(data);
             //    foreach (var discoveredRuleCoveredCase in discoveredRule.CoveredCases)
             //    {
-            //        data.Cases.Find(item => item.Number == discoveredRuleCoveredCase.Number).Result =
-            //            discoveredRule.Result;
+            //        data.Cases.Find(item => item.Number == discoveredRuleCoveredCase.Number).Class =
+            //            discoveredRule.Class;
             //    }
             //    data.Cases = data.Cases.Except(discoveredRule.CoveredCases).ToList();
             //}
@@ -171,7 +169,7 @@ namespace MAClassification
             var predictedResults = new List<string>();
             foreach (var items in rules)
             {
-                var groups = items.GroupBy(s => s.Result).ToList();
+                var groups = items.GroupBy(s => s.Class).ToList();
                 groups = groups.OrderByDescending(s => s.Sum(item => item.Quality)).ToList();
                 predictedResults.Add(groups.First().Key);
             }

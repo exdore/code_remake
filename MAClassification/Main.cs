@@ -129,7 +129,7 @@ namespace MAClassification
                 row[0] = item.Number;
                 for (int i = 1; i <= item.AttributesValuesList.Count; i++)
                     row[i] = item.AttributesValuesList[i - 1];
-                row[data.Header.Count + 1] = item.Result;
+                row[data.Header.Count + 1] = item.Class;
                 dt.Rows.Add(row);
             }
             dataGridView1.DataSource = dt;
