@@ -4,7 +4,7 @@ using MAClassification.Models;
 
 namespace MAClassification
 {
-    public class Attributes : List<Attribute>
+    public class Attributes : List<DataAttribute>
     {
         public int GetValuesCount()
         {

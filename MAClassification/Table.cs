@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
 using ArffSharp;
+using MAClassification.Models;
 
 namespace MAClassification
 {
@@ -65,7 +66,7 @@ namespace MAClassification
         {
             var attributes = new Attributes();
             for (var i = 0; i < Header.Count; i++)
-                attributes.Add(new Models.Attribute
+                attributes.Add(new DataAttribute
                 {
                     AttributeName = Header[i],
                     AttributeValues = Cases.Select(item => item.AttributesValuesList[i]).Distinct().ToList(),

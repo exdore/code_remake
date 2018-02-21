@@ -27,7 +27,7 @@ namespace MAClassification
         {
             var currentAntRule = new Rule
             {
-                ConditionsList = new List<Condition>(),
+                ConditionsList = new List<RuleCondition>(),
                 CoveredCases = data.Table.Cases
             };
             _rule = currentAntRule;

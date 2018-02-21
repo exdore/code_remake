@@ -7,10 +7,10 @@ using MAClassification.Models;
 namespace MAClassification
 {
     [Serializable]
-    [XmlInclude(typeof(Condition))]
+    [XmlInclude(typeof(RuleCondition))]
     public class Rule 
     {
-        public List<Condition> ConditionsList { get; set; }
+        public List<RuleCondition> ConditionsList { get; set; }
 
         public string Class { get; set; }             //make it array of probabilities to save likehood for every class 
 
@@ -75,7 +75,7 @@ namespace MAClassification
                     if (item.IsChosen) continue;
                     if (probability < item.Probability)
                     {
-                        ConditionsList.Add(new Condition
+                        ConditionsList.Add(new RuleCondition
                         {
                             AttributeName = item.AttributeName,
                             AttributeValue = item.AttributeValue
@@ -110,7 +110,7 @@ namespace MAClassification
             CoveredCases = cases;
         }
 
-        public void CheckUsedAttributes(List<Models.Attribute> attributes)
+        public void CheckUsedAttributes(List<Models.DataAttribute> attributes)
         {
             foreach (var condition in ConditionsList)
             {
@@ -180,7 +180,7 @@ namespace MAClassification
         public override int GetHashCode()
         {
             var hashCode = 541764673;
-            hashCode = hashCode * -1521134295 + EqualityComparer<List<Condition>>.Default.GetHashCode(ConditionsList);
+            hashCode = hashCode * -1521134295 + EqualityComparer<List<RuleCondition>>.Default.GetHashCode(ConditionsList);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Class);
             hashCode = hashCode * -1521134295 + Quality.GetHashCode();
             hashCode = hashCode * -1521134295 + Precision.GetHashCode();

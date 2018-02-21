@@ -3,7 +3,7 @@
 namespace MAClassification.Models
 {
     [Serializable]
-    public class Condition
+    public class RuleCondition
     {
         public string AttributeName { get; set; }
         public string AttributeValue { get; set; }

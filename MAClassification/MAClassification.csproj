@@ -46,10 +46,10 @@
   <ItemGroup>
     <Compile Include="Agent.cs" />
     <Compile Include="Ant.cs" />
-    <Compile Include="Models\Attribute.cs" />
+    <Compile Include="Models\DataAttribute.cs" />
     <Compile Include="Attributes.cs" />
     <Compile Include="Case.cs" />
-    <Compile Include="Models\Condition.cs" />
+    <Compile Include="Models\RuleCondition.cs" />
     <Compile Include="Divider.cs" />
     <Compile Include="GeneticsOptimizer.cs" />
     <Compile Include="Main.cs">
