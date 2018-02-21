@@ -22,7 +22,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
 using LumenWorks.Framework.IO.Csv.Resources;
 
 namespace LumenWorks.Framework.IO.Csv
@@ -104,13 +103,10 @@ namespace LumenWorks.Framework.IO.Csv
 
 					return true;
 				}
-				else
-				{
-					_current = null;
-					_currentRecordIndex = _reader._currentRecordIndex;
+			    _current = null;
+			    _currentRecordIndex = _reader._currentRecordIndex;
 
-					return false;
-				}
+			    return false;
 			}
 
 			#endregion
@@ -141,7 +137,7 @@ namespace LumenWorks.Framework.IO.Csv
 					if (_reader._currentRecordIndex != _currentRecordIndex)
 						throw new InvalidOperationException(ExceptionMessage.EnumerationVersionCheckFailed);
 
-					return this.Current;
+					return Current;
 				}
 			}
 

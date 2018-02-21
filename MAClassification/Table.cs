@@ -65,7 +65,7 @@ namespace MAClassification
         {
             var attributes = new Attributes();
             for (var i = 0; i < Header.Count; i++)
-                attributes.Add(new Attribute
+                attributes.Add(new Models.Attribute
                 {
                     AttributeName = Header[i],
                     AttributeValues = Cases.Select(item => item.AttributesValuesList[i]).Distinct().ToList(),

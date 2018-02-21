@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
+using MAClassification.Models;
 
 namespace MAClassification
 {
@@ -109,7 +110,7 @@ namespace MAClassification
             CoveredCases = cases;
         }
 
-        public void CheckUsedAttributes(List<Attribute> attributes)
+        public void CheckUsedAttributes(List<Models.Attribute> attributes)
         {
             foreach (var condition in ConditionsList)
             {

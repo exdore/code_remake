@@ -15,11 +15,11 @@ namespace MAClassification.Serializators
             streamWriter.Close();
         }
 
-        public Terms Deserialize(TermTypes TermType)
+        public Terms Deserialize(TermTypes termType)
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Terms));
-            var streamReader = File.Exists(TermType + @"Terms.xml")
-                ? new StreamReader(TermType + @"Terms.xml")
+            var streamReader = File.Exists(termType + @"Terms.xml")
+                ? new StreamReader(termType + @"Terms.xml")
                 : new StreamReader(@"BasicTerms.xml");
             Terms currentTerms = (Terms)xmlSerializer.Deserialize(streamReader);
             streamReader.Close();

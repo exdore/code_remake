@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MAClassification
+namespace MAClassification.Models
 {
     public class Attribute
     {

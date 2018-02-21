@@ -39,6 +39,6 @@ namespace LumenWorks.Framework.IO.Csv
 		/// <summary>
 		/// Replaces by a null value (<see langword="null"/>).
 		/// </summary>
-		ReplaceByNull = 2,
+		ReplaceByNull = 2
 	}
 }

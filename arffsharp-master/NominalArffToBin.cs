@@ -1,9 +1,9 @@
-﻿namespace ArffSharp
-{
-    using System;
-    using System.IO;
-    using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
 
+namespace ArffSharp
+{
     public class NominalArffToBin
     {
         public static void Convert(string inputArffFile, string outputFile)

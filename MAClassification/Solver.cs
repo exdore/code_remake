@@ -111,11 +111,11 @@ namespace MAClassification
                     AntType = AntTypes.Euristic,
                     AntNumber = ++count
                 };
-                RuleData ruleData = new RuleData()
+                RuleData ruleData = new RuleData
                 {
                     Attributes = Attributes,
                     Classes = Classes,
-                    MinCasesPerRule = this.CalculationOptions.MinCasesPerRule,
+                    MinCasesPerRule = CalculationOptions.MinCasesPerRule,
                     Table = data,
                     Terms = basicTerms
                 };

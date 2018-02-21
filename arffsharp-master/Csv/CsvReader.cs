@@ -22,12 +22,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Data.Common;
-using Debug = System.Diagnostics.Debug;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-
 using LumenWorks.Framework.IO.Csv.Resources;
 
 namespace LumenWorks.Framework.IO.Csv
@@ -72,7 +72,7 @@ namespace LumenWorks.Framework.IO.Csv
         /// <summary>
         /// Contains the field header comparer.
         /// </summary>
-        private static readonly StringComparer _fieldHeaderComparer = StringComparer.CurrentCultureIgnoreCase;
+        private static readonly StringComparer FieldHeaderComparer = StringComparer.CurrentCultureIgnoreCase;
 
         #region Settings
 
@@ -251,7 +251,7 @@ namespace LumenWorks.Framework.IO.Csv
         public CsvReader(TextReader reader, bool hasHeaders, char delimiter = DefaultDelimiter, char quote = DefaultQuote, char escape = DefaultEscape, char comment = DefaultComment, ValueTrimmingOptions trimmingOptions = ValueTrimmingOptions.UnquotedOnly, int bufferSize = DefaultBufferSize)
         {
 #if DEBUG
-            _allocStack = new System.Diagnostics.StackTrace();
+            _allocStack = new StackTrace();
 #endif
 
             if (reader == null)
@@ -284,7 +284,7 @@ namespace LumenWorks.Framework.IO.Csv
             _trimmingOptions = trimmingOptions;
             _supportsMultiline = true;
             _skipEmptyLines = true;
-            this.DefaultHeaderName = "Column";
+            DefaultHeaderName = "Column";
 
             _currentRecordIndex = -1;
             _defaultParseErrorAction = ParseErrorAction.RaiseEvent;
@@ -712,7 +712,7 @@ namespace LumenWorks.Framework.IO.Csv
         private void EnsureInitialize()
         {
             if (!_initialized)
-                this.ReadNextRecord(true, false);
+                ReadNextRecord(true, false);
 
             Debug.Assert(_fieldHeaders != null);
             Debug.Assert(_fieldHeaders.Length > 0 || (_fieldHeaders.Length == 0 && _fieldHeaderIndexes == null));
@@ -738,8 +738,7 @@ namespace LumenWorks.Framework.IO.Csv
 
             if (_fieldHeaderIndexes != null && _fieldHeaderIndexes.TryGetValue(header, out index))
                 return index;
-            else
-                return -1;
+            return -1;
         }
 
         #endregion
@@ -814,8 +813,7 @@ namespace LumenWorks.Framework.IO.Csv
         {
             if (_buffer != null && _bufferLength > 0)
                 return new string(_buffer, 0, _bufferLength);
-            else
-                return string.Empty;
+            return string.Empty;
         }
 
         #endregion
@@ -832,14 +830,10 @@ namespace LumenWorks.Framework.IO.Csv
             // Handle cases where the delimiter is a whitespace (e.g. tab)
             if (c == _delimiter)
                 return false;
-            else
-            {
-                // See char.IsLatin1(char c) in Reflector
-                if (c <= '\x00ff')
-                    return (c == ' ' || c == '\t');
-                else
-                    return (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) == System.Globalization.UnicodeCategory.SpaceSeparator);
-            }
+            // See char.IsLatin1(char c) in Reflector
+            if (c <= '\x00ff')
+                return (c == ' ' || c == '\t');
+            return (CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.SpaceSeparator);
         }
 
         #endregion
@@ -932,7 +926,7 @@ namespace LumenWorks.Framework.IO.Csv
 
                 return true;
             }
-            else if (c == '\n')
+            if (c == '\n')
             {
                 pos++;
 
@@ -963,10 +957,9 @@ namespace LumenWorks.Framework.IO.Csv
 
             if (c == '\n')
                 return true;
-            else if (c == '\r' && _delimiter != '\r')
+            if (c == '\r' && _delimiter != '\r')
                 return true;
-            else
-                return false;
+            return false;
         }
 
         #endregion
@@ -991,13 +984,10 @@ namespace LumenWorks.Framework.IO.Csv
 
             if (_bufferLength > 0)
                 return true;
-            else
-            {
-                _eof = true;
-                _buffer = null;
+            _eof = true;
+            _buffer = null;
 
-                return false;
-            }
+            return false;
         }
 
         #endregion
@@ -1043,7 +1033,7 @@ namespace LumenWorks.Framework.IO.Csv
                 // Directly return field if cached
                 if (_fields[field] != null)
                     return _fields[field];
-                else if (_missingFieldFlag)
+                if (_missingFieldFlag)
                     return HandleMissingField(null, field, ref _nextFieldStart);
             }
 
@@ -1124,31 +1114,27 @@ namespace LumenWorks.Framework.IO.Csv
 
                                     break;
                                 }
-                                else if (c == '\r' || c == '\n')
+                                if (c == '\r' || c == '\n')
                                 {
                                     _nextFieldStart = pos;
                                     _eol = true;
 
                                     break;
                                 }
-                                else
-                                    pos++;
+                                pos++;
                             }
 
                             if (pos < _bufferLength)
                                 break;
-                            else
-                            {
-                                if (!discardValue)
-                                    value += new string(_buffer, start, pos - start);
+                            if (!discardValue)
+                                value += new string(_buffer, start, pos - start);
 
-                                start = 0;
-                                pos = 0;
-                                _nextFieldStart = 0;
+                            start = 0;
+                            pos = 0;
+                            _nextFieldStart = 0;
 
-                                if (!ReadBuffer())
-                                    break;
-                            }
+                            if (!ReadBuffer())
+                                break;
                         }
 
                         if (!discardValue)
@@ -1259,20 +1245,17 @@ namespace LumenWorks.Framework.IO.Csv
 
                             if (!quoted)
                                 break;
-                            else
+                            if (!discardValue && !escaped)
+                                value += new string(_buffer, start, pos - start);
+
+                            start = 0;
+                            pos = 0;
+                            _nextFieldStart = 0;
+
+                            if (!ReadBuffer())
                             {
-                                if (!discardValue && !escaped)
-                                    value += new string(_buffer, start, pos - start);
-
-                                start = 0;
-                                pos = 0;
-                                _nextFieldStart = 0;
-
-                                if (!ReadBuffer())
-                                {
-                                    HandleParseError(new MalformedCsvException(GetCurrentRawData(), _nextFieldStart, Math.Max(0, _currentRecordIndex), index), ref _nextFieldStart);
-                                    return null;
-                                }
+                                HandleParseError(new MalformedCsvException(GetCurrentRawData(), _nextFieldStart, Math.Max(0, _currentRecordIndex), index), ref _nextFieldStart);
+                                return null;
                             }
                         }
 
@@ -1340,11 +1323,9 @@ namespace LumenWorks.Framework.IO.Csv
                     {
                         if (_eol || _eof)
                             return null;
-                        else
-                            return string.IsNullOrEmpty(value) ? string.Empty : value;
+                        return string.IsNullOrEmpty(value) ? string.Empty : value;
                     }
-                    else
-                        return value;
+                    return value;
                 }
 
                 index++;
@@ -1397,8 +1378,7 @@ namespace LumenWorks.Framework.IO.Csv
 
                     return true;
                 }
-                else
-                    return false;
+                return false;
             }
 
             CheckDisposed();
@@ -1436,7 +1416,7 @@ namespace LumenWorks.Framework.IO.Csv
                         _fieldCount++;
 
                         if (_fieldCount == _fields.Length)
-                            Array.Resize<string>(ref _fields, (_fieldCount + 1) * 2);
+                            Array.Resize(ref _fields, (_fieldCount + 1) * 2);
                     }
                 }
 
@@ -1445,7 +1425,7 @@ namespace LumenWorks.Framework.IO.Csv
                 _fieldCount++;
 
                 if (_fields.Length != _fieldCount)
-                    Array.Resize<string>(ref _fields, _fieldCount);
+                    Array.Resize(ref _fields, _fieldCount);
 
                 _initialized = true;
 
@@ -1458,13 +1438,13 @@ namespace LumenWorks.Framework.IO.Csv
                     _firstRecordInCache = false;
 
                     _fieldHeaders = new string[_fieldCount];
-                    _fieldHeaderIndexes = new Dictionary<string, int>(_fieldCount, _fieldHeaderComparer);
+                    _fieldHeaderIndexes = new Dictionary<string, int>(_fieldCount, FieldHeaderComparer);
 
                     for (int i = 0; i < _fields.Length; i++)
                     {
                         string headerName = _fields[i];
                         if (string.IsNullOrEmpty(headerName) || headerName.Trim().Length == 0)
-                            headerName = this.DefaultHeaderName + i.ToString();
+                            headerName = DefaultHeaderName + i;
 
                         _fieldHeaders[i] = headerName;
                         _fieldHeaderIndexes.Add(headerName, i);
@@ -1631,13 +1611,10 @@ namespace LumenWorks.Framework.IO.Csv
 
                 if (pos < _bufferLength)
                     break;
-                else
-                {
-                    pos = 0;
+                pos = 0;
 
-                    if (!ReadBuffer())
-                        return false;
-                }
+                if (!ReadBuffer())
+                    return false;
             }
 
             return true;
@@ -1753,23 +1730,20 @@ namespace LumenWorks.Framework.IO.Csv
 
             if (value != null)
                 return value;
-            else
+            switch (_missingFieldAction)
             {
-                switch (_missingFieldAction)
-                {
-                    case MissingFieldAction.ParseError:
-                        HandleParseError(new MissingFieldCsvException(GetCurrentRawData(), currentPosition, Math.Max(0, _currentRecordIndex), fieldIndex), ref currentPosition);
-                        return value;
+                case MissingFieldAction.ParseError:
+                    HandleParseError(new MissingFieldCsvException(GetCurrentRawData(), currentPosition, Math.Max(0, _currentRecordIndex), fieldIndex), ref currentPosition);
+                    return value;
 
-                    case MissingFieldAction.ReplaceByEmpty:
-                        return string.Empty;
+                case MissingFieldAction.ReplaceByEmpty:
+                    return string.Empty;
 
-                    case MissingFieldAction.ReplaceByNull:
-                        return null;
+                case MissingFieldAction.ReplaceByNull:
+                    return null;
 
-                    default:
-                        throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, ExceptionMessage.MissingFieldActionNotSupported, _missingFieldAction));
-                }
+                default:
+                    throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, ExceptionMessage.MissingFieldActionNotSupported, _missingFieldAction));
             }
         }
 
@@ -1944,7 +1918,7 @@ namespace LumenWorks.Framework.IO.Csv
             }
 
             // null marks columns that will change for each row
-            object[] schemaRow = new object[] { 
+            object[] schemaRow = { 
                     true,					// 00- AllowDBNull
                     null,					// 01- BaseColumnName
                     string.Empty,			// 02- BaseSchemaName
@@ -2019,8 +1993,7 @@ namespace LumenWorks.Framework.IO.Csv
 
             if (((IDataRecord)this).IsDBNull(i))
                 return DBNull.Value;
-            else
-                return this[i];
+            return this[i];
         }
 
         bool IDataRecord.IsDBNull(int i)
@@ -2063,7 +2036,7 @@ namespace LumenWorks.Framework.IO.Csv
         {
             ValidateDataReader(DataReaderValidations.IsInitialized | DataReaderValidations.IsNotClosed);
 
-            IDataRecord record = (IDataRecord)this;
+            IDataRecord record = this;
 
             for (int i = 0; i < _fieldCount; i++)
                 values[i] = record.GetValue(i);
@@ -2081,8 +2054,7 @@ namespace LumenWorks.Framework.IO.Csv
 
             if (_hasHeaders)
                 return _fieldHeaders[i];
-            else
-                return "Column" + i.ToString(CultureInfo.InvariantCulture);
+            return "Column" + i.ToString(CultureInfo.InvariantCulture);
         }
 
         long IDataRecord.GetInt64(int i)
@@ -2107,8 +2079,7 @@ namespace LumenWorks.Framework.IO.Csv
 
             if (Int32.TryParse(value, out result))
                 return (result != 0);
-            else
-                return Boolean.Parse(value);
+            return Boolean.Parse(value);
         }
 
         Guid IDataRecord.GetGuid(int i)
@@ -2154,8 +2125,7 @@ namespace LumenWorks.Framework.IO.Csv
 
             if (i == 0)
                 return this;
-            else
-                return null;
+            return null;
         }
 
         long IDataRecord.GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
@@ -2194,9 +2164,9 @@ namespace LumenWorks.Framework.IO.Csv
         /// <exception cref="T:System.ComponentModel.ObjectDisposedException">
         ///	The instance has been disposed of.
         /// </exception>
-        public CsvReader.RecordEnumerator GetEnumerator()
+        public RecordEnumerator GetEnumerator()
         {
-            return new CsvReader.RecordEnumerator(this);
+            return new RecordEnumerator(this);
         }
 
         /// <summary>
@@ -2208,7 +2178,7 @@ namespace LumenWorks.Framework.IO.Csv
         /// </exception>
         IEnumerator<string[]> IEnumerable<string[]>.GetEnumerator()
         {
-            return this.GetEnumerator();
+            return GetEnumerator();
         }
 
         #endregion
@@ -2235,13 +2205,13 @@ namespace LumenWorks.Framework.IO.Csv
         /// <summary>
         /// Contains the stack when the object was allocated.
         /// </summary>
-        private System.Diagnostics.StackTrace _allocStack;
+        private StackTrace _allocStack;
 #endif
 
         /// <summary>
         /// Contains the disposed status flag.
         /// </summary>
-        private bool _isDisposed = false;
+        private bool _isDisposed;
 
         /// <summary>
         /// Contains the locking object for multi-threading purpose.
@@ -2259,7 +2229,7 @@ namespace LumenWorks.Framework.IO.Csv
         /// <value>
         /// 	<see langword="true"/> if the instance has been disposed of; otherwise, <see langword="false"/>.
         /// </value>
-        [System.ComponentModel.Browsable(false)]
+        [Browsable(false)]
         public bool IsDisposed
         {
             get { return _isDisposed; }
@@ -2289,7 +2259,7 @@ namespace LumenWorks.Framework.IO.Csv
         protected void CheckDisposed()
         {
             if (_isDisposed)
-                throw new ObjectDisposedException(this.GetType().FullName);
+                throw new ObjectDisposedException(GetType().FullName);
         }
 
         /// <summary>
@@ -2371,7 +2341,7 @@ namespace LumenWorks.Framework.IO.Csv
         ~CsvReader()
         {
 #if DEBUG
-            Debug.WriteLine("FinalizableObject was not disposed" + _allocStack.ToString());
+            Debug.WriteLine("FinalizableObject was not disposed" + _allocStack);
 #endif
 
             Dispose(false);

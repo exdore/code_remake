@@ -51,7 +51,6 @@ namespace LumenWorks.Framework.IO.Csv
 		/// <param name="error">The error that occured.</param>
 		/// <param name="defaultAction">The default action to take.</param>
 		public ParseErrorEventArgs(MalformedCsvException error, ParseErrorAction defaultAction)
-			: base()
 		{
 			_error = error;
 			_action = defaultAction;

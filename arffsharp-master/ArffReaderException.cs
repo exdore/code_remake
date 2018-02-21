@@ -1,7 +1,7 @@
-﻿namespace ArffSharp
-{
-    using System;
+﻿using System;
 
+namespace ArffSharp
+{
     public class ArffReaderException : Exception
     {
         public ArffReaderException(string message) : base(message) { }

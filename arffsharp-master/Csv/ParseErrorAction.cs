@@ -39,6 +39,6 @@ namespace LumenWorks.Framework.IO.Csv
 		/// <summary>
 		/// Throws an exception.
 		/// </summary>
-		ThrowException = 2,
+		ThrowException = 2
 	}
 }

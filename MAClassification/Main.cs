@@ -1,5 +1,4 @@
-﻿using ArffSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -7,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
+using ArffSharp;
 using MAClassification.Models;
 using MAClassification.Serializators;
 
@@ -57,28 +57,28 @@ namespace MAClassification
             };
 
 
-            var EuristicFunctionType = EuristicFunction.Controls.OfType<RadioButton>()
+            var euristicFunctionType = EuristicFunction.Controls.OfType<RadioButton>()
                 .FirstOrDefault(item => item.Checked)?.Name;
-            var PheromonesFunctionType = PheromonesUpdateMethod.Controls.OfType<RadioButton>()
+            var pheromonesFunctionType = PheromonesUpdateMethod.Controls.OfType<RadioButton>()
                 .FirstOrDefault(item => item.Checked)?.Name;
-            var PruningStatus = RulesPruningStatus.Controls.OfType<RadioButton>()
+            var pruningStatus = RulesPruningStatus.Controls.OfType<RadioButton>()
                 .FirstOrDefault(item => item.Checked)?.Name;
-            var DivideMethod = TrainingSetDivideMethod.Controls.OfType<RadioButton>()
+            var divideMethod = TrainingSetDivideMethod.Controls.OfType<RadioButton>()
                 .FirstOrDefault(item => item.Checked)?.Name;
 
-            bool isPruned = PruningStatus == "pruningActive";
-            CalculationOptions options = new CalculationOptions()
+            bool isPruned = pruningStatus == "pruningActive";
+            CalculationOptions options = new CalculationOptions
             {
-                EuristicType = euristicMapper[EuristicFunctionType],
-                PheromonesType = pheromonesMapper[PheromonesFunctionType],
-                DivideType = divideMapper[DivideMethod],
+                EuristicType = euristicMapper[euristicFunctionType],
+                PheromonesType = pheromonesMapper[pheromonesFunctionType],
+                DivideType = divideMapper[divideMethod],
                 IsPruned = isPruned,
                 DataPath = label2.Text,
                 MaxAntsGenerationsNumber = (int)antsCount.Value,
                 MaxNumberForConvergence = (int)convergenceStopValue.Value,
                 MaxUncoveredCases = (int)maxUncoveredCasesCount.Value,
                 MinCasesPerRule = (int)minNumberPerRule.Value,
-                CrossValidationCoefficient = trackBar1.Value,
+                CrossValidationCoefficient = trackBar1.Value
             };
 
             _solver = new Solver
@@ -99,7 +99,7 @@ namespace MAClassification
             File.Delete(@"rules.xml");
             PopulateDataGrid();
             _rulesSets = new List<Rule>();
-            Parallel.ForEach(tables, (table) =>
+            Parallel.ForEach(tables, table =>
             {
                 _rulesSets.AddRange(_solver.FindSolution(table));
             });

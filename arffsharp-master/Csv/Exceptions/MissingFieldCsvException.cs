@@ -30,7 +30,7 @@ namespace LumenWorks.Framework.IO.Csv
 	/// <remarks>
 	/// MissingFieldException would have been a better name, but there is already a <see cref="T:System.MissingFieldException"/>.
 	/// </remarks>
-	[Serializable()]
+	[Serializable]
 	public class MissingFieldCsvException
 		: MalformedCsvException
 	{
@@ -40,7 +40,6 @@ namespace LumenWorks.Framework.IO.Csv
 		/// Initializes a new instance of the MissingFieldCsvException class.
 		/// </summary>
 		public MissingFieldCsvException()
-			: base()
 		{
 		}
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MAClassification
+namespace MAClassification.Models
 {
     [Serializable]
     public class Condition

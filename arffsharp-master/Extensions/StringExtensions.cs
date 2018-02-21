@@ -1,7 +1,7 @@
-﻿namespace ArffSharp.Extensions
-{
-    using System;
+﻿using System;
 
+namespace ArffSharp.Extensions
+{
     public static class StringExtensions
     {
         public static bool StartsWithI(this string target, string value)
@@ -30,7 +30,7 @@
                 {
                     continue;
                 }
-                else if (c == '\\')
+                if (c == '\\')
                 {
                     if (i < input.Length - 1)
                     {

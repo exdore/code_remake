@@ -13,11 +13,11 @@ namespace ArffSharp
     {
         public const string AttributeDeclaration = "@attribute";
         public const string DataDeclaration = "@data";
-        private int attributeCount;
-        private readonly CsvReader csvReader;
-        private readonly StreamReader reader;
+        private int _attributeCount;
+        private readonly CsvReader _csvReader;
+        private readonly StreamReader _reader;
 
-        private readonly Stream stream;
+        private readonly Stream _stream;
 
         public ArffReader(string fileName)
             : this(File.OpenRead(fileName))
@@ -26,17 +26,17 @@ namespace ArffSharp
 
         public ArffReader(Stream stream)
         {
-            this.stream = stream;
-            reader = new StreamReader(stream);
+            _stream = stream;
+            _reader = new StreamReader(stream);
             ReadAttributes();
-            csvReader = new CsvReader(reader, false, trimmingOptions: ValueTrimmingOptions.All);
+            _csvReader = new CsvReader(_reader, false, trimmingOptions: ValueTrimmingOptions.All);
         }
 
         public List<ArffAttribute> Attributes { get; set; }
 
         public void Dispose()
         {
-            stream?.Dispose();
+            _stream?.Dispose();
         }
 
         public void BuildIntervals()
@@ -108,18 +108,18 @@ namespace ArffSharp
 
         public ArffRecord ReadNextRecord()
         {
-            if (!csvReader.ReadNextRecord()) return null;
+            if (!_csvReader.ReadNextRecord()) return null;
 
             var record = new ArffRecord
             {
-                Values = new ArffValue[attributeCount]
+                Values = new ArffValue[_attributeCount]
             };
 
-            for (var i = 0; i < attributeCount; i++)
+            for (var i = 0; i < _attributeCount; i++)
                 if (Attributes[i].NominalValues.Count != 1)
                 {
                     var arffVal = record.Values[i] = new ArffValue();
-                    var val = csvReader[i].Unescape();
+                    var val = _csvReader[i].Unescape();
                     if (val == "?")
                     {
                         arffVal.NominalValueIndex = -1;
@@ -136,9 +136,9 @@ namespace ArffSharp
                 else
                 {
                     var arffVal = record.Values[i] = new ArffValue();
-                    if (csvReader[i].Unescape() != "?")
+                    if (_csvReader[i].Unescape() != "?")
                     {
-                        var val = double.Parse(csvReader[i].Unescape(), NumberStyles.Float, CultureInfo.InvariantCulture);
+                        var val = double.Parse(_csvReader[i].Unescape(), NumberStyles.Float, CultureInfo.InvariantCulture);
                         var index = Attributes[i].RealValues.IndexOf(val);
                         if (index == -1)
                         {
@@ -165,7 +165,7 @@ namespace ArffSharp
         {
             var attributes = new List<ArffAttribute>();
             string line;
-            while ((line = reader.ReadLine()) != null)
+            while ((line = _reader.ReadLine()) != null)
             {
                 if (line.StartsWithI(DataDeclaration))
                     break;
@@ -179,7 +179,7 @@ namespace ArffSharp
                 string[] values;
                 if (!line.Contains("{"))
                 {
-                    split = line.Split(new char[] { ' ', '\t' });
+                    split = line.Split(' ', '\t');
                     name = split[0].Trim().Unescape();
                     values = new string[1];
                     values[0] = split[1];
@@ -202,7 +202,7 @@ namespace ArffSharp
             }
 
             Attributes = new List<ArffAttribute>(attributes);
-            attributeCount = attributes.Count;
+            _attributeCount = attributes.Count;
         }
     }
 }

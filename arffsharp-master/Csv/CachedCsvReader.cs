@@ -20,11 +20,11 @@
 //	ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
-
 using LumenWorks.Framework.IO.Csv.Resources;
 
 namespace LumenWorks.Framework.IO.Csv
@@ -207,10 +207,9 @@ namespace LumenWorks.Framework.IO.Csv
 		{
 			get
 			{
-				if (_currentRecordIndex < base.CurrentRecordIndex)
+			    if (_currentRecordIndex < base.CurrentRecordIndex)
 					return false;
-				else
-					return base.EndOfStream;
+			    return base.EndOfStream;
 			}
 		}
 
@@ -243,17 +242,15 @@ namespace LumenWorks.Framework.IO.Csv
 		{
 			get
 			{
-				if (_readingStream)
+			    if (_readingStream)
 					return base[field];
-				else if (_currentRecordIndex > -1)
-				{
-					if (field > -1 && field < this.FieldCount)
-						return _records[(int) _currentRecordIndex][field];
-					else
-						throw new ArgumentOutOfRangeException("field", field, string.Format(CultureInfo.InvariantCulture, ExceptionMessage.FieldIndexOutOfRange, field));
-				}
-				else
-					throw new InvalidOperationException(ExceptionMessage.NoCurrentRecord);
+			    if (_currentRecordIndex > -1)
+			    {
+			        if (field > -1 && field < FieldCount)
+			            return _records[(int) _currentRecordIndex][field];
+			        throw new ArgumentOutOfRangeException("field", field, string.Format(CultureInfo.InvariantCulture, ExceptionMessage.FieldIndexOutOfRange, field));
+			    }
+			    throw new InvalidOperationException(ExceptionMessage.NoCurrentRecord);
 			}
 		}
 
@@ -298,47 +295,44 @@ namespace LumenWorks.Framework.IO.Csv
 				_currentRecordIndex++;
 				return true;
 			}
-			else
-			{
-				_readingStream = true;
+		    _readingStream = true;
 
-				try
-				{
-					bool canRead = base.ReadNextRecord(onlyReadHeaders, skipToNextLine);
+		    try
+		    {
+		        bool canRead = base.ReadNextRecord(onlyReadHeaders, skipToNextLine);
 
-					if (canRead)
-					{
-						string[] record = new string[this.FieldCount];
+		        if (canRead)
+		        {
+		            string[] record = new string[FieldCount];
 
-						if (base.CurrentRecordIndex > -1)
-						{
-							CopyCurrentRecordTo(record);
-							_records.Add(record);
-						}
-						else
-						{
-							if (MoveTo(0))
-								CopyCurrentRecordTo(record);
+		            if (base.CurrentRecordIndex > -1)
+		            {
+		                CopyCurrentRecordTo(record);
+		                _records.Add(record);
+		            }
+		            else
+		            {
+		                if (MoveTo(0))
+		                    CopyCurrentRecordTo(record);
 
-							MoveTo(-1);
-						}
+		                MoveTo(-1);
+		            }
 
-						if (!onlyReadHeaders)
-							_currentRecordIndex++;
-					}
-					else
-					{
-						// No more records to read, so set array size to only what is needed
-						_records.Capacity = _records.Count;
-					}
+		            if (!onlyReadHeaders)
+		                _currentRecordIndex++;
+		        }
+		        else
+		        {
+		            // No more records to read, so set array size to only what is needed
+		            _records.Capacity = _records.Count;
+		        }
 
-					return canRead;
-				}
-				finally
-				{
-					_readingStream = false;
-				}
-			}
+		        return canRead;
+		    }
+		    finally
+		    {
+		        _readingStream = false;
+		    }
 		}
 
 		#endregion
@@ -379,11 +373,8 @@ namespace LumenWorks.Framework.IO.Csv
 				_currentRecordIndex = record;
 				return true;
 			}
-			else
-			{
-				_currentRecordIndex = base.CurrentRecordIndex;
-				return base.MoveTo(record);
-			}
+		    _currentRecordIndex = base.CurrentRecordIndex;
+		    return base.MoveTo(record);
 		}
 
 		#endregion
@@ -397,7 +388,7 @@ namespace LumenWorks.Framework.IO.Csv
 			get { return false; }
 		}
 
-		System.Collections.IList IListSource.GetList()
+		IList IListSource.GetList()
 		{
 			if (_bindingList == null)
 				_bindingList = new CsvBindingList(this);
