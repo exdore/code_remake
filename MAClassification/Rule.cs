@@ -110,7 +110,7 @@ namespace MAClassification
             CoveredCases = cases;
         }
 
-        public void CheckUsedAttributes(List<Models.DataAttribute> attributes)
+        public void CheckUsedAttributes(List<DataAttribute> attributes)
         {
             foreach (var condition in ConditionsList)
             {

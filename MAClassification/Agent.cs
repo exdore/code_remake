@@ -4,12 +4,11 @@ using System.Xml.Serialization;
 using MAClassification.Models;
 
 namespace MAClassification
-{
+{ 
     public enum AgentTypes { Ant }
     public enum EuristicTypes { Entropy, Density }
-    public enum PheromonesTypes { Normalization, Evaporation}
+    public enum PheromonesTypes { Normalization, Evaporation }
     public enum DivideTypes { CrossValidation, ByClass }
-
     [Serializable]
     [XmlInclude(typeof(Ant))]
     [XmlInclude(typeof(Rule))]

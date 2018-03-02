@@ -23,7 +23,7 @@ namespace MAClassification
             {
                 while (count > 0)
                 {
-                    if (count % n == 0)
+                    if (count % n == 0)             //?????
                         data.Cases = data.Cases.OrderBy(a => Guid.NewGuid()).ToList();
                     var k = size / (n - 1);
                     Step = (size - k) / (n - 1);
